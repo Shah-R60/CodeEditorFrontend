@@ -1,14 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { Play } from "lucide-react";
+import { Play, Lock } from "lucide-react";
 
 type LanguageKey = "python" | "javascript" | "cpp";
 
 type TestCase = {
   input: string;
   expectedOutput: string;
+  isHidden?: boolean;
+};
+
+type Question = {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: string;
+  boilerplate?: Record<string, string> | null;
+  testCases: TestCase[];
 };
 
 type TestResult = {
@@ -27,7 +37,7 @@ type ExecuteResponse = {
   totalTests: number;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 const languageTemplates: Record<LanguageKey, string> = {
   python: `def solve():
@@ -65,22 +75,37 @@ const languageMeta: Record<LanguageKey, { label: string; monaco: string }> = {
   cpp: { label: "C++", monaco: "cpp" }
 };
 
-const initialTestCases: TestCase[] = [
-  { input: "5\n10", expectedOutput: "15" },
-  { input: "100\n200", expectedOutput: "300" }
-];
-
 export default function Home() {
   const [language, setLanguage] = useState<LanguageKey>("python");
   const [code, setCode] = useState<string>(languageTemplates.python);
-  const [testCases] = useState<TestCase[]>(initialTestCases);
+  const [question, setQuestion] = useState<Question | null>(null);
   const [results, setResults] = useState<ExecuteResponse | null>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorBanner, setErrorBanner] = useState<string>("");
 
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/db/questions/random`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setQuestion(data.data);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  // Update editor code when question or language changes
+  useEffect(() => {
+    if (question && question.boilerplate && question.boilerplate[language]) {
+      setCode(question.boilerplate[language]);
+    } else {
+      setCode(languageTemplates[language]);
+    }
+  }, [question, language]);
+
   const selectedResult = results?.results[activeTab] ?? null;
-  const selectedTestCase = testCases[activeTab] ?? null;
+  const selectedTestCase = question?.testCases[activeTab] ?? null;
 
   const verdictLabel = useMemo(() => {
     if (!results) return "Ready";
@@ -91,7 +116,6 @@ export default function Home() {
 
   const handleLanguageChange = (value: LanguageKey) => {
     setLanguage(value);
-    setCode(languageTemplates[value]);
   };
 
   const handleRun = async () => {
@@ -103,7 +127,7 @@ export default function Home() {
       const response = await fetch(`${API_BASE_URL}/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, code, testCases })
+        body: JSON.stringify({ language, code, testCases: question?.testCases || [] })
       });
 
       let data: ExecuteResponse | null = null;
@@ -159,24 +183,26 @@ export default function Home() {
       <div className="flex flex-1 flex-col gap-4 px-6 py-5 lg:flex-row">
         <section className="flex w-full flex-1 flex-col gap-4 lg:w-1/2">
           <div className="flex flex-1 flex-col rounded-2xl border border-gray-800 bg-gray-900/70 p-6 shadow-lg">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Problem</h2>
-              <span className="rounded-full border border-gray-700 bg-gray-800/70 px-3 py-1 text-xs uppercase text-gray-300">
-                Warmup
-              </span>
-            </div>
-            <div className="mt-4 space-y-3 text-sm leading-6 text-gray-200">
-              <p className="text-base font-semibold text-white">Add Two Numbers</p>
-              <p>
-                Read two integers from standard input and print their sum.
-              </p>
-              <div className="rounded-xl border border-gray-800 bg-gray-950/70 p-4 text-xs text-gray-300">
-                <p className="font-semibold text-gray-100">Input</p>
-                <p>Two integers separated by space or newline.</p>
-                <p className="mt-3 font-semibold text-gray-100">Output</p>
-                <p>Print the sum as a single integer.</p>
-              </div>
-            </div>
+            {!question ? (
+              <div className="flex flex-1 items-center justify-center text-sm text-gray-400">Loading problem...</div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Problem</h2>
+                  <span className={`rounded-full border px-3 py-1 text-xs uppercase ${
+                    question.difficulty === 'HARD' ? 'border-rose-500/50 bg-rose-500/10 text-rose-300' :
+                    question.difficulty === 'MEDIUM' ? 'border-amber-500/50 bg-amber-500/10 text-amber-300' :
+                    'border-emerald-500/50 bg-emerald-500/10 text-emerald-300'
+                  }`}>
+                    {question.difficulty}
+                  </span>
+                </div>
+                <div className="mt-4 space-y-3 text-sm leading-6 text-gray-200">
+                  <p className="text-base font-semibold text-white">{question.title}</p>
+                  <p className="whitespace-pre-wrap">{question.description}</p>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex flex-1 flex-col rounded-2xl border border-gray-800 bg-gray-900/70 p-6 shadow-lg">
@@ -229,34 +255,44 @@ export default function Home() {
                   </div>
 
                   <div className="flex flex-col gap-3 text-sm">
-                    <div>
-                      <p className="text-xs uppercase text-gray-400">Input</p>
-                      <pre className="mt-2 rounded-lg border border-gray-800 bg-gray-900/80 p-3 text-xs text-gray-200">
-                        {selectedTestCase?.input || ""}
-                      </pre>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-gray-400">
-                        {selectedResult?.stderr ? "Error" : "Your Output"}
-                      </p>
-                      <pre
-                        className={`mt-2 rounded-lg border p-3 text-xs ${
-                          selectedResult?.stderr
-                            ? "border-rose-500/40 bg-rose-500/10 text-rose-200"
-                            : "border-gray-800 bg-gray-900/80 text-gray-200"
-                        }`}
-                      >
-                        {selectedResult?.stderr
-                          ? selectedResult.stderr
-                          : selectedResult?.stdout || ""}
-                      </pre>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-gray-400">Expected</p>
-                      <pre className="mt-2 rounded-lg border border-gray-800 bg-gray-900/80 p-3 text-xs text-gray-200">
-                        {selectedResult?.expected || ""}
-                      </pre>
-                    </div>
+                    {selectedTestCase?.isHidden ? (
+                      <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-800 bg-gray-900/80 p-8 text-gray-400">
+                        <Lock className="h-6 w-6" />
+                        <span className="text-sm font-semibold">Hidden Test Case</span>
+                        <p className="text-xs text-center max-w-xs">Input and Expected Output are hidden. Your code must handle edge cases automatically.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <p className="text-xs uppercase text-gray-400">Input</p>
+                          <pre className="mt-2 rounded-lg border border-gray-800 bg-gray-900/80 p-3 text-xs text-gray-200">
+                            {selectedTestCase?.input || ""}
+                          </pre>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase text-gray-400">
+                            {selectedResult?.stderr ? "Error" : "Your Output"}
+                          </p>
+                          <pre
+                            className={`mt-2 rounded-lg border p-3 text-xs ${
+                              selectedResult?.stderr
+                                ? "border-rose-500/40 bg-rose-500/10 text-rose-200"
+                                : "border-gray-800 bg-gray-900/80 text-gray-200"
+                            }`}
+                          >
+                            {selectedResult?.stderr
+                              ? selectedResult.stderr
+                              : selectedResult?.stdout || ""}
+                          </pre>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase text-gray-400">Expected</p>
+                          <pre className="mt-2 rounded-lg border border-gray-800 bg-gray-900/80 p-3 text-xs text-gray-200">
+                            {selectedResult?.expected || ""}
+                          </pre>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
