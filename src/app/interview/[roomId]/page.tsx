@@ -65,7 +65,7 @@ export default function InterviewRoom() {
   const [results, setResults] = useState<ExecuteResponse | null>(null);
   const [streamToken, setStreamToken] = useState<string | null>(null);
   const [streamApiKey, setStreamApiKey] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string>("");
+  const [userId] = useState<string>(() => `user_${Math.floor(Math.random() * 100000)}`);
   const [activeTab, setActiveTab] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorBanner, setErrorBanner] = useState<string>("");
@@ -103,13 +103,10 @@ export default function InterviewRoom() {
     });
 
     // Fetch GetStream.io token
-    const currentUserId = `user_${Math.floor(Math.random() * 100000)}`;
-    setUserId(currentUserId);
-
     fetch(`${API_BASE_URL}/stream/token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: currentUserId, roomId }),
+      body: JSON.stringify({ userId, roomId }),
     })
       .then((res) => res.json())
       .then((data) => {

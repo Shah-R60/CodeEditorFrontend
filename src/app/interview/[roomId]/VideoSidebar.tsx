@@ -6,9 +6,10 @@ import {
   StreamVideoClient,
   StreamCall,
   StreamTheme,
-  SpeakerLayout,
   CallControls,
-  Call
+  Call,
+  useCallStateHooks,
+  ParticipantView
 } from '@stream-io/video-react-sdk';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 
@@ -18,6 +19,26 @@ interface VideoSidebarProps {
   userId: string;
   callId: string;
 }
+
+const CustomVerticalLayout = () => {
+  const { useParticipants } = useCallStateHooks();
+  const participants = useParticipants();
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+      {participants.length === 0 && (
+        <div className="flex aspect-video items-center justify-center rounded-xl border border-dashed border-gray-700 text-sm text-gray-500">
+          Waiting for others...
+        </div>
+      )}
+      {participants.map((participant) => (
+        <div key={participant.sessionId} className="w-full relative aspect-video rounded-xl bg-gray-800 overflow-hidden border border-gray-700 shadow-md">
+          <ParticipantView participant={participant} />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default function VideoSidebar({ token, apiKey, userId, callId }: VideoSidebarProps) {
   const [client, setClient] = useState<StreamVideoClient | null>(null);
@@ -35,8 +56,9 @@ export default function VideoSidebar({ token, apiKey, userId, callId }: VideoSid
     const myCall = myClient.call('default', callId);
 
     let isMounted = true;
+    let joinPromise: Promise<void> | null = null;
 
-    myCall.join({ create: true }).then(() => {
+    joinPromise = myCall.join({ create: true }).then(() => {
       if (isMounted) {
         setClient(myClient);
         setCall(myCall);
@@ -47,9 +69,13 @@ export default function VideoSidebar({ token, apiKey, userId, callId }: VideoSid
 
     return () => {
       isMounted = false;
-      myCall.leave().then(() => {
-        myClient.disconnectUser();
-      });
+      if (joinPromise) {
+        joinPromise.then(() => {
+          myCall.leave().then(() => {
+            myClient.disconnectUser();
+          });
+        });
+      }
     };
   }, [token, apiKey, userId, callId]);
 
@@ -67,8 +93,8 @@ export default function VideoSidebar({ token, apiKey, userId, callId }: VideoSid
         <StreamCall call={call}>
           <StreamTheme className="h-full w-full absolute inset-0">
             <div className="flex-1 h-full w-full flex flex-col overflow-hidden bg-gray-950">
-              <SpeakerLayout />
-              <div className="border-t border-gray-800 bg-gray-900 pb-2">
+              <CustomVerticalLayout />
+              <div className="border-t border-gray-800 bg-gray-900 pb-2 pt-2">
                 <CallControls />
               </div>
             </div>
