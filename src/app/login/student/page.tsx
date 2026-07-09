@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Lock, Mail, Loader2, Code2, ArrowRight } from "lucide-react";
+import { Lock, Mail, Loader2, Code2, ArrowRight, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 export default function StudentLogin() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = async (data: any) => {
@@ -49,7 +50,7 @@ export default function StudentLogin() {
           <div className="bg-blue-600 p-1.5 rounded-lg shadow-sm">
             <Code2 className="text-white h-6 w-6" />
           </div>
-          <span className="text-2xl font-bold tracking-tight text-slate-900">CodeEditor</span>
+          <span className="text-2xl font-bold tracking-tight text-slate-900">CodeCanvas</span>
         </Link>
         <h2 className="text-center text-3xl font-extrabold text-slate-900 tracking-tight">
           Welcome back
@@ -100,12 +101,19 @@ export default function StudentLogin() {
                 </div>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   {...register("password", { required: true })}
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 focus:bg-white transition-all"
+                  className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 focus:bg-white transition-all"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
               {errors.password && <span className="text-rose-500 text-xs mt-1.5 font-medium block">Password is required</span>}
             </div>

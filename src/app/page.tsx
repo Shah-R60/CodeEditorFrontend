@@ -33,7 +33,7 @@ export default function LandingPage() {
             <div className="bg-blue-600 p-1.5 rounded-lg shadow-sm">
               <Code2 className="text-white h-6 w-6" />
             </div>
-            <span className="text-xl font-bold tracking-tight">CodeEditor</span>
+            <span className="text-xl font-bold tracking-tight">CodeCanvas</span>
           </div>
           
 
@@ -66,13 +66,13 @@ export default function LandingPage() {
       <main className="max-w-7xl mx-auto px-8 pt-20 pb-24 grid md:grid-cols-2 gap-12 items-center">
         <div className="space-y-8 pr-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-semibold">
-            CodeEditor Skills Platform
+            CodeCanvas Skills Platform
           </div>
           <h1 className="text-6xl font-extrabold tracking-tight leading-[1.1] text-slate-900">
             AI-native hiring & <br/> learning solutions
           </h1>
           <p className="text-lg text-slate-600 leading-relaxed max-w-xl">
-            Discover and develop the skills that will shape the future with CodeEditor's skills assessment, development, and simulation capabilities.
+            Discover and develop the skills that will shape the future with CodeCanvas's skills assessment, development, and simulation capabilities.
           </p>
           <div className="flex items-center gap-4 pt-4">
             <button onClick={handleAction} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2">
@@ -149,7 +149,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Explore capabilities</h2>
-            <p className="text-lg text-slate-500">Choose your path to get started with CodeEditor.</p>
+            <p className="text-lg text-slate-500">Choose your path to get started with CodeCanvas.</p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
