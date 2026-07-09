@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function RecruiterDashboard() {
   const stats = [
     { name: "Total Candidates", value: "1,248", change: "+12%", icon: Users, color: "text-blue-600", bg: "bg-blue-100" },
-    { name: "Active Assessments", value: "24", change: "+4", icon: FileCode2, color: "text-emerald-600", bg: "bg-emerald-100" },
+    { name: "Active Assessments", value: "24", change: "+4", icon: FileCode2, color: "text-blue-600", bg: "bg-blue-100" },
     { name: "Avg. Pass Rate", value: "68%", change: "+2.4%", icon: CheckCircle2, color: "text-violet-600", bg: "bg-violet-100" },
   ];
 
@@ -34,7 +34,7 @@ export default function RecruiterDashboard() {
                 <div className={`p-3 rounded-xl ${stat.bg}`}>
                   <Icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
-                <span className="flex items-center text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                <span className="flex items-center text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
                   <TrendingUp className="w-4 h-4 mr-1" />
                   {stat.change}
                 </span>
@@ -53,7 +53,7 @@ export default function RecruiterDashboard() {
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-5 border-b border-slate-200 flex justify-between items-center">
             <h2 className="text-lg font-bold text-slate-900">Recent Candidate Activity</h2>
-            <Link href="/recruiter/candidates" className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+            <Link href="/recruiter/candidates" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
               View all
             </Link>
           </div>
@@ -80,7 +80,7 @@ export default function RecruiterDashboard() {
                     <td className="px-6 py-4 font-bold text-slate-900">{activity.score}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                        activity.status === 'Passed' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                        activity.status === 'Passed' ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'
                       }`}>
                         {activity.status}
                       </span>
@@ -96,22 +96,22 @@ export default function RecruiterDashboard() {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 h-fit">
           <h2 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
           <div className="space-y-3">
-            <Link href="/recruiter/questions/new" className="flex items-center p-4 border border-slate-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
-              <div className="bg-emerald-100 p-2.5 rounded-lg text-emerald-600 mr-4 group-hover:bg-emerald-200 transition-colors">
+            <Link href="/recruiter/questions/new" className="flex items-center p-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group">
+              <div className="bg-blue-100 p-2.5 rounded-lg text-blue-600 mr-4 group-hover:bg-blue-200 transition-colors">
                 <FileCode2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">Create Question</h3>
+                <h3 className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">Create Question</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Add a new coding problem</p>
               </div>
             </Link>
             
-            <button className="w-full flex items-center p-4 border border-slate-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all group text-left">
+            <button className="w-full flex items-center p-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group text-left">
               <div className="bg-blue-100 p-2.5 rounded-lg text-blue-600 mr-4 group-hover:bg-blue-200 transition-colors">
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">Invite Candidate</h3>
+                <h3 className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">Invite Candidate</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Send an assessment link</p>
               </div>
             </button>

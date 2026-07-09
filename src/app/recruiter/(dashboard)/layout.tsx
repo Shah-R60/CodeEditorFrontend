@@ -9,18 +9,17 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
 
   const navItems = [
     { name: "Dashboard", href: "/recruiter", icon: LayoutDashboard },
-    { name: "Questions", href: "/recruiter/questions", icon: Library },
-    { name: "Candidates", href: "/recruiter/candidates", icon: Users },
+    { name: "Jobs", href: "/recruiter/jobs", icon: Briefcase },
     { name: "Settings", href: "/recruiter/settings", icon: Settings },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900 selection:bg-emerald-100">
+    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900 selection:bg-blue-100">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 z-10">
         <div className="h-16 flex items-center px-6 border-b border-slate-200">
           <Link href="/recruiter" className="flex items-center gap-2 hover:opacity-90 transition">
-            <div className="bg-emerald-600 p-1.5 rounded-lg shadow-sm">
+            <div className="bg-blue-600 p-1.5 rounded-lg shadow-sm">
               <Briefcase className="text-white h-5 w-5" />
             </div>
             <span className="text-xl font-bold tracking-tight text-slate-900">CodeCanvas</span>
@@ -38,11 +37,11 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-colors ${
                   isActive 
-                    ? "bg-emerald-50 text-emerald-700" 
+                    ? "bg-blue-50 text-blue-700" 
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
-                <Icon size={20} className={isActive ? "text-emerald-600" : "text-slate-400"} />
+                <Icon size={20} className={isActive ? "text-blue-600" : "text-slate-400"} />
                 {item.name}
               </Link>
             );
@@ -65,7 +64,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
             {navItems.find(item => pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/recruiter"))?.name || "Dashboard"}
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold border border-emerald-200">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200">
               R
             </div>
           </div>

@@ -44,10 +44,10 @@ export default function RecruiterLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-slate-900 selection:bg-emerald-100">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans text-slate-900 selection:bg-blue-100">
       <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
         <Link href="/" className="flex items-center gap-2 mb-8 hover:opacity-90 transition">
-          <div className="bg-emerald-600 p-1.5 rounded-lg shadow-sm">
+          <div className="bg-blue-600 p-1.5 rounded-lg shadow-sm">
             <Briefcase className="text-white h-6 w-6" />
           </div>
           <span className="text-2xl font-bold tracking-tight text-slate-900">CodeCanvas</span>
@@ -84,7 +84,7 @@ export default function RecruiterLogin() {
                   type="email"
                   autoComplete="email"
                   {...register("email", { required: true })}
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white transition-all"
+                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 focus:bg-white transition-all"
                   placeholder="recruiter@company.com"
                 />
               </div>
@@ -104,7 +104,7 @@ export default function RecruiterLogin() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   {...register("password", { required: true })}
-                  className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white transition-all"
+                  className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 focus:bg-white transition-all"
                   placeholder="••••••••"
                 />
                 <button
@@ -124,7 +124,7 @@ export default function RecruiterLogin() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-emerald-600 focus:ring-emerald-600/20 border-slate-300 rounded cursor-pointer"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-600/20 border-slate-300 rounded cursor-pointer"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-600 cursor-pointer select-none">
                   Remember me
@@ -132,7 +132,7 @@ export default function RecruiterLogin() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-semibold text-emerald-600 hover:text-emerald-500 transition">
+                <a href="#" className="font-semibold text-blue-600 hover:text-blue-500 transition">
                   Forgot password?
                 </a>
               </div>
@@ -142,7 +142,7 @@ export default function RecruiterLogin() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 {isLoading ? (
                   <>
@@ -160,7 +160,7 @@ export default function RecruiterLogin() {
 
           <div className="mt-8 text-center text-sm text-slate-600">
             Don't have an account?{' '}
-            <Link href="/signup/recruiter" className="font-semibold text-emerald-600 hover:text-emerald-500 transition">
+            <Link href="/signup/recruiter" className="font-semibold text-blue-600 hover:text-blue-500 transition">
               Sign up here
             </Link>
           </div>
