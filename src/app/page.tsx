@@ -54,7 +54,8 @@ const a = input[0] ?? 0;
 const b = input[1] ?? 0;
 console.log(a + b);
 `,
-  cpp: `#include <bits/stdc++.h>
+  cpp: `#include <iostream>
+#include <vector>
 using namespace std;
 
 int main() {
@@ -76,8 +77,8 @@ const languageMeta: Record<LanguageKey, { label: string; monaco: string }> = {
 };
 
 export default function Home() {
-  const [language, setLanguage] = useState<LanguageKey>("python");
-  const [code, setCode] = useState<string>(languageTemplates.python);
+  const [language, setLanguage] = useState<LanguageKey>("cpp");
+  const [code, setCode] = useState<string>(languageTemplates.cpp);
   const [question, setQuestion] = useState<Question | null>(null);
   const [results, setResults] = useState<ExecuteResponse | null>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
