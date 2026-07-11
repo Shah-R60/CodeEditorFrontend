@@ -87,7 +87,7 @@ export default function Home() {
   const [errorBanner, setErrorBanner] = useState<string>("");
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/db/questions/random`)
+    fetch(`${API_BASE_URL}/db/questions/demo/random`)
       .then(res => res.json())
       .then(data => {
         if (data.success && data.data) {
@@ -162,9 +162,9 @@ export default function Home() {
       <nav className="flex h-14 shrink-0 items-center justify-between border-b border-gray-800 bg-[#161616] px-6">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold tracking-[0.3em] text-emerald-500">
-            CODE
+            PRACTICE
           </span>
-          <span className="text-sm font-semibold text-gray-200">Execution Lab</span>
+          <span className="text-sm font-semibold text-gray-200">Sandbox</span>
         </div>
         <div className="flex items-center gap-3">
           <select

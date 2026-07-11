@@ -8,16 +8,20 @@ import { Code2, ChevronRight, CheckCircle2, Building, PlayCircle, ArrowRight, Us
 export default function LandingPage() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoggedIn(!!localStorage.getItem('token'));
+    setUserRole(localStorage.getItem('userRole'));
   }, []);
 
   const handleAction = () => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
+      const role = localStorage.getItem('userRole');
       if (token) {
-        router.push('/editor');
+        if (role === 'RECRUITER') router.push('/recruiter');
+        else router.push('/student');
       } else {
         router.push('/login/student');
       }
@@ -41,11 +45,11 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <>
-                <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.reload(); }} className="text-sm font-medium text-slate-600 hover:text-red-600 transition">
+                <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('userRole'); localStorage.removeItem('userId'); window.location.reload(); }} className="text-sm font-medium text-slate-600 hover:text-red-600 transition">
                   Sign out
                 </button>
-                <button onClick={() => router.push('/editor')} className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm hover:shadow-md">
-                  Go to Editor
+                <button onClick={() => router.push(userRole === 'RECRUITER' ? '/recruiter' : '/student')} className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm hover:shadow-md">
+                  Go to Dashboard
                 </button>
               </>
             ) : (
@@ -162,7 +166,7 @@ export default function LandingPage() {
               <p className="text-slate-600 leading-relaxed mb-8 flex-1">
                 Access our coding environment to practice algorithmic challenges, prepare for technical interviews, and benchmark your skills.
               </p>
-              <button onClick={() => router.push('/signup/student')} className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wide group/btn">
+              <button onClick={() => router.push('/login/student')} className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wide group/btn">
                 SEE MORE <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -176,7 +180,7 @@ export default function LandingPage() {
               <p className="text-slate-600 leading-relaxed mb-8 flex-1">
                 Bring our AI Interviewer and comprehensive skills assessments to your hiring team to evaluate candidates fairly and efficiently.
               </p>
-              <button onClick={() => router.push('/signup/recruiter')} className="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-wide group/btn">
+              <button onClick={() => router.push('/login/recruiter')} className="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-wide group/btn">
                 SEE MORE <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
             </div>

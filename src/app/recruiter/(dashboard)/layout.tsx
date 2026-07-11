@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Library, Users, Settings, LogOut, Briefcase } from "lucide-react";
 
 export default function RecruiterLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const navItems = [
     { name: "Dashboard", href: "/recruiter", icon: LayoutDashboard },
@@ -49,7 +50,14 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
         </nav>
 
         <div className="p-4 border-t border-slate-200">
-          <button className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-colors group">
+          <button 
+            onClick={() => {
+              localStorage.removeItem('userId');
+              localStorage.removeItem('userRole');
+              router.push('/login/recruiter');
+            }}
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-colors group"
+          >
             <LogOut size={20} className="text-slate-400 group-hover:text-rose-500 transition-colors" />
             Log Out
           </button>
