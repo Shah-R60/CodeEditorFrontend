@@ -11,12 +11,20 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
   const jobId = params.jobId as string;
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/apply/${jobId}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const fetchJob = async () => {
       try {
         const recruiterId = localStorage.getItem('userId');
-        const res = await fetch(`http://localhost:3001/db/jobs/${jobId}`, {
+        const res = await fetch(`http://localhost:3001/db/drives/${jobId}`, {
           headers: { 'x-user-id': recruiterId || '' }
         });
         const json = await res.json();
@@ -40,21 +48,21 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
 
   // Base navigation
   const navItems = [
-    { name: "Dashboard", href: `/recruiter/jobs/${jobId}`, icon: LayoutDashboard, exact: true },
-    { name: "Pipeline", href: `/recruiter/jobs/${jobId}/pipeline`, icon: GitMerge, exact: true },
+    { name: "Dashboard", href: `/recruiter/drives/${jobId}`, icon: LayoutDashboard, exact: true },
+    { name: "Pipeline", href: `/recruiter/drives/${jobId}/pipeline`, icon: GitMerge, exact: true },
   ];
 
   // Dynamic Stages
-  const stageItems = (job.stages || []).map((stage: any) => ({
-    name: stage.name,
-    href: `/recruiter/jobs/${jobId}/stages/${stage.id}`,
+  const stageItems = (job.rounds || []).map((round: any) => ({
+    name: round.name,
+    href: `/recruiter/drives/${jobId}/stages/${round.id}`,
     icon: Map,
     exact: false
   }));
 
   // Final Selection
   const finalItems = [
-    { name: "Final Selection", href: `/recruiter/jobs/${jobId}/final`, icon: CheckCircle, exact: true }
+    { name: "Final Selection", href: `/recruiter/drives/${jobId}/final`, icon: CheckCircle, exact: true }
   ];
 
   const allNavItems = [...navItems, ...stageItems, ...finalItems];
@@ -66,9 +74,9 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 z-10">
         <div className="h-16 flex items-center px-6 border-b border-slate-200">
-          <Link href="/recruiter/jobs" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition font-medium text-sm">
+          <Link href="/recruiter/drives" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition font-medium text-sm">
             <ArrowLeft size={16} />
-            Back to Jobs
+            Back to Drives
           </Link>
         </div>
 
@@ -105,11 +113,11 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
             </div>
           </div>
 
-          {/* Stages */}
+          {/* Rounds */}
           <div>
-            <div className="px-3 mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Stages</div>
+            <div className="px-3 mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Rounds</div>
             <div className="space-y-1">
-              {stageItems.length === 0 && <div className="px-3 text-xs text-slate-500">No stages defined</div>}
+              {stageItems.length === 0 && <div className="px-3 text-xs text-slate-500">No rounds defined</div>}
               {stageItems.map((item) => {
                 const isActive = pathname.startsWith(item.href);
                 const Icon = item.icon;
@@ -163,8 +171,11 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
             {currentNav}
           </div>
           <div className="flex items-center gap-4">
-            <button className="text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors border border-blue-200">
-              Share Apply Link
+            <button 
+              onClick={handleCopyLink}
+              className="text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors border border-blue-200"
+            >
+              {copied ? "Copied!" : "Share Apply Link"}
             </button>
             <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
               R

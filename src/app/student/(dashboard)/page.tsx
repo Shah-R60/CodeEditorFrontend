@@ -1,9 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, CheckCircle2, ChevronRight, PlayCircle, Laptop, Trophy, Code } from "lucide-react";
+import { Clock, CheckCircle2, ChevronRight, PlayCircle, Laptop, Trophy, Code, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function StudentDashboard() {
+  const [assessments, setAssessments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(`http://localhost:3001/db/users/${userId}/assessments`);
+        const json = await res.json();
+        
+        if (json.success) {
+          // Filter out only those where the hiring drive is Active
+          const active = json.data.filter((c: any) => c.hiringDrive?.status === 'Active');
+          setAssessments(active);
+        }
+      } catch (err) {
+        console.error("Failed to fetch assessments", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssessments();
+  }, []);
+
   return (
     <div className="space-y-10">
       {/* Welcome Header */}
@@ -38,29 +69,72 @@ export default function StudentDashboard() {
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 hover:bg-slate-50 transition cursor-pointer group">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition">Frontend Engineer Assessment</h3>
-                  <p className="text-slate-500 text-sm mt-1">TechCorp Inc.</p>
-                </div>
-                <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">Due in 3 days</span>
+            {loading ? (
+              <div className="p-8 text-center text-slate-500 flex flex-col items-center justify-center">
+                <Loader2 className="animate-spin text-blue-500 mb-2" size={24} />
+                <p>Loading your active assessments...</p>
               </div>
-              <div className="mt-4 flex items-center gap-4 text-sm text-slate-500">
-                <span className="flex items-center gap-1"><Clock size={16} /> 60 mins</span>
-                <span className="flex items-center gap-1"><Code size={16} /> 2 Coding Tasks</span>
-              </div>
-              <div className="mt-6 flex justify-end">
-                <button className="flex items-center gap-2 text-sm font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
-                  Start Assessment <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
+            ) : assessments.length > 0 ? (
+              assessments.map((assessment) => {
+                const drive = assessment.hiringDrive;
+                const totalRounds = drive?.rounds?.length || 0;
+                // Calculate roughly an hour per round if no duration specified
+                const duration = drive?.rounds?.reduce((acc: number, round: any) => {
+                  return acc + (round.duration ? parseInt(round.duration) : 60);
+                }, 0) || 60;
 
-            {/* Empty State Mock */}
-            <div className="p-8 text-center text-slate-500 bg-slate-50/50">
-              No more active assessments at this time.
-            </div>
+                const firstRound = drive?.rounds?.[0];
+                const startDate = firstRound?.startDate ? new Date(firstRound.startDate) : null;
+                const now = new Date();
+
+                let actionElement;
+
+                if (!startDate) {
+                  actionElement = (
+                    <span className="flex items-center gap-2 text-sm font-bold text-slate-400 cursor-not-allowed">
+                      Upcoming Assessment <Clock size={16} />
+                    </span>
+                  );
+                } else if (startDate > now) {
+                  const formattedTime = startDate.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+                  actionElement = (
+                    <span className="flex items-center gap-2 text-sm font-bold text-slate-500 cursor-not-allowed">
+                      Starts: {formattedTime} <Clock size={16} />
+                    </span>
+                  );
+                } else {
+                  actionElement = (
+                    <Link href="/editor" className="flex items-center gap-2 text-sm font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
+                      Start Assessment <ChevronRight size={16} />
+                    </Link>
+                  );
+                }
+
+                return (
+                  <div key={assessment.id} className="p-6 border-b border-slate-100 hover:bg-slate-50 transition cursor-pointer group">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition">{drive?.title}</h3>
+                        <p className="text-slate-500 text-sm mt-1">{drive?.department}</p>
+                      </div>
+                      <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">Active</span>
+                    </div>
+                    <div className="mt-4 flex items-center gap-4 text-sm text-slate-500">
+                      <span className="flex items-center gap-1"><Clock size={16} /> {duration} mins</span>
+                      <span className="flex items-center gap-1"><Code size={16} /> {totalRounds} Tasks</span>
+                      <span className="flex items-center gap-1 ml-auto font-medium text-slate-700">Status: {assessment.status}</span>
+                    </div>
+                    <div className="mt-6 flex justify-end">
+                      {actionElement}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-8 text-center text-slate-500 bg-slate-50/50">
+                No active assessments at this time.
+              </div>
+            )}
           </div>
         </div>
 

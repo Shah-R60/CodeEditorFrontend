@@ -14,7 +14,7 @@ export default function JobDashboardTab() {
     const fetchCandidates = async () => {
       try {
         const recruiterId = localStorage.getItem('userId');
-        const res = await fetch(`http://localhost:3001/db/jobs/${jobId}`, {
+        const res = await fetch(`http://localhost:3001/db/drives/${jobId}`, {
           headers: { 'x-user-id': recruiterId || '' }
         });
         const json = await res.json();

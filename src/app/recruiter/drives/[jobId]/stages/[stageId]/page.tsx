@@ -17,7 +17,7 @@ export default function StageDetailsPage() {
     const fetchJob = async () => {
       try {
         const recruiterId = localStorage.getItem('userId');
-        const res = await fetch(`http://localhost:3001/db/jobs/${jobId}`, {
+        const res = await fetch(`http://localhost:3001/db/drives/${jobId}`, {
           headers: { 'x-user-id': recruiterId || '' }
         });
         const json = await res.json();
@@ -37,7 +37,7 @@ export default function StageDetailsPage() {
 
   if (!job) return <div>Job not found</div>;
 
-  const currentStage = job.stages?.find((s: any) => s.id === stageId);
+  const currentStage = job.rounds?.find((s: any) => s.id === stageId);
   if (!currentStage) return <div>Stage not found</div>;
 
   // Filter candidates specifically for this stage

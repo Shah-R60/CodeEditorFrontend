@@ -1,21 +1,63 @@
 "use client";
 
-import { Users, FileCode2, CheckCircle2, TrendingUp, Clock } from "lucide-react";
+import { Users, FileCode2, CheckCircle2, TrendingUp, Clock, CheckSquare, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+type DashboardData = {
+  stats: {
+    totalCandidates: number;
+    activeAssessments: number;
+    completedAssessments: number;
+    passRate: string;
+  };
+  recentActivity: Array<{
+    id: string;
+    candidate: string;
+    test: string;
+    score: string;
+    time: string;
+    status: string;
+  }>;
+};
 
 export default function RecruiterDashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+        const token = localStorage.getItem("token") || "";
+        const userId = localStorage.getItem("userId") || "";
+        
+        const res = await fetch(`${apiUrl}/db/drives/dashboard/stats`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "x-user-id": userId
+          }
+        });
+        const result = await res.json();
+        if (result.success) {
+          setData(result.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch dashboard data", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDashboard();
+  }, []);
   const stats = [
-    { name: "Total Candidates", value: "1,248", change: "+12%", icon: Users, color: "text-blue-600", bg: "bg-blue-100" },
-    { name: "Active Assessments", value: "24", change: "+4", icon: FileCode2, color: "text-blue-600", bg: "bg-blue-100" },
-    { name: "Avg. Pass Rate", value: "68%", change: "+2.4%", icon: CheckCircle2, color: "text-violet-600", bg: "bg-violet-100" },
+    { name: "Total Candidates", value: data?.stats.totalCandidates.toString() || "0", change: "+0%", icon: Users, color: "text-blue-600", bg: "bg-blue-100" },
+    { name: "Active Assessments", value: data?.stats.activeAssessments.toString() || "0", change: "Active", icon: FileCode2, color: "text-emerald-600", bg: "bg-emerald-100" },
+    { name: "Completed Assessments", value: data?.stats.completedAssessments.toString() || "0", change: "Done", icon: CheckSquare, color: "text-amber-600", bg: "bg-amber-100" },
+    { name: "Avg. Pass Rate", value: data?.stats.passRate || "0%", change: "+0.0%", icon: CheckCircle2, color: "text-violet-600", bg: "bg-violet-100" },
   ];
 
-  const recentActivity = [
-    { id: 1, candidate: "Sarah Jenkins", test: "Frontend Engineer Assessment", score: "95/100", time: "2 hours ago", status: "Passed" },
-    { id: 2, candidate: "Michael Chen", test: "Backend Developer Test", score: "82/100", time: "5 hours ago", status: "Passed" },
-    { id: 3, candidate: "Alex Rodriguez", test: "Data Structures & Algos", score: "45/100", time: "1 day ago", status: "Failed" },
-    { id: 4, candidate: "Emily Watson", test: "Frontend Engineer Assessment", score: "91/100", time: "1 day ago", status: "Passed" },
-  ];
+  const recentActivity = data?.recentActivity || [];
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -25,7 +67,7 @@ export default function RecruiterDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -57,7 +99,16 @@ export default function RecruiterDashboard() {
               View all
             </Link>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto min-h-[300px]">
+            {isLoading ? (
+               <div className="flex justify-center items-center h-[300px]">
+                 <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+               </div>
+            ) : recentActivity.length === 0 ? (
+               <div className="flex justify-center items-center h-[300px] text-slate-500">
+                 No candidate activity found. Let's create an assessment!
+               </div>
+            ) : (
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
@@ -89,6 +140,7 @@ export default function RecruiterDashboard() {
                 ))}
               </tbody>
             </table>
+            )}
           </div>
         </div>
 
