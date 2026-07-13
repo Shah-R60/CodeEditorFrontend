@@ -46,7 +46,7 @@ export default function FinalSelectionPage() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <CheckCircle className="text-emerald-500" size={24} /> Final Selection
+          <CheckCircle className="text-emerald-500" size={24} /> Qualified Candidates
         </h2>
         <p className="text-sm text-slate-500 mt-1">Candidates who successfully passed all assessment rounds.</p>
       </div>
@@ -68,7 +68,7 @@ export default function FinalSelectionPage() {
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
                     <Award size={32} className="mx-auto text-slate-300 mb-3" />
-                    No candidates have reached the final selection yet.
+                    No candidates have reached the qualified stage yet.
                   </td>
                 </tr>
               ) : finalCandidates.map((c: any) => (

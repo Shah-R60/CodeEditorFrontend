@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Users, FileCode, LineChart, Loader2, LayoutDashboard, Calendar, Settings as SettingsIcon, Activity, Search, Filter, ChevronDown, Plus, Download, Shuffle, Library, Eye, Edit2, Trash2, Share2, MoreHorizontal, Clock, ArrowRight } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart as RechartsLineChart, Line } from 'recharts';
 
 export default function StageDetailsPage() {
   const params = useParams();
@@ -14,23 +15,105 @@ export default function StageDetailsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Modals & Questions State
+  const [globalQuestions, setGlobalQuestions] = useState<any[]>([]);
+  const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
+  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
+  const [tempSelectedQuestions, setTempSelectedQuestions] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [addQuestionForm, setAddQuestionForm] = useState({
+    title: '', description: '', difficulty: 'Easy', type: 'Coding', marks: 10, tags: ''
+  });
+
+  const [scheduleForm, setScheduleForm] = useState({
+    date: '', startTime: '', endTime: '', timeZone: 'Asia/Kolkata (IST)', duration: '90 mins', deadline: '',
+    allowLateJoin: true, gracePeriod: '5 mins', autoStart: true, autoEnd: true, publishSchedule: true
+  });
+  const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [settingsForm, setSettingsForm] = useState({
+    name: '', type: 'Assessment', status: 'Active', duration: '60',
+    shuffleQuestions: true, shuffleMCQs: true, saveProgress: true,
+    tabSwitching: true, copyPaste: true, fullScreen: true,
+    autoSubmit: true
+  });
 
   useEffect(() => {
-    const fetchJob = async () => {
-      try {
-        const recruiterId = localStorage.getItem('userId');
-        const res = await fetch(`http://localhost:3001/db/drives/${jobId}`, {
-          headers: { 'x-user-id': recruiterId || '' }
+    if (job) {
+      const stage = job.rounds?.find((s: any) => s.id === stageId);
+      if (stage) {
+        let dateStr = '', startStr = '', endStr = '', deadlineStr = '';
+        if (stage.startDate) {
+          const d = new Date(stage.startDate);
+          dateStr = d.toISOString().split('T')[0];
+          startStr = d.toTimeString().slice(0,5);
+        }
+        if (stage.endDate) {
+          const d = new Date(stage.endDate);
+          endStr = d.toTimeString().slice(0,5);
+        }
+        if (stage.deadline) {
+          const d = new Date(stage.deadline);
+          // datetime-local requires YYYY-MM-DDThh:mm format
+          deadlineStr = d.toISOString().slice(0, 16);
+        }
+        setScheduleForm({
+          date: dateStr,
+          startTime: startStr,
+          endTime: endStr,
+          timeZone: stage.timeZone || 'Asia/Kolkata (IST)',
+          duration: stage.duration || '90 mins',
+          deadline: deadlineStr,
+          allowLateJoin: stage.config?.allowLateJoin ?? true,
+          gracePeriod: stage.config?.gracePeriod || '5 mins',
+          autoStart: stage.config?.autoStart ?? true,
+          autoEnd: stage.config?.autoEnd ?? true,
+          publishSchedule: stage.config?.publishSchedule ?? true,
         });
-        const json = await res.json();
-        if (json.success) setJob(json.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+
+        setSettingsForm({
+          name: stage.name || '',
+          type: stage.type || 'Assessment',
+          status: stage.config?.status || 'Active',
+          duration: stage.duration || '60 mins',
+          shuffleQuestions: stage.config?.shuffleQuestions ?? true,
+          shuffleMCQs: stage.config?.shuffleMCQs ?? true,
+          saveProgress: stage.config?.saveProgress ?? true,
+          tabSwitching: stage.config?.tabSwitching ?? true,
+          copyPaste: stage.config?.copyPaste ?? true,
+          fullScreen: stage.config?.fullScreen ?? true,
+          autoSubmit: stage.config?.autoSubmit ?? true,
+        });
       }
-    };
-    fetchJob();
+    }
+  }, [job, stageId]);
+
+  const fetchJobAndQuestions = async () => {
+    try {
+      const recruiterId = localStorage.getItem('userId');
+      
+      const [jobRes, questionsRes] = await Promise.all([
+        fetch(`http://localhost:3001/db/drives/${jobId}`, {
+          headers: { 'x-user-id': recruiterId || '' }
+        }),
+        fetch(`http://localhost:3001/db/questions`)
+      ]);
+      
+      const jobJson = await jobRes.json();
+      const questionsJson = await questionsRes.json();
+      
+      if (jobJson.success) setJob(jobJson.data);
+      if (questionsJson.success) setGlobalQuestions(questionsJson.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobAndQuestions();
   }, [jobId]);
 
   if (loading) {
@@ -42,8 +125,225 @@ export default function StageDetailsPage() {
   const currentStage = job.rounds?.find((s: any) => s.id === stageId);
   if (!currentStage) return <div>Stage not found</div>;
 
-  // Filter candidates specifically for this stage (for the Candidates Tab)
+  const updateRoundQuestions = async (newQuestionIds: string[]) => {
+    try {
+      const recruiterId = localStorage.getItem('userId');
+      const updatedConfig = { ...(currentStage.config || {}), questions: newQuestionIds };
+      
+      const res = await fetch(`http://localhost:3001/db/drives/${jobId}/rounds/${stageId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': recruiterId || ''
+        },
+        body: JSON.stringify({ config: updatedConfig })
+      });
+      const json = await res.json();
+      if (json.success) {
+        // Optimistically update local state
+        setJob((prevJob: any) => {
+          const updatedRounds = prevJob.rounds.map((r: any) => 
+            r.id === stageId ? { ...r, config: updatedConfig } : r
+          );
+          return { ...prevJob, rounds: updatedRounds };
+        });
+      }
+    } catch (err) {
+      console.error('Error updating round questions:', err);
+    }
+  };
+
+  const handleRandomize = () => {
+    const currentIds = currentStage.config?.questions || [];
+    if (currentIds.length <= 1) return;
+    const shuffled = [...currentIds].sort(() => Math.random() - 0.5);
+    updateRoundQuestions(shuffled);
+  };
+
+  const handleDeleteQuestion = (qId: string) => {
+    const currentIds = currentStage.config?.questions || [];
+    updateRoundQuestions(currentIds.filter((id: string) => id !== qId));
+  };
+
+  const handleAddQuestionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const tagArray = addQuestionForm.tags.split(',').map(t => t.trim()).filter(Boolean);
+      
+      const res = await fetch(`http://localhost:3001/db/questions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: addQuestionForm.title,
+          description: addQuestionForm.description,
+          difficulty: addQuestionForm.difficulty.toUpperCase(),
+          type: addQuestionForm.type,
+          marks: parseInt(addQuestionForm.marks as any),
+          tags: tagArray,
+          testCases: [{ input: "test", expectedOutput: "test" }] // Minimum required
+        })
+      });
+      
+      const json = await res.json();
+      if (json.success) {
+        setGlobalQuestions([...globalQuestions, json.data]);
+        const currentIds = currentStage.config?.questions || [];
+        updateRoundQuestions([...currentIds, json.data.id]);
+        setIsAddQuestionModalOpen(false);
+        setAddQuestionForm({ title: '', description: '', difficulty: 'Easy', type: 'Coding', marks: 10, tags: '' });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBankSelection = (qId: string, isSelected: boolean) => {
+    if (isSelected && !tempSelectedQuestions.includes(qId)) {
+      setTempSelectedQuestions([...tempSelectedQuestions, qId]);
+    } else if (!isSelected && tempSelectedQuestions.includes(qId)) {
+      setTempSelectedQuestions(tempSelectedQuestions.filter((id: string) => id !== qId));
+    }
+  };
+
+  const handleBankDone = () => {
+    updateRoundQuestions(tempSelectedQuestions);
+    setIsBankModalOpen(false);
+  };
+
+  const openBankModal = () => {
+    setTempSelectedQuestions(currentStage.config?.questions || []);
+    setIsBankModalOpen(true);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        alert("Import functionality is currently a stub for demonstration.");
+      }
+    };
+    input.click();
+  };
+
+  const handleScheduleSubmit = async () => {
+    setIsSavingSchedule(true);
+    try {
+      const recruiterId = localStorage.getItem('userId');
+      
+      let startDateStr = null;
+      let endDateStr = null;
+      
+      if (scheduleForm.date) {
+        if (scheduleForm.startTime) {
+          startDateStr = new Date(`${scheduleForm.date}T${scheduleForm.startTime}:00`).toISOString();
+        } else {
+          startDateStr = new Date(scheduleForm.date).toISOString();
+        }
+        
+        if (scheduleForm.endTime) {
+          endDateStr = new Date(`${scheduleForm.date}T${scheduleForm.endTime}:00`).toISOString();
+        }
+      }
+
+      let deadlineObj = scheduleForm.deadline ? new Date(scheduleForm.deadline).toISOString() : null;
+
+      const payload = {
+        startDate: startDateStr,
+        endDate: endDateStr,
+        duration: scheduleForm.duration,
+        timeZone: scheduleForm.timeZone,
+        deadline: deadlineObj,
+        config: {
+          ...(currentStage.config || {}),
+          allowLateJoin: scheduleForm.allowLateJoin,
+          gracePeriod: scheduleForm.gracePeriod,
+          autoStart: scheduleForm.autoStart,
+          autoEnd: scheduleForm.autoEnd,
+          publishSchedule: scheduleForm.publishSchedule,
+        }
+      };
+      
+      const res = await fetch(`http://localhost:3001/db/drives/${jobId}/rounds/${stageId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': recruiterId || ''
+        },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (json.success) {
+        setJob((prevJob: any) => {
+          const updatedRounds = prevJob.rounds.map((r: any) => 
+            r.id === stageId ? { ...r, ...payload, config: payload.config } : r
+          );
+          return { ...prevJob, rounds: updatedRounds };
+        });
+      }
+    } catch (err) {
+      console.error('Error updating schedule:', err);
+    } finally {
+      setIsSavingSchedule(false);
+    }
+  };
+
+  const handleSettingsSubmit = async () => {
+    setIsSavingSettings(true);
+    try {
+      const recruiterId = localStorage.getItem('userId');
+      const payload = {
+        name: settingsForm.name,
+        type: settingsForm.type,
+        duration: settingsForm.duration,
+        config: {
+          ...(currentStage.config || {}),
+          status: settingsForm.status,
+          shuffleQuestions: settingsForm.shuffleQuestions,
+          shuffleMCQs: settingsForm.shuffleMCQs,
+          saveProgress: settingsForm.saveProgress,
+          tabSwitching: settingsForm.tabSwitching,
+          copyPaste: settingsForm.copyPaste,
+          fullScreen: settingsForm.fullScreen,
+          autoSubmit: settingsForm.autoSubmit,
+        }
+      };
+      
+      const res = await fetch(`http://localhost:3001/db/drives/${jobId}/rounds/${stageId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': recruiterId || ''
+        },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (json.success) {
+        setJob((prevJob: any) => {
+          const updatedRounds = prevJob.rounds.map((r: any) => 
+            r.id === stageId ? { ...r, name: payload.name, type: payload.type, duration: payload.duration, config: payload.config } : r
+          );
+          return { ...prevJob, rounds: updatedRounds };
+        });
+      }
+    } catch (err) {
+      console.error('Error updating settings:', err);
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   const stageCandidates = job.candidates?.filter((c: any) => c.stage === currentStage.name) || [];
+
+  const roundQuestionIds = currentStage.config?.questions || [];
+  const roundQuestions = roundQuestionIds
+    .map((id: string) => globalQuestions.find(q => q.id === id))
+    .filter(Boolean);
 
   // Metrics logic for the Overview Tab
   let invited = 0;
@@ -438,16 +738,16 @@ export default function StageDetailsPage() {
                 <h3 className="text-lg font-bold text-slate-900">Assessment Questions</h3>
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-                <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
+                <button onClick={openBankModal} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
                   <Library size={16} /> Question Bank
                 </button>
-                <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
+                <button onClick={handleRandomize} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
                   <Shuffle size={16} /> Randomize
                 </button>
-                <button className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
+                <button onClick={handleImport} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
                   <Download size={16} /> Import
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap">
+                <button onClick={() => setIsAddQuestionModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap">
                   <Plus size={16} /> Add Question
                 </button>
               </div>
@@ -460,19 +760,19 @@ export default function StageDetailsPage() {
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Categories</div>
                   <div className="space-y-1">
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg transition-colors">
-                      Coding <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">2</span>
+                      Coding <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'Coding').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      MCQ <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">10</span>
+                      MCQ <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'MCQ').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      SQL <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">1</span>
+                      SQL <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'SQL').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      Debugging <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">0</span>
+                      Debugging <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'Debugging').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      Subjective <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">0</span>
+                      Subjective <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'Subjective').length}</span>
                     </button>
                   </div>
                 </div>
@@ -480,52 +780,60 @@ export default function StageDetailsPage() {
 
               {/* Question Cards List */}
               <div className="flex-1 space-y-4">
-                
-                {[
-                  { id: 1, title: "Two Sum", type: "Coding", difficulty: "Easy", marks: 10, tags: ["Arrays", "Hash Table"] },
-                  { id: 2, title: "Reverse Linked List", type: "Coding", difficulty: "Medium", marks: 20, tags: ["Linked List", "Recursion"] },
-                  { id: 3, title: "Find Nth Highest Salary", type: "SQL", difficulty: "Hard", marks: 30, tags: ["Database", "Subquery"] },
-                ].map(q => (
-                  <div key={q.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{q.type}</span>
-                        <span className="text-slate-300">•</span>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
-                          q.difficulty === 'Easy' ? 'bg-emerald-50 text-emerald-700' :
-                          q.difficulty === 'Medium' ? 'bg-amber-50 text-amber-700' :
-                          'bg-rose-50 text-rose-700'
-                        }`}>
-                          {q.difficulty}
-                        </span>
-                      </div>
-                      <h4 className="text-lg font-bold text-slate-900 mb-2">{q.title}</h4>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg">
-                          <span className="text-blue-600 font-bold">{q.marks}</span> Marks
-                        </div>
-                        <div className="flex gap-1.5">
-                          {q.tags.map(t => (
-                            <span key={t} className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md">{t}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger" title="Preview">
-                        <Eye size={18} />
-                      </button>
-                      <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger" title="Edit">
-                        <Edit2 size={18} />
-                      </button>
-                      <button className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors tooltip-trigger" title="Delete">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+                {roundQuestions.length === 0 ? (
+                  <div className="bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
+                    <FileCode size={32} className="mx-auto text-slate-300 mb-3" />
+                    <h4 className="text-slate-900 font-semibold mb-1">No questions added yet</h4>
+                    <p className="text-slate-500 text-sm mb-4">Click "Add Question" to create one or select from the Question Bank.</p>
                   </div>
-                ))}
+                ) : (
+                  roundQuestions.map(q => {
+                    const qType = q.boilerplate?.type || 'Coding';
+                    const qMarks = q.boilerplate?.marks || 10;
+                    const qTags = q.boilerplate?.tags || [];
 
+                    return (
+                      <div key={q.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{qType}</span>
+                            <span className="text-slate-300">•</span>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
+                              q.difficulty === 'EASY' ? 'bg-emerald-50 text-emerald-700' :
+                              q.difficulty === 'MEDIUM' ? 'bg-amber-50 text-amber-700' :
+                              'bg-rose-50 text-rose-700'
+                            }`}>
+                              {q.difficulty}
+                            </span>
+                          </div>
+                          <h4 className="text-lg font-bold text-slate-900 mb-2">{q.title}</h4>
+                          <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg">
+                              <span className="text-blue-600 font-bold">{qMarks}</span> Marks
+                            </div>
+                            <div className="flex gap-1.5">
+                              {qTags.map((t: string) => (
+                                <span key={t} className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md">{t}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger" title="Preview">
+                            <Eye size={18} />
+                          </button>
+                          <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger" title="Edit">
+                            <Edit2 size={18} />
+                          </button>
+                          <button onClick={() => handleDeleteQuestion(q.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors tooltip-trigger" title="Delete">
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
@@ -533,19 +841,167 @@ export default function StageDetailsPage() {
 
         {/* Analysis View */}
         {activeTab === "analysis" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                <div className="text-slate-500 font-medium text-sm mb-1">Pass Rate</div>
-                <div className="text-3xl font-bold text-slate-900">
-                  {stageCandidates.length > 0 
-                    ? Math.round((stageCandidates.filter((c:any) => c.status === 'Passed').length / stageCandidates.length) * 100) + '%' 
-                    : '-'}
+          <div className="space-y-6">
+            
+            {/* Top Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Average Score</div>
+                 <div className="text-2xl font-bold text-slate-900">84<span className="text-sm text-slate-400 font-normal">/100</span></div>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Highest</div>
+                 <div className="text-2xl font-bold text-emerald-600">98</div>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Lowest</div>
+                 <div className="text-2xl font-bold text-rose-600">32</div>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Median</div>
+                 <div className="text-2xl font-bold text-slate-900">86</div>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Pass Rate</div>
+                 <div className="text-2xl font-bold text-blue-600">
+                   {stageCandidates.length > 0 
+                     ? Math.round((stageCandidates.filter((c:any) => c.status === 'Passed').length / stageCandidates.length) * 100) + '%' 
+                     : '76%'}
+                 </div>
+              </div>
+            </div>
+
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Score Distribution */}
+              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <h4 className="text-sm font-bold text-slate-900 mb-4">Score Distribution</h4>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={[
+                      { range: '0-20', count: 2 },
+                      { range: '21-40', count: 5 },
+                      { range: '41-60', count: 12 },
+                      { range: '61-80', count: 38 },
+                      { range: '81-100', count: 24 }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                      <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                      <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-             </div>
-             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                <div className="text-slate-500 font-medium text-sm mb-1">Avg Score</div>
-                <div className="text-3xl font-bold text-slate-900">84/100</div>
-             </div>
+              </div>
+
+              {/* Question Wise Accuracy */}
+              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <h4 className="text-sm font-bold text-slate-900 mb-4">Question Wise Accuracy</h4>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={[
+                      { q: 'Q1', accuracy: 92 },
+                      { q: 'Q2', accuracy: 78 },
+                      { q: 'Q3', accuracy: 45 },
+                      { q: 'Q4', accuracy: 64 },
+                      { q: 'Q5', accuracy: 88 }
+                    ]} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                      <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                      <YAxis dataKey="q" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} />
+                      <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                      <Bar dataKey="accuracy" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Language Usage & Completion Rate */}
+              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row gap-6">
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-slate-900 mb-4">Language Usage</h4>
+                  <div className="h-48 flex items-center justify-center relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Python', value: 45 },
+                            { name: 'Java', value: 30 },
+                            { name: 'C++', value: 15 },
+                            { name: 'JavaScript', value: 10 }
+                          ]}
+                          cx="50%" cy="50%"
+                          innerRadius={50} outerRadius={70}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          <Cell fill="#3b82f6" />
+                          <Cell fill="#f59e0b" />
+                          <Cell fill="#10b981" />
+                          <Cell fill="#f43f5e" />
+                        </Pie>
+                        <RechartsTooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-slate-900 mb-4">Completion Rate</h4>
+                  <div className="h-48 flex items-center justify-center relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Completed', value: 82 },
+                            { name: 'Incomplete', value: 18 }
+                          ]}
+                          cx="50%" cy="50%"
+                          innerRadius={60} outerRadius={70}
+                          startAngle={90} endAngle={-270}
+                          dataKey="value"
+                          stroke="none"
+                        >
+                          <Cell fill="#3b82f6" />
+                          <Cell fill="#e2e8f0" />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-2xl font-bold text-slate-900">82%</span>
+                      <span className="text-xs text-slate-500">Submitted</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submission Timeline */}
+              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                <h4 className="text-sm font-bold text-slate-900 mb-4">Submission Timeline</h4>
+                <div className="h-48 mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsLineChart data={[
+                      { time: '10:00', count: 0 },
+                      { time: '10:15', count: 5 },
+                      { time: '10:30', count: 12 },
+                      { time: '10:45', count: 35 },
+                      { time: '11:00', count: 80 },
+                      { time: '11:15', count: 120 },
+                      { time: '11:30', count: 145 }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} />
+                      <RechartsTooltip cursor={{stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                      <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, fill: '#6366f1', strokeWidth: 0 }} />
+                    </RechartsLineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+            </div>
           </div>
         )}
 
@@ -557,8 +1013,12 @@ export default function StageDetailsPage() {
                 <h3 className="text-lg font-bold text-slate-900">Assessment Schedule</h3>
                 <p className="text-slate-500 text-sm">Configure timing and access rules for this round.</p>
               </div>
-              <button className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm">
-                Save Changes
+              <button 
+                onClick={handleScheduleSubmit} 
+                disabled={isSavingSchedule}
+                className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
+              >
+                {isSavingSchedule ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
 
@@ -568,31 +1028,31 @@ export default function StageDetailsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Date</label>
-                    <input type="date" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" defaultValue="2026-07-25" />
+                    <input type="date" value={scheduleForm.date} onChange={e => setScheduleForm({...scheduleForm, date: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Timezone</label>
-                    <select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option>Asia/Kolkata (IST)</option>
-                      <option>UTC</option>
-                      <option>America/New_York (EST)</option>
+                    <select value={scheduleForm.timeZone} onChange={e => setScheduleForm({...scheduleForm, timeZone: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="Asia/Kolkata (IST)">Asia/Kolkata (IST)</option>
+                      <option value="UTC">UTC</option>
+                      <option value="America/New_York (EST)">America/New_York (EST)</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Start Time</label>
-                    <input type="time" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" defaultValue="10:00" />
+                    <input type="time" value={scheduleForm.startTime} onChange={e => setScheduleForm({...scheduleForm, startTime: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">End Time</label>
-                    <input type="time" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" defaultValue="11:30" />
+                    <input type="time" value={scheduleForm.endTime} onChange={e => setScheduleForm({...scheduleForm, endTime: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Duration</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 90 mins" defaultValue={currentStage?.duration || "90 mins"} />
+                    <input type="text" value={scheduleForm.duration} onChange={e => setScheduleForm({...scheduleForm, duration: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 90 mins" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Registration Deadline</label>
-                    <input type="datetime-local" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="datetime-local" value={scheduleForm.deadline} onChange={e => setScheduleForm({...scheduleForm, deadline: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
               </div>
@@ -609,7 +1069,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Permit candidates to start the assessment after the start time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <input type="checkbox" checked={scheduleForm.allowLateJoin} onChange={e => setScheduleForm({...scheduleForm, allowLateJoin: e.target.checked})} className="sr-only peer" />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -619,10 +1079,10 @@ export default function StageDetailsPage() {
                       <div className="text-sm font-semibold text-slate-900">Grace Period</div>
                       <div className="text-xs text-slate-500">Additional time allowed before auto-submission.</div>
                     </div>
-                    <select className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-32">
-                      <option>5 mins</option>
-                      <option>10 mins</option>
-                      <option>15 mins</option>
+                    <select value={scheduleForm.gracePeriod} onChange={e => setScheduleForm({...scheduleForm, gracePeriod: e.target.value})} className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-32">
+                      <option value="5 mins">5 mins</option>
+                      <option value="10 mins">10 mins</option>
+                      <option value="15 mins">15 mins</option>
                     </select>
                   </div>
 
@@ -632,7 +1092,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Automatically start the assessment at the scheduled time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <input type="checkbox" checked={scheduleForm.autoStart} onChange={e => setScheduleForm({...scheduleForm, autoStart: e.target.checked})} className="sr-only peer" />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -643,7 +1103,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Automatically submit all active assessments at the end time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <input type="checkbox" checked={scheduleForm.autoEnd} onChange={e => setScheduleForm({...scheduleForm, autoEnd: e.target.checked})} className="sr-only peer" />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -654,7 +1114,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Make this schedule visible to invited candidates.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <input type="checkbox" checked={scheduleForm.publishSchedule} onChange={e => setScheduleForm({...scheduleForm, publishSchedule: e.target.checked})} className="sr-only peer" />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -673,8 +1133,11 @@ export default function StageDetailsPage() {
                 <h3 className="text-lg font-bold text-slate-900">Stage Settings</h3>
                 <p className="text-slate-500 text-sm">Configure security, proctoring, and general round settings.</p>
               </div>
-              <button className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm">
-                Save Settings
+              <button 
+                onClick={handleSettingsSubmit}
+                disabled={isSavingSettings}
+                className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm disabled:opacity-50">
+                {isSavingSettings ? 'Saving...' : 'Save Settings'}
               </button>
             </div>
 
@@ -685,11 +1148,11 @@ export default function StageDetailsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Round Name</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" defaultValue={currentStage?.name || "Round"} />
+                    <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({...settingsForm, name: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Round Type</label>
-                    <select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" defaultValue={currentStage?.type || "Assessment"}>
+                    <select value={settingsForm.type} onChange={e => setSettingsForm({...settingsForm, type: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option value="Assessment">Assessment</option>
                       <option value="Interview">Interview</option>
                       <option value="Project">Project</option>
@@ -697,7 +1160,7 @@ export default function StageDetailsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Status</label>
-                    <select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select value={settingsForm.status} onChange={e => setSettingsForm({...settingsForm, status: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option>Active</option>
                       <option>Draft</option>
                       <option>Archived</option>
@@ -705,11 +1168,7 @@ export default function StageDetailsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Duration</label>
-                    <input type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" defaultValue={currentStage?.duration || "60 mins"} />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Passing Score (%)</label>
-                    <input type="number" className="w-full md:w-1/2 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" defaultValue="70" />
+                    <input type="text" value={settingsForm.duration} onChange={e => setSettingsForm({...settingsForm, duration: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
               </div>
@@ -720,24 +1179,36 @@ export default function StageDetailsPage() {
               <div className="p-6">
                 <h4 className="text-base font-bold text-slate-900 mb-4">Assessment Settings</h4>
                 <div className="space-y-4">
-                  {[
-                    { label: "Shuffle Questions", desc: "Present questions in a random order for each candidate.", default: true },
-                    { label: "Shuffle MCQs", desc: "Randomize the order of options for multiple choice questions.", default: true },
-                    { label: "Negative Marking", desc: "Deduct marks for incorrect answers.", default: false },
-                    { label: "Multiple Attempts", desc: "Allow candidates to retake the assessment.", default: false },
-                    { label: "Save Progress", desc: "Automatically save answers as the candidate progresses.", default: true },
-                  ].map(setting => (
-                    <div key={setting.label} className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">{setting.label}</div>
-                        <div className="text-xs text-slate-500">{setting.desc}</div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked={setting.default} />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Shuffle Questions</div>
+                      <div className="text-xs text-slate-500">Present questions in a random order for each candidate.</div>
                     </div>
-                  ))}
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleQuestions} onChange={e => setSettingsForm({...settingsForm, shuffleQuestions: e.target.checked})} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Shuffle MCQs</div>
+                      <div className="text-xs text-slate-500">Randomize the order of options for multiple choice questions.</div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleMCQs} onChange={e => setSettingsForm({...settingsForm, shuffleMCQs: e.target.checked})} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Save Progress</div>
+                      <div className="text-xs text-slate-500">Automatically save answers as the candidate progresses.</div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.saveProgress} onChange={e => setSettingsForm({...settingsForm, saveProgress: e.target.checked})} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -747,27 +1218,36 @@ export default function StageDetailsPage() {
               <div className="p-6">
                 <h4 className="text-base font-bold text-slate-900 mb-4">Security</h4>
                 <div className="space-y-4">
-                  {[
-                    { label: "Webcam Proctoring", desc: "Require candidates to keep their webcam on during the assessment.", default: true },
-                    { label: "Tab Switching Detection", desc: "Flag candidates who switch browser tabs.", default: true },
-                    { label: "Copy Paste Disabled", desc: "Prevent candidates from copying or pasting text.", default: true },
-                    { label: "Full Screen Mode", desc: "Enforce full screen mode during the assessment.", default: true },
-                    { label: "Screen Recording", desc: "Record the candidate's screen during the test.", default: false },
-                    { label: "Face Detection", desc: "Detect if multiple faces or no faces are visible.", default: true },
-                    { label: "Multiple Monitor Detection", desc: "Flag candidates using more than one screen.", default: false },
-                    { label: "Browser Lock", desc: "Lock down the browser using secure assessment tools.", default: false },
-                  ].map(setting => (
-                    <div key={setting.label} className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">{setting.label}</div>
-                        <div className="text-xs text-slate-500">{setting.desc}</div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked={setting.default} />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Tab Switching Detection</div>
+                      <div className="text-xs text-slate-500">Flag candidates who switch browser tabs.</div>
                     </div>
-                  ))}
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.tabSwitching} onChange={e => setSettingsForm({...settingsForm, tabSwitching: e.target.checked})} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Copy Paste Disabled</div>
+                      <div className="text-xs text-slate-500">Prevent candidates from copying or pasting text.</div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.copyPaste} onChange={e => setSettingsForm({...settingsForm, copyPaste: e.target.checked})} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Full Screen Mode</div>
+                      <div className="text-xs text-slate-500">Enforce full screen mode during the assessment.</div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.fullScreen} onChange={e => setSettingsForm({...settingsForm, fullScreen: e.target.checked})} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -777,22 +1257,16 @@ export default function StageDetailsPage() {
               <div className="p-6">
                 <h4 className="text-base font-bold text-slate-900 mb-4">Submission</h4>
                 <div className="space-y-4">
-                  {[
-                    { label: "Auto Submit", desc: "Automatically submit when time expires.", default: true },
-                    { label: "Late Submission", desc: "Allow submissions after the time limit (marked as late).", default: false },
-                    { label: "Manual Review Required", desc: "Require a recruiter to manually review the submission before scoring.", default: false },
-                  ].map(setting => (
-                    <div key={setting.label} className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
-                      <div>
-                        <div className="text-sm font-semibold text-slate-900">{setting.label}</div>
-                        <div className="text-xs text-slate-500">{setting.desc}</div>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" className="sr-only peer" defaultChecked={setting.default} />
-                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                      </label>
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-900">Auto Submit</div>
+                      <div className="text-xs text-slate-500">Automatically submit when time expires.</div>
                     </div>
-                  ))}
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.autoSubmit} onChange={e => setSettingsForm({...settingsForm, autoSubmit: e.target.checked})} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -801,6 +1275,120 @@ export default function StageDetailsPage() {
         )}
 
       </div>
+      
+      {/* Modals */}
+      {isAddQuestionModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Add New Question</h3>
+              <button onClick={() => setIsAddQuestionModalOpen(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <form onSubmit={handleAddQuestionSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Question Title</label>
+                <input required type="text" value={addQuestionForm.title} onChange={e => setAddQuestionForm({...addQuestionForm, title: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Reverse Linked List" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
+                <textarea required value={addQuestionForm.description} onChange={e => setAddQuestionForm({...addQuestionForm, description: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]" placeholder="Problem statement..." />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Difficulty</label>
+                  <select value={addQuestionForm.difficulty} onChange={e => setAddQuestionForm({...addQuestionForm, difficulty: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>Easy</option>
+                    <option>Medium</option>
+                    <option>Hard</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Type</label>
+                  <select value={addQuestionForm.type} onChange={e => setAddQuestionForm({...addQuestionForm, type: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>Coding</option>
+                    <option>MCQ</option>
+                    <option>SQL</option>
+                    <option>Debugging</option>
+                    <option>Subjective</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Marks</label>
+                  <input required type="number" value={addQuestionForm.marks} onChange={e => setAddQuestionForm({...addQuestionForm, marks: parseInt(e.target.value)})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tags (comma separated)</label>
+                  <input type="text" value={addQuestionForm.tags} onChange={e => setAddQuestionForm({...addQuestionForm, tags: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Arrays, Sorting" />
+                </div>
+              </div>
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                <button type="button" onClick={() => setIsAddQuestionModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">Cancel</button>
+                <button type="submit" disabled={isSubmitting} className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors disabled:opacity-50">
+                  {isSubmitting ? 'Saving...' : 'Save Question'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isBankModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[80vh]">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <h3 className="text-lg font-bold text-slate-900">Question Bank</h3>
+              <button onClick={() => setIsBankModalOpen(false)} className="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div className="p-4 bg-slate-50 border-b border-slate-100 shrink-0">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input type="text" placeholder="Search questions..." className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {globalQuestions.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 text-sm">No questions available in the bank.</div>
+              ) : (
+                globalQuestions.map(q => {
+                  const isSelected = tempSelectedQuestions.includes(q.id);
+                  return (
+                    <div 
+                      key={q.id} 
+                      onClick={() => handleBankSelection(q.id, !isSelected)}
+                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors bg-white cursor-pointer"
+                    >
+                      <input 
+                        type="checkbox" 
+                        checked={isSelected}
+                        readOnly
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 pointer-events-none" 
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-slate-900 truncate text-sm">{q.title}</div>
+                        <div className="text-xs text-slate-500 flex gap-2 mt-0.5">
+                          <span>{q.boilerplate?.type || 'Coding'}</span>
+                          <span>•</span>
+                          <span>{q.difficulty}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0 gap-3">
+              <button onClick={() => setIsBankModalOpen(false)} className="px-5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors border border-transparent">
+                Cancel
+              </button>
+              <button onClick={handleBankDone} className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors">
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

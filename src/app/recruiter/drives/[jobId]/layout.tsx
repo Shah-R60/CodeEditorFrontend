@@ -62,7 +62,7 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
 
   // Final Selection
   const finalItems = [
-    { name: "Final Selection", href: `/recruiter/drives/${jobId}/final`, icon: CheckCircle, exact: true }
+    { name: "Qualified Candidates", href: `/recruiter/drives/${jobId}/final`, icon: CheckCircle, exact: true }
   ];
 
   const allNavItems = [...navItems, ...stageItems, ...finalItems];
