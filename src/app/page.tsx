@@ -11,7 +11,8 @@ export default function LandingPage() {
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem('token'));
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token && token !== 'undefined' && token !== 'null');
     setUserRole(localStorage.getItem('userRole'));
   }, []);
 

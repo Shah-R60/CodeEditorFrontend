@@ -44,9 +44,10 @@ export default function StageDetailsPage() {
       const stage = job.rounds?.find((s: any) => s.id === stageId);
       if (stage) {
         let dateStr = '', startStr = '', endStr = '', deadlineStr = '';
+        const pad = (n: number) => n.toString().padStart(2, '0');
         if (stage.startDate) {
           const d = new Date(stage.startDate);
-          dateStr = d.toISOString().split('T')[0];
+          dateStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
           startStr = d.toTimeString().slice(0,5);
         }
         if (stage.endDate) {
@@ -55,8 +56,8 @@ export default function StageDetailsPage() {
         }
         if (stage.deadline) {
           const d = new Date(stage.deadline);
-          // datetime-local requires YYYY-MM-DDThh:mm format
-          deadlineStr = d.toISOString().slice(0, 16);
+          // datetime-local requires YYYY-MM-DDThh:mm format in local time
+          deadlineStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         }
         setScheduleForm({
           date: dateStr,
@@ -232,6 +233,10 @@ export default function StageDetailsPage() {
   };
 
   const handleScheduleSubmit = async () => {
+    if (!currentStage.config?.questions || currentStage.config.questions.length === 0) {
+      alert("Please select at least one question in the Questions tab before saving the schedule.");
+      return;
+    }
     setIsSavingSchedule(true);
     try {
       const recruiterId = localStorage.getItem('userId');
@@ -456,7 +461,17 @@ export default function StageDetailsPage() {
             <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm">
               Edit Round
             </button>
-            <button className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition-colors shadow-sm">
+            <button 
+              className="bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!currentStage.config?.questions || currentStage.config.questions.length === 0}
+              onClick={() => {
+                if (!currentStage.config?.questions || currentStage.config.questions.length === 0) {
+                  alert("You must select questions before publishing this round.");
+                } else {
+                  alert('Published successfully!');
+                }
+              }}
+            >
               Publish
             </button>
             <button className="p-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors shadow-sm tooltip-trigger" title="Share Link">
@@ -555,11 +570,10 @@ export default function StageDetailsPage() {
                 </div>
                 <div className="flex justify-between items-center border-b border-slate-50 pb-3">
                   <span className="text-slate-500 font-medium">Format</span>
-                  <span className="text-slate-900 font-medium text-right text-sm">4 Coding Problems<br/>20 MCQs</span>
-                </div>
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-slate-500 font-medium">Passing Score</span>
-                  <span className="text-blue-600 font-bold bg-blue-50 px-2.5 py-1 rounded-lg">70%</span>
+                  <span className="text-slate-900 font-medium text-right text-sm">
+                    {currentStage.config?.questions?.length || 0} Coding Problems<br/>
+                    {currentStage.config?.mcqs?.length || 0} MCQs
+                  </span>
                 </div>
                 <div className="flex justify-between items-start pt-2">
                   <span className="text-slate-500 font-medium">Languages</span>
@@ -1013,13 +1027,18 @@ export default function StageDetailsPage() {
                 <h3 className="text-lg font-bold text-slate-900">Assessment Schedule</h3>
                 <p className="text-slate-500 text-sm">Configure timing and access rules for this round.</p>
               </div>
-              <button 
-                onClick={handleScheduleSubmit} 
-                disabled={isSavingSchedule}
-                className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm disabled:opacity-50"
-              >
-                {isSavingSchedule ? 'Saving...' : 'Save Changes'}
-              </button>
+              <div className="flex items-center gap-4">
+                {(!currentStage.config?.questions || currentStage.config.questions.length === 0) && (
+                  <span className="text-xs text-rose-500 font-medium">Select questions first</span>
+                )}
+                <button 
+                  onClick={handleScheduleSubmit} 
+                  disabled={isSavingSchedule || (!currentStage.config?.questions || currentStage.config.questions.length === 0)}
+                  className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSavingSchedule ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">

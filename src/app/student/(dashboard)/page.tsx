@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { Clock, CheckCircle2, ChevronRight, PlayCircle, Laptop, Trophy, Code, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function StudentDashboard() {
+  const router = useRouter();
   const [assessments, setAssessments] = useState<any[]>([]);
+  const [completedAssessments, setCompletedAssessments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,9 +24,11 @@ export default function StudentDashboard() {
         const json = await res.json();
         
         if (json.success) {
-          // Filter out only those where the hiring drive is Active
-          const active = json.data.filter((c: any) => c.hiringDrive?.status === 'Active');
+          // Filter out active and completed assessments
+          const active = json.data.filter((c: any) => c.status !== 'Passed' && c.status !== 'Rejected' && c.hiringDrive?.status === 'Active');
+          const completed = json.data.filter((c: any) => c.status === 'Passed' || c.status === 'Rejected');
           setAssessments(active);
+          setCompletedAssessments(completed);
         }
       } catch (err) {
         console.error("Failed to fetch assessments", err);
@@ -36,7 +41,7 @@ export default function StudentDashboard() {
   }, []);
 
   return (
-    <div className="space-y-10">
+    <div className="max-w-7xl w-full mx-auto px-4 md:px-12 py-10 space-y-10">
       {/* Welcome Header */}
       <div>
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome back!</h1>
@@ -111,7 +116,7 @@ export default function StudentDashboard() {
                 }
 
                 return (
-                  <div key={assessment.id} className="p-6 border-b border-slate-100 hover:bg-slate-50 transition cursor-pointer group">
+                  <div key={assessment.id} onClick={() => router.push(`/student/drives/${drive?.id}`)} className="p-6 border-b border-slate-100 hover:bg-slate-50 transition cursor-pointer group">
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition">{drive?.title}</h3>
@@ -144,44 +149,55 @@ export default function StudentDashboard() {
              <Trophy className="text-yellow-500" /> Your Stats
           </h2>
           
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 grid grid-cols-2 gap-4">
-            <div className="p-4 bg-slate-50 rounded-xl text-center">
-              <div className="text-3xl font-extrabold text-emerald-600">3</div>
-              <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Completed</div>
-            </div>
-            <div className="p-4 bg-slate-50 rounded-xl text-center">
-              <div className="text-3xl font-extrabold text-blue-600">89%</div>
-              <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Avg Score</div>
-            </div>
-          </div>
+          {(() => {
+            const completedCount = completedAssessments.length;
+            const avgScore = completedCount > 0 
+              ? Math.round(completedAssessments.reduce((acc, curr) => {
+                  const match = curr.score?.match(/\d+/);
+                  return acc + (match ? parseInt(match[0]) : 0);
+                }, 0) / completedCount)
+              : 0;
+
+            return (
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-50 rounded-xl text-center">
+                  <div className="text-3xl font-extrabold text-emerald-600">{completedCount}</div>
+                  <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Completed</div>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-xl text-center">
+                  <div className="text-3xl font-extrabold text-blue-600">{avgScore}%</div>
+                  <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Avg Score</div>
+                </div>
+              </div>
+            );
+          })()}
 
           <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 mt-8">
             <CheckCircle2 className="text-emerald-500" /> Completed
           </h2>
           
           <div className="space-y-3">
-             {/* Mock Completed Item */}
-             <div className="bg-white border border-slate-200 rounded-xl p-4 flex justify-between items-center hover:border-slate-300 transition cursor-default">
-               <div>
-                 <div className="font-semibold text-slate-900 text-sm">Backend Developer Assessment</div>
-                 <div className="text-xs text-slate-500">StartupX</div>
+             {completedAssessments.length > 0 ? (
+               completedAssessments.map(assessment => {
+                 const drive = assessment.hiringDrive;
+                 return (
+                   <div key={assessment.id} className="bg-white border border-slate-200 rounded-xl p-4 flex justify-between items-center hover:border-slate-300 transition cursor-default">
+                     <div>
+                       <div className="font-semibold text-slate-900 text-sm">{drive?.title}</div>
+                       <div className="text-xs text-slate-500">{drive?.department}</div>
+                     </div>
+                     <div className="text-right">
+                       <div className={`font-bold ${assessment.status === 'Passed' ? 'text-emerald-600' : 'text-rose-600'}`}>{assessment.score || assessment.status}</div>
+                       <div className="text-xs text-slate-400">{new Date(assessment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                     </div>
+                   </div>
+                 );
+               })
+             ) : (
+               <div className="p-6 text-center text-slate-500 bg-slate-50/50 rounded-xl border border-slate-200 border-dashed">
+                 No completed assessments yet.
                </div>
-               <div className="text-right">
-                 <div className="font-bold text-emerald-600">Passed</div>
-                 <div className="text-xs text-slate-400">Oct 12, 2026</div>
-               </div>
-             </div>
-             
-             <div className="bg-white border border-slate-200 rounded-xl p-4 flex justify-between items-center hover:border-slate-300 transition cursor-default">
-               <div>
-                 <div className="font-semibold text-slate-900 text-sm">Fullstack Interview</div>
-                 <div className="text-xs text-slate-500">GlobalNet</div>
-               </div>
-               <div className="text-right">
-                 <div className="font-bold text-emerald-600">92/100</div>
-                 <div className="text-xs text-slate-400">Sep 28, 2026</div>
-               </div>
-             </div>
+             )}
           </div>
         </div>
       </div>

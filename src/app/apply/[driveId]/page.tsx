@@ -133,6 +133,13 @@ export default function ApplyPage() {
               {error && (
                 <div className="p-4 bg-rose-50 border border-rose-100 text-rose-700 text-sm rounded-xl">
                   {error}
+                  {error.includes("login or register") && (
+                    <div className="mt-3">
+                      <Link href="/login/student" className="inline-flex items-center justify-center bg-rose-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-rose-700 transition-colors shadow-sm">
+                        Create Account / Log In
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
 

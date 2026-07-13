@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Code2, LogOut, Laptop } from "lucide-react";
+import { Code2, LogOut, Laptop, LayoutDashboard } from "lucide-react";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -26,6 +26,9 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         </Link>
 
         <div className="flex items-center gap-4">
+          <Link href="/student" className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold transition">
+            <LayoutDashboard size={16} /> Dashboard
+          </Link>
           <Link href="/editor" className="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold transition">
             <Laptop size={16} /> Open Sandbox
           </Link>
@@ -40,7 +43,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-12 py-10">
+      <main className="flex-1 w-full flex flex-col">
         {children}
       </main>
     </div>
