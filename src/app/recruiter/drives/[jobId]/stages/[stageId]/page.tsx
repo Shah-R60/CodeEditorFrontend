@@ -3,19 +3,19 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Users, FileCode, LineChart, Loader2, LayoutDashboard, Calendar, Settings as SettingsIcon, Activity, Search, Filter, ChevronDown, Plus, Download, Shuffle, Library, Eye, Edit2, Trash2, Share2, MoreHorizontal, Clock, ArrowRight } from "lucide-react";
+import { Users, FileCode, LineChart, Loader2, LayoutDashboard, Calendar, Settings as SettingsIcon, Activity, Search, Filter, ChevronDown, Plus, Download, Shuffle, Library, Eye, Edit2, Trash2, Share2, MoreHorizontal, Clock, ArrowRight, RefreshCw } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart as RechartsLineChart, Line } from 'recharts';
 
 export default function StageDetailsPage() {
   const params = useParams();
   const jobId = params.jobId as string;
   const stageId = params.stageId as string;
-  
+
   type TabType = "overview" | "candidates" | "questions" | "schedule" | "analysis" | "settings";
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Modals & Questions State
   const [globalQuestions, setGlobalQuestions] = useState<any[]>([]);
   const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
@@ -38,6 +38,7 @@ export default function StageDetailsPage() {
     tabSwitching: true, copyPaste: true, fullScreen: true,
     autoSubmit: true
   });
+  const [sortConfig, setSortConfig] = useState<"none" | "score-desc">("none");
 
   useEffect(() => {
     if (job) {
@@ -47,17 +48,17 @@ export default function StageDetailsPage() {
         const pad = (n: number) => n.toString().padStart(2, '0');
         if (stage.startDate) {
           const d = new Date(stage.startDate);
-          dateStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-          startStr = d.toTimeString().slice(0,5);
+          dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+          startStr = d.toTimeString().slice(0, 5);
         }
         if (stage.endDate) {
           const d = new Date(stage.endDate);
-          endStr = d.toTimeString().slice(0,5);
+          endStr = d.toTimeString().slice(0, 5);
         }
         if (stage.deadline) {
           const d = new Date(stage.deadline);
           // datetime-local requires YYYY-MM-DDThh:mm format in local time
-          deadlineStr = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          deadlineStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
         }
         setScheduleForm({
           date: dateStr,
@@ -93,17 +94,17 @@ export default function StageDetailsPage() {
   const fetchJobAndQuestions = async () => {
     try {
       const recruiterId = localStorage.getItem('userId');
-      
+
       const [jobRes, questionsRes] = await Promise.all([
         fetch(`http://localhost:3001/db/drives/${jobId}`, {
           headers: { 'x-user-id': recruiterId || '' }
         }),
         fetch(`http://localhost:3001/db/questions`)
       ]);
-      
+
       const jobJson = await jobRes.json();
       const questionsJson = await questionsRes.json();
-      
+
       if (jobJson.success) setJob(jobJson.data);
       if (questionsJson.success) setGlobalQuestions(questionsJson.data);
     } catch (err) {
@@ -130,7 +131,7 @@ export default function StageDetailsPage() {
     try {
       const recruiterId = localStorage.getItem('userId');
       const updatedConfig = { ...(currentStage.config || {}), questions: newQuestionIds };
-      
+
       const res = await fetch(`http://localhost:3001/db/drives/${jobId}/rounds/${stageId}`, {
         method: 'PUT',
         headers: {
@@ -143,7 +144,7 @@ export default function StageDetailsPage() {
       if (json.success) {
         // Optimistically update local state
         setJob((prevJob: any) => {
-          const updatedRounds = prevJob.rounds.map((r: any) => 
+          const updatedRounds = prevJob.rounds.map((r: any) =>
             r.id === stageId ? { ...r, config: updatedConfig } : r
           );
           return { ...prevJob, rounds: updatedRounds };
@@ -171,7 +172,7 @@ export default function StageDetailsPage() {
     setIsSubmitting(true);
     try {
       const tagArray = addQuestionForm.tags.split(',').map(t => t.trim()).filter(Boolean);
-      
+
       const res = await fetch(`http://localhost:3001/db/questions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,7 +186,7 @@ export default function StageDetailsPage() {
           testCases: [{ input: "test", expectedOutput: "test" }] // Minimum required
         })
       });
-      
+
       const json = await res.json();
       if (json.success) {
         setGlobalQuestions([...globalQuestions, json.data]);
@@ -240,17 +241,17 @@ export default function StageDetailsPage() {
     setIsSavingSchedule(true);
     try {
       const recruiterId = localStorage.getItem('userId');
-      
+
       let startDateStr = null;
       let endDateStr = null;
-      
+
       if (scheduleForm.date) {
         if (scheduleForm.startTime) {
           startDateStr = new Date(`${scheduleForm.date}T${scheduleForm.startTime}:00`).toISOString();
         } else {
           startDateStr = new Date(scheduleForm.date).toISOString();
         }
-        
+
         if (scheduleForm.endTime) {
           endDateStr = new Date(`${scheduleForm.date}T${scheduleForm.endTime}:00`).toISOString();
         }
@@ -273,7 +274,7 @@ export default function StageDetailsPage() {
           publishSchedule: scheduleForm.publishSchedule,
         }
       };
-      
+
       const res = await fetch(`http://localhost:3001/db/drives/${jobId}/rounds/${stageId}`, {
         method: 'PUT',
         headers: {
@@ -285,7 +286,7 @@ export default function StageDetailsPage() {
       const json = await res.json();
       if (json.success) {
         setJob((prevJob: any) => {
-          const updatedRounds = prevJob.rounds.map((r: any) => 
+          const updatedRounds = prevJob.rounds.map((r: any) =>
             r.id === stageId ? { ...r, ...payload, config: payload.config } : r
           );
           return { ...prevJob, rounds: updatedRounds };
@@ -318,7 +319,7 @@ export default function StageDetailsPage() {
           autoSubmit: settingsForm.autoSubmit,
         }
       };
-      
+
       const res = await fetch(`http://localhost:3001/db/drives/${jobId}/rounds/${stageId}`, {
         method: 'PUT',
         headers: {
@@ -330,7 +331,7 @@ export default function StageDetailsPage() {
       const json = await res.json();
       if (json.success) {
         setJob((prevJob: any) => {
-          const updatedRounds = prevJob.rounds.map((r: any) => 
+          const updatedRounds = prevJob.rounds.map((r: any) =>
             r.id === stageId ? { ...r, name: payload.name, type: payload.type, duration: payload.duration, config: payload.config } : r
           );
           return { ...prevJob, rounds: updatedRounds };
@@ -343,7 +344,31 @@ export default function StageDetailsPage() {
     }
   };
 
-  const stageCandidates = job.candidates?.filter((c: any) => c.stage === currentStage.name) || [];
+  let stageCandidates = job.candidates?.filter((c: any) => c.stage === currentStage.name) || [];
+
+  if (sortConfig === 'score-desc') {
+    stageCandidates = [...stageCandidates].sort((a: any, b: any) => {
+      const getScore = (s: string) => s ? parseFloat(s.split('/')[0]) : -1;
+      const scoreA = getScore(a.score);
+      const scoreB = getScore(b.score);
+      
+      if (scoreA !== scoreB) {
+        return scoreB - scoreA;
+      }
+      
+      const getSeconds = (tt: string) => {
+        if (!tt) return Infinity;
+        const timePart = tt.split('_')[0];
+        const mMatch = timePart.match(/(\d+)m/);
+        const sMatch = timePart.match(/(\d+)s/);
+        const m = mMatch ? parseInt(mMatch[1]) : 0;
+        const s = sMatch ? parseInt(sMatch[1]) : 0;
+        return m * 60 + s;
+      };
+      
+      return getSeconds(a.timeTaken) - getSeconds(b.timeTaken);
+    });
+  }
 
   const roundQuestionIds = currentStage.config?.questions || [];
   const roundQuestions = roundQuestionIds
@@ -356,10 +381,10 @@ export default function StageDetailsPage() {
   let qualified = 0;
 
   const roundIndex = job.rounds?.findIndex((r: any) => r.id === stageId) || 0;
-  
+
   job.candidates?.forEach((c: any) => {
     const cRoundIndex = job.rounds?.findIndex((r: any) => r.name === c.stage) || 0;
-    
+
     if (cRoundIndex >= roundIndex) {
       invited++;
       if (cRoundIndex > roundIndex) {
@@ -369,7 +394,7 @@ export default function StageDetailsPage() {
         if (c.status === 'Passed') {
           completed++;
           qualified++;
-        } else if (c.status === 'Rejected') {
+        } else if (c.status === 'Rejected' || (c.status === 'In Review' && c.score)) {
           completed++;
         }
       }
@@ -377,7 +402,7 @@ export default function StageDetailsPage() {
   });
 
   const passRate = invited > 0 ? Math.round((qualified / invited) * 100) : 0;
-  
+
   // Status logic
   let statusText = 'Draft';
   let statusColor = 'bg-slate-200 text-slate-700';
@@ -386,7 +411,7 @@ export default function StageDetailsPage() {
   if (currentStage.startDate) {
     const now = new Date();
     const start = new Date(currentStage.startDate);
-    
+
     if (start > now) {
       statusText = 'Scheduled';
       statusColor = 'bg-emerald-100 text-emerald-700';
@@ -427,21 +452,21 @@ export default function StageDetailsPage() {
               <span className="text-slate-900">Round Details</span>
             </div>
             <h1 className="text-3xl font-bold text-slate-900 mb-4">{currentStage.name}</h1>
-            
+
             <div className="flex flex-wrap items-center gap-y-3 gap-x-5 text-sm text-slate-600 font-medium">
               <span className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${statusColor}`}>
                 <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
                 {statusText}
               </span>
-              
+
               {currentStage.startDate ? (
                 <>
                   <span className="flex items-center gap-1.5">
-                    <Calendar size={16} className="text-slate-400" /> 
+                    <Calendar size={16} className="text-slate-400" />
                     {new Date(currentStage.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Clock size={16} className="text-slate-400" /> 
+                    <Clock size={16} className="text-slate-400" />
                     {new Date(currentStage.startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                     <ArrowRight size={14} className="text-slate-400" />
                     {currentStage.endDate ? new Date(currentStage.endDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD'}
@@ -456,12 +481,19 @@ export default function StageDetailsPage() {
               <span className="flex items-center gap-1.5 border-l border-slate-200 pl-5"><Activity size={16} className="text-slate-400" /> {passRate}% Pass Rate</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={fetchJobAndQuestions}
+              className="p-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors shadow-sm tooltip-trigger"
+              title="Refresh Data"
+            >
+              <RefreshCw size={18} />
+            </button>
             <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm">
               Edit Round
             </button>
-            <button 
+            <button
               className="bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!currentStage.config?.questions || currentStage.config.questions.length === 0}
               onClick={() => {
@@ -486,37 +518,37 @@ export default function StageDetailsPage() {
 
       {/* Internal Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto">
-        <button 
+        <button
           onClick={() => setActiveTab("overview")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <LayoutDashboard size={16} /> Overview
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab("candidates")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'candidates' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <Users size={16} /> Candidates ({stageCandidates.length})
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab("questions")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'questions' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <FileCode size={16} /> Questions
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab("schedule")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'schedule' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <Calendar size={16} /> Schedule
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab("analysis")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'analysis' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
           <LineChart size={16} /> Analysis
         </button>
-        <button 
+        <button
           onClick={() => setActiveTab("settings")}
           className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'settings' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
         >
@@ -526,11 +558,11 @@ export default function StageDetailsPage() {
 
       {/* Tab Content */}
       <div className="pt-4">
-        
+
         {/* Overview View */}
         {activeTab === "overview" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             {/* Candidates Card */}
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2 mb-6">
@@ -571,7 +603,7 @@ export default function StageDetailsPage() {
                 <div className="flex justify-between items-center border-b border-slate-50 pb-3">
                   <span className="text-slate-500 font-medium">Format</span>
                   <span className="text-slate-900 font-medium text-right text-sm">
-                    {currentStage.config?.questions?.length || 0} Coding Problems<br/>
+                    {currentStage.config?.questions?.length || 0} Coding Problems<br />
                     {currentStage.config?.mcqs?.length || 0} MCQs
                   </span>
                 </div>
@@ -648,18 +680,24 @@ export default function StageDetailsPage() {
         {/* Candidates View */}
         {activeTab === "candidates" && (
           <div className="space-y-4">
-            
+
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row justify-between gap-4">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="text" 
-                  placeholder="Search candidates by name or email..." 
+                <input
+                  type="text"
+                  placeholder="Search candidates by name or email..."
                   className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-900"
                 />
               </div>
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setSortConfig(sortConfig === "none" ? "score-desc" : "none")}
+                  className={`flex items-center gap-2 px-4 py-2 border text-sm font-semibold rounded-lg transition-colors ${sortConfig === "score-desc" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"}`}
+                >
+                  Sort by Score
+                </button>
                 <div className="relative group z-10">
                   <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
                     <Filter size={16} /> Filters <ChevronDown size={14} />
@@ -716,17 +754,22 @@ export default function StageDetailsPage() {
                       <td className="px-6 py-4 font-semibold text-slate-900">{c.name}</td>
                       <td className="px-6 py-4 text-slate-500">{c.email}</td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${
-                          c.status === "Passed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                          c.status === "In Review" ? "bg-amber-50 text-amber-700 border-amber-200" :
-                          "bg-rose-50 text-rose-700 border-rose-200"
-                        }`}>
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${c.status === "Passed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                            c.status === "In Review" ? "bg-amber-50 text-amber-700 border-amber-200" :
+                              "bg-rose-50 text-rose-700 border-rose-200"
+                          }`}>
                           {c.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 font-medium text-slate-700">{c.score || '-'}</td>
-                      <td className="px-6 py-4 text-slate-500">-</td>
-                      <td className="px-6 py-4 text-slate-500">-</td>
+                      <td className="px-6 py-4 text-slate-500">
+                        {c.timeTaken && c.timeTaken.includes('_')
+                          ? new Date(c.timeTaken.split('_')[1]).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+                          : '-'}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500">
+                        {c.timeTaken ? c.timeTaken.split('_')[0] : '-'}
+                      </td>
                       <td className="px-6 py-4">
                         {c.status === 'Passed' ? <span className="text-emerald-600 font-semibold">Yes</span> : <span className="text-slate-400">No</span>}
                       </td>
@@ -744,7 +787,7 @@ export default function StageDetailsPage() {
         {/* Questions View */}
         {activeTab === "questions" && (
           <div className="space-y-6">
-            
+
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2">
@@ -774,19 +817,19 @@ export default function StageDetailsPage() {
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Categories</div>
                   <div className="space-y-1">
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg transition-colors">
-                      Coding <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'Coding').length}</span>
+                      Coding <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Coding').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      MCQ <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'MCQ').length}</span>
+                      MCQ <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'MCQ').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      SQL <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'SQL').length}</span>
+                      SQL <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'SQL').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      Debugging <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'Debugging').length}</span>
+                      Debugging <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Debugging').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      Subjective <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter(q => (q.boilerplate?.type || 'Coding') === 'Subjective').length}</span>
+                      Subjective <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Subjective').length}</span>
                     </button>
                   </div>
                 </div>
@@ -801,7 +844,7 @@ export default function StageDetailsPage() {
                     <p className="text-slate-500 text-sm mb-4">Click "Add Question" to create one or select from the Question Bank.</p>
                   </div>
                 ) : (
-                  roundQuestions.map(q => {
+                  roundQuestions.map((q: any) => {
                     const qType = q.boilerplate?.type || 'Coding';
                     const qMarks = q.boilerplate?.marks || 10;
                     const qTags = q.boilerplate?.tags || [];
@@ -812,11 +855,10 @@ export default function StageDetailsPage() {
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{qType}</span>
                             <span className="text-slate-300">•</span>
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${
-                              q.difficulty === 'EASY' ? 'bg-emerald-50 text-emerald-700' :
-                              q.difficulty === 'MEDIUM' ? 'bg-amber-50 text-amber-700' :
-                              'bg-rose-50 text-rose-700'
-                            }`}>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${q.difficulty === 'EASY' ? 'bg-emerald-50 text-emerald-700' :
+                                q.difficulty === 'MEDIUM' ? 'bg-amber-50 text-amber-700' :
+                                  'bg-rose-50 text-rose-700'
+                              }`}>
                               {q.difficulty}
                             </span>
                           </div>
@@ -832,7 +874,7 @@ export default function StageDetailsPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                           <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger" title="Preview">
                             <Eye size={18} />
@@ -856,38 +898,38 @@ export default function StageDetailsPage() {
         {/* Analysis View */}
         {activeTab === "analysis" && (
           <div className="space-y-6">
-            
+
             {/* Top Cards */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Average Score</div>
-                 <div className="text-2xl font-bold text-slate-900">84<span className="text-sm text-slate-400 font-normal">/100</span></div>
+                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Average Score</div>
+                <div className="text-2xl font-bold text-slate-900">84<span className="text-sm text-slate-400 font-normal">/100</span></div>
               </div>
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Highest</div>
-                 <div className="text-2xl font-bold text-emerald-600">98</div>
+                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Highest</div>
+                <div className="text-2xl font-bold text-emerald-600">98</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Lowest</div>
-                 <div className="text-2xl font-bold text-rose-600">32</div>
+                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Lowest</div>
+                <div className="text-2xl font-bold text-rose-600">32</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Median</div>
-                 <div className="text-2xl font-bold text-slate-900">86</div>
+                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Median</div>
+                <div className="text-2xl font-bold text-slate-900">86</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Pass Rate</div>
-                 <div className="text-2xl font-bold text-blue-600">
-                   {stageCandidates.length > 0 
-                     ? Math.round((stageCandidates.filter((c:any) => c.status === 'Passed').length / stageCandidates.length) * 100) + '%' 
-                     : '76%'}
-                 </div>
+                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Pass Rate</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {stageCandidates.length > 0
+                    ? Math.round((stageCandidates.filter((c: any) => c.status === 'Passed').length / stageCandidates.length) * 100) + '%'
+                    : '76%'}
+                </div>
               </div>
             </div>
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
+
               {/* Score Distribution */}
               <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
                 <h4 className="text-sm font-bold text-slate-900 mb-4">Score Distribution</h4>
@@ -903,7 +945,7 @@ export default function StageDetailsPage() {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                       <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                      <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                      <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                       <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -925,7 +967,7 @@ export default function StageDetailsPage() {
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                       <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                       <YAxis dataKey="q" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} />
-                      <RechartsTooltip cursor={{fill: '#f8fafc'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                      <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                       <Bar dataKey="accuracy" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -956,12 +998,12 @@ export default function StageDetailsPage() {
                           <Cell fill="#10b981" />
                           <Cell fill="#f43f5e" />
                         </Pie>
-                        <RechartsTooltip contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                        <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-                
+
                 <div className="flex-1">
                   <h4 className="text-sm font-bold text-slate-900 mb-4">Completion Rate</h4>
                   <div className="h-48 flex items-center justify-center relative">
@@ -1008,7 +1050,7 @@ export default function StageDetailsPage() {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                       <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} />
-                      <RechartsTooltip cursor={{stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} />
+                      <RechartsTooltip cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                       <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, fill: '#6366f1', strokeWidth: 0 }} />
                     </RechartsLineChart>
                   </ResponsiveContainer>
@@ -1031,8 +1073,8 @@ export default function StageDetailsPage() {
                 {(!currentStage.config?.questions || currentStage.config.questions.length === 0) && (
                   <span className="text-xs text-rose-500 font-medium">Select questions first</span>
                 )}
-                <button 
-                  onClick={handleScheduleSubmit} 
+                <button
+                  onClick={handleScheduleSubmit}
                   disabled={isSavingSchedule || (!currentStage.config?.questions || currentStage.config.questions.length === 0)}
                   className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -1047,11 +1089,11 @@ export default function StageDetailsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Date</label>
-                    <input type="date" value={scheduleForm.date} onChange={e => setScheduleForm({...scheduleForm, date: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="date" value={scheduleForm.date} onChange={e => setScheduleForm({ ...scheduleForm, date: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Timezone</label>
-                    <select value={scheduleForm.timeZone} onChange={e => setScheduleForm({...scheduleForm, timeZone: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select value={scheduleForm.timeZone} onChange={e => setScheduleForm({ ...scheduleForm, timeZone: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option value="Asia/Kolkata (IST)">Asia/Kolkata (IST)</option>
                       <option value="UTC">UTC</option>
                       <option value="America/New_York (EST)">America/New_York (EST)</option>
@@ -1059,19 +1101,19 @@ export default function StageDetailsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Start Time</label>
-                    <input type="time" value={scheduleForm.startTime} onChange={e => setScheduleForm({...scheduleForm, startTime: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="time" value={scheduleForm.startTime} onChange={e => setScheduleForm({ ...scheduleForm, startTime: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">End Time</label>
-                    <input type="time" value={scheduleForm.endTime} onChange={e => setScheduleForm({...scheduleForm, endTime: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="time" value={scheduleForm.endTime} onChange={e => setScheduleForm({ ...scheduleForm, endTime: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Duration</label>
-                    <input type="text" value={scheduleForm.duration} onChange={e => setScheduleForm({...scheduleForm, duration: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 90 mins" />
+                    <input type="text" value={scheduleForm.duration} onChange={e => setScheduleForm({ ...scheduleForm, duration: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 90 mins" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Registration Deadline</label>
-                    <input type="datetime-local" value={scheduleForm.deadline} onChange={e => setScheduleForm({...scheduleForm, deadline: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="datetime-local" value={scheduleForm.deadline} onChange={e => setScheduleForm({ ...scheduleForm, deadline: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
               </div>
@@ -1081,14 +1123,14 @@ export default function StageDetailsPage() {
               <div className="p-6">
                 <h4 className="text-base font-bold text-slate-900 mb-4">Extra Options</h4>
                 <div className="space-y-5">
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-sm font-semibold text-slate-900">Allow Late Join</div>
                       <div className="text-xs text-slate-500">Permit candidates to start the assessment after the start time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" checked={scheduleForm.allowLateJoin} onChange={e => setScheduleForm({...scheduleForm, allowLateJoin: e.target.checked})} className="sr-only peer" />
+                      <input type="checkbox" checked={scheduleForm.allowLateJoin} onChange={e => setScheduleForm({ ...scheduleForm, allowLateJoin: e.target.checked })} className="sr-only peer" />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1098,7 +1140,7 @@ export default function StageDetailsPage() {
                       <div className="text-sm font-semibold text-slate-900">Grace Period</div>
                       <div className="text-xs text-slate-500">Additional time allowed before auto-submission.</div>
                     </div>
-                    <select value={scheduleForm.gracePeriod} onChange={e => setScheduleForm({...scheduleForm, gracePeriod: e.target.value})} className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-32">
+                    <select value={scheduleForm.gracePeriod} onChange={e => setScheduleForm({ ...scheduleForm, gracePeriod: e.target.value })} className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-32">
                       <option value="5 mins">5 mins</option>
                       <option value="10 mins">10 mins</option>
                       <option value="15 mins">15 mins</option>
@@ -1111,7 +1153,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Automatically start the assessment at the scheduled time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" checked={scheduleForm.autoStart} onChange={e => setScheduleForm({...scheduleForm, autoStart: e.target.checked})} className="sr-only peer" />
+                      <input type="checkbox" checked={scheduleForm.autoStart} onChange={e => setScheduleForm({ ...scheduleForm, autoStart: e.target.checked })} className="sr-only peer" />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1122,7 +1164,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Automatically submit all active assessments at the end time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" checked={scheduleForm.autoEnd} onChange={e => setScheduleForm({...scheduleForm, autoEnd: e.target.checked})} className="sr-only peer" />
+                      <input type="checkbox" checked={scheduleForm.autoEnd} onChange={e => setScheduleForm({ ...scheduleForm, autoEnd: e.target.checked })} className="sr-only peer" />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1133,11 +1175,11 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Make this schedule visible to invited candidates.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" checked={scheduleForm.publishSchedule} onChange={e => setScheduleForm({...scheduleForm, publishSchedule: e.target.checked})} className="sr-only peer" />
+                      <input type="checkbox" checked={scheduleForm.publishSchedule} onChange={e => setScheduleForm({ ...scheduleForm, publishSchedule: e.target.checked })} className="sr-only peer" />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-                  
+
                 </div>
               </div>
             </div>
@@ -1152,7 +1194,7 @@ export default function StageDetailsPage() {
                 <h3 className="text-lg font-bold text-slate-900">Stage Settings</h3>
                 <p className="text-slate-500 text-sm">Configure security, proctoring, and general round settings.</p>
               </div>
-              <button 
+              <button
                 onClick={handleSettingsSubmit}
                 disabled={isSavingSettings}
                 className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm disabled:opacity-50">
@@ -1167,11 +1209,11 @@ export default function StageDetailsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Round Name</label>
-                    <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({...settingsForm, name: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Round Type</label>
-                    <select value={settingsForm.type} onChange={e => setSettingsForm({...settingsForm, type: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select value={settingsForm.type} onChange={e => setSettingsForm({ ...settingsForm, type: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option value="Assessment">Assessment</option>
                       <option value="Interview">Interview</option>
                       <option value="Project">Project</option>
@@ -1179,7 +1221,7 @@ export default function StageDetailsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Status</label>
-                    <select value={settingsForm.status} onChange={e => setSettingsForm({...settingsForm, status: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select value={settingsForm.status} onChange={e => setSettingsForm({ ...settingsForm, status: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option>Active</option>
                       <option>Draft</option>
                       <option>Archived</option>
@@ -1187,7 +1229,7 @@ export default function StageDetailsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">Duration</label>
-                    <input type="text" value={settingsForm.duration} onChange={e => setSettingsForm({...settingsForm, duration: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="text" value={settingsForm.duration} onChange={e => setSettingsForm({ ...settingsForm, duration: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
               </div>
@@ -1204,7 +1246,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Present questions in a random order for each candidate.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleQuestions} onChange={e => setSettingsForm({...settingsForm, shuffleQuestions: e.target.checked})} />
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleQuestions} onChange={e => setSettingsForm({ ...settingsForm, shuffleQuestions: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1214,7 +1256,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Randomize the order of options for multiple choice questions.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleMCQs} onChange={e => setSettingsForm({...settingsForm, shuffleMCQs: e.target.checked})} />
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleMCQs} onChange={e => setSettingsForm({ ...settingsForm, shuffleMCQs: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1224,7 +1266,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Automatically save answers as the candidate progresses.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settingsForm.saveProgress} onChange={e => setSettingsForm({...settingsForm, saveProgress: e.target.checked})} />
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.saveProgress} onChange={e => setSettingsForm({ ...settingsForm, saveProgress: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1243,7 +1285,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Flag candidates who switch browser tabs.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settingsForm.tabSwitching} onChange={e => setSettingsForm({...settingsForm, tabSwitching: e.target.checked})} />
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.tabSwitching} onChange={e => setSettingsForm({ ...settingsForm, tabSwitching: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1253,7 +1295,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Prevent candidates from copying or pasting text.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settingsForm.copyPaste} onChange={e => setSettingsForm({...settingsForm, copyPaste: e.target.checked})} />
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.copyPaste} onChange={e => setSettingsForm({ ...settingsForm, copyPaste: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1263,7 +1305,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Enforce full screen mode during the assessment.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settingsForm.fullScreen} onChange={e => setSettingsForm({...settingsForm, fullScreen: e.target.checked})} />
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.fullScreen} onChange={e => setSettingsForm({ ...settingsForm, fullScreen: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1282,7 +1324,7 @@ export default function StageDetailsPage() {
                       <div className="text-xs text-slate-500">Automatically submit when time expires.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" checked={settingsForm.autoSubmit} onChange={e => setSettingsForm({...settingsForm, autoSubmit: e.target.checked})} />
+                      <input type="checkbox" className="sr-only peer" checked={settingsForm.autoSubmit} onChange={e => setSettingsForm({ ...settingsForm, autoSubmit: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
@@ -1294,7 +1336,7 @@ export default function StageDetailsPage() {
         )}
 
       </div>
-      
+
       {/* Modals */}
       {isAddQuestionModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
@@ -1306,16 +1348,16 @@ export default function StageDetailsPage() {
             <form onSubmit={handleAddQuestionSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Question Title</label>
-                <input required type="text" value={addQuestionForm.title} onChange={e => setAddQuestionForm({...addQuestionForm, title: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Reverse Linked List" />
+                <input required type="text" value={addQuestionForm.title} onChange={e => setAddQuestionForm({ ...addQuestionForm, title: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Reverse Linked List" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
-                <textarea required value={addQuestionForm.description} onChange={e => setAddQuestionForm({...addQuestionForm, description: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]" placeholder="Problem statement..." />
+                <textarea required value={addQuestionForm.description} onChange={e => setAddQuestionForm({ ...addQuestionForm, description: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]" placeholder="Problem statement..." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Difficulty</label>
-                  <select value={addQuestionForm.difficulty} onChange={e => setAddQuestionForm({...addQuestionForm, difficulty: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select value={addQuestionForm.difficulty} onChange={e => setAddQuestionForm({ ...addQuestionForm, difficulty: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option>Easy</option>
                     <option>Medium</option>
                     <option>Hard</option>
@@ -1323,7 +1365,7 @@ export default function StageDetailsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Type</label>
-                  <select value={addQuestionForm.type} onChange={e => setAddQuestionForm({...addQuestionForm, type: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select value={addQuestionForm.type} onChange={e => setAddQuestionForm({ ...addQuestionForm, type: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option>Coding</option>
                     <option>MCQ</option>
                     <option>SQL</option>
@@ -1335,11 +1377,11 @@ export default function StageDetailsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Marks</label>
-                  <input required type="number" value={addQuestionForm.marks} onChange={e => setAddQuestionForm({...addQuestionForm, marks: parseInt(e.target.value)})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input required type="number" value={addQuestionForm.marks} onChange={e => setAddQuestionForm({ ...addQuestionForm, marks: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tags (comma separated)</label>
-                  <input type="text" value={addQuestionForm.tags} onChange={e => setAddQuestionForm({...addQuestionForm, tags: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Arrays, Sorting" />
+                  <input type="text" value={addQuestionForm.tags} onChange={e => setAddQuestionForm({ ...addQuestionForm, tags: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Arrays, Sorting" />
                 </div>
               </div>
               <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
@@ -1373,16 +1415,16 @@ export default function StageDetailsPage() {
                 globalQuestions.map(q => {
                   const isSelected = tempSelectedQuestions.includes(q.id);
                   return (
-                    <div 
-                      key={q.id} 
+                    <div
+                      key={q.id}
                       onClick={() => handleBankSelection(q.id, !isSelected)}
                       className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors bg-white cursor-pointer"
                     >
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={isSelected}
                         readOnly
-                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 pointer-events-none" 
+                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 pointer-events-none"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold text-slate-900 truncate text-sm">{q.title}</div>

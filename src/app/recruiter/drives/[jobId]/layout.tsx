@@ -118,7 +118,7 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
             <div className="px-3 mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">Rounds</div>
             <div className="space-y-1">
               {stageItems.length === 0 && <div className="px-3 text-xs text-slate-500">No rounds defined</div>}
-              {stageItems.map((item) => {
+              {stageItems.map((item: any) => {
                 const isActive = pathname.startsWith(item.href);
                 const Icon = item.icon;
                 return (

@@ -38,6 +38,25 @@ export default function ApplyPage() {
     fetchDriveInfo();
   }, [driveId]);
 
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (!userId) return;
+
+        const res = await fetch(`http://localhost:3001/db/users/${userId}/profile`);
+        const json = await res.json();
+        if (json.success && json.data.user) {
+          if (json.data.user.name) setName(json.data.user.name);
+          if (json.data.user.email) setEmail(json.data.user.email);
+        }
+      } catch (err) {
+        console.error("Failed to auto-fill user profile", err);
+      }
+    };
+    fetchUserProfile();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);

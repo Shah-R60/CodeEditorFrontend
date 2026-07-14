@@ -11,6 +11,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
   const navItems = [
     { name: "Dashboard", href: "/recruiter", icon: LayoutDashboard },
     { name: "Hiring Drives", href: "/recruiter/drives", icon: Briefcase },
+    { name: "Question Bank", href: "/recruiter/questions", icon: Library },
     { name: "Settings", href: "/recruiter/settings", icon: Settings },
   ];
 

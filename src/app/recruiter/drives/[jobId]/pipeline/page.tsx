@@ -175,8 +175,8 @@ export default function PipelinePlanTab() {
                 if (c.status === 'Passed') {
                   completed++;
                   qualified++; // They passed it but haven't been officially moved to the next round name yet
-                } else if (c.status === 'Rejected') {
-                  completed++; // They finished it (failed)
+                } else if (c.status === 'Rejected' || (c.status === 'In Review' && c.score)) {
+                  completed++; // They finished it (failed or in review with a score)
                 }
               }
             }
