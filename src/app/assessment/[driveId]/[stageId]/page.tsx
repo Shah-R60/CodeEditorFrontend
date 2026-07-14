@@ -199,10 +199,17 @@ export default function Assessment() {
       const s = takenSeconds % 60;
       const timeTakenStr = `${m}m ${s}s_${new Date().toISOString()}`;
       
+      const submissions = questions.map((q: any) => ({
+        questionId: q.id,
+        title: q.title,
+        language: language,
+        code: savedCodes[q.id] || languageTemplates[language]
+      }));
+      
       await fetch(`http://localhost:3001/db/users/${userId}/assessments/${candidateId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ score: scoreString, timeTaken: timeTakenStr })
+        body: JSON.stringify({ score: scoreString, timeTaken: timeTakenStr, submissions, stageId })
       });
       
       alert("Assessment Submitted Successfully!");

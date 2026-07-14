@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Users, FileCode, LineChart, Loader2, LayoutDashboard, Calendar, Settings as SettingsIcon, Activity, Search, Filter, ChevronDown, Plus, Download, Shuffle, Library, Eye, Edit2, Trash2, Share2, MoreHorizontal, Clock, ArrowRight, RefreshCw } from "lucide-react";
+import Editor from "@monaco-editor/react";
+import { Users, FileCode, LineChart, Loader2, LayoutDashboard, Calendar, Settings as SettingsIcon, Activity, Search, Filter, ChevronDown, Plus, Download, Shuffle, Library, Eye, Edit2, Trash2, Share2, MoreHorizontal, Clock, ArrowRight, RefreshCw, X, Code2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart as RechartsLineChart, Line } from 'recharts';
 
 export default function StageDetailsPage() {
@@ -15,6 +16,23 @@ export default function StageDetailsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Helper functions to get round-specific data safely
+  const getStageScore = (c: any) => {
+    if (!c) return undefined;
+    if (c.stageData && c.stageData[currentStage?.id]) return c.stageData[currentStage.id].score;
+    return currentStage?.type === 'Online Assessment' ? c.score : undefined;
+  };
+  const getStageTimeTaken = (c: any) => {
+    if (!c) return undefined;
+    if (c.stageData && c.stageData[currentStage?.id]) return c.stageData[currentStage.id].timeTaken;
+    return currentStage?.type === 'Online Assessment' ? c.timeTaken : undefined;
+  };
+  const getStageSubmissions = (c: any) => {
+    if (!c) return [];
+    if (c.stageData && c.stageData[currentStage?.id]) return c.stageData[currentStage.id].submissions;
+    return currentStage?.type === 'Online Assessment' ? c.submissions : [];
+  };
 
   // Modals & Questions State
   const [globalQuestions, setGlobalQuestions] = useState<any[]>([]);
@@ -39,6 +57,10 @@ export default function StageDetailsPage() {
     autoSubmit: true
   });
   const [sortConfig, setSortConfig] = useState<"none" | "score-desc">("none");
+  const [selectedCandidateForReview, setSelectedCandidateForReview] = useState<any>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isCodeReviewModalOpen, setIsCodeReviewModalOpen] = useState(false);
+  const [activeCodeTabIndex, setActiveCodeTabIndex] = useState(0);
 
   useEffect(() => {
     if (job) {
@@ -125,6 +147,48 @@ export default function StageDetailsPage() {
   if (!job) return <div>Job not found</div>;
 
   const currentStage = job.rounds?.find((s: any) => s.id === stageId);
+  const handleUpdateCandidateStatus = async (status: string) => {
+    if (!selectedCandidateForReview) return;
+    setIsUpdatingStatus(true);
+    try {
+      let finalStatus = status;
+      let finalStage = selectedCandidateForReview.stage;
+
+      if (status === 'Passed') {
+        const roundIdx = job.rounds?.findIndex((r: any) => r.id === currentStage.id) || 0;
+        if (roundIdx < (job.rounds?.length || 0) - 1) {
+          finalStage = job.rounds[roundIdx + 1].name;
+          finalStatus = 'Pending';
+        } else {
+          finalStage = 'Qualified';
+          finalStatus = 'Passed';
+        }
+      }
+
+      const res = await fetch(`http://localhost:3001/db/drives/${jobId}/candidates/${selectedCandidateForReview.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: finalStatus, stage: finalStage })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setJob((prevJob: any) => {
+          const updatedCandidates = prevJob.candidates.map((c: any) =>
+            c.id === selectedCandidateForReview.id ? { ...c, status: finalStatus, stage: finalStage } : c
+          );
+          return { ...prevJob, candidates: updatedCandidates };
+        });
+        setSelectedCandidateForReview(null);
+      } else {
+        console.error("Failed to update candidate status:", json.error);
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   if (!currentStage) return <div>Stage not found</div>;
 
   const updateRoundQuestions = async (newQuestionIds: string[]) => {
@@ -344,19 +408,33 @@ export default function StageDetailsPage() {
     }
   };
 
-  let stageCandidates = job.candidates?.filter((c: any) => c.stage === currentStage.name) || [];
+  const roundIndex = job.rounds?.findIndex((r: any) => r.id === stageId) || 0;
+
+  let stageCandidates = job.candidates?.filter((c: any) => {
+    if (c.stage === currentStage.name) return true;
+    if (c.stage === 'Qualified') return true;
+
+    const cRoundIndex = job.rounds?.findIndex((r: any) => r.name === c.stage) || 0;
+    return cRoundIndex > roundIndex;
+  }) || [];
+
+  const isAdvanced = (c: any) => {
+    if (c.stage === 'Qualified') return true;
+    const cRoundIndex = job.rounds?.findIndex((r: any) => r.name === c.stage) || 0;
+    return cRoundIndex > roundIndex;
+  };
 
   if (sortConfig === 'score-desc') {
     stageCandidates = [...stageCandidates].sort((a: any, b: any) => {
-      const getScore = (s: string) => s ? parseFloat(s.split('/')[0]) : -1;
-      const scoreA = getScore(a.score);
-      const scoreB = getScore(b.score);
-      
+      const getScore = (s: string | undefined) => s ? parseFloat(s.split('/')[0]) : -1;
+      const scoreA = getScore(getStageScore(a));
+      const scoreB = getScore(getStageScore(b));
+
       if (scoreA !== scoreB) {
         return scoreB - scoreA;
       }
-      
-      const getSeconds = (tt: string) => {
+
+      const getSeconds = (tt: string | undefined) => {
         if (!tt) return Infinity;
         const timePart = tt.split('_')[0];
         const mMatch = timePart.match(/(\d+)m/);
@@ -365,8 +443,8 @@ export default function StageDetailsPage() {
         const s = sMatch ? parseInt(sMatch[1]) : 0;
         return m * 60 + s;
       };
-      
-      return getSeconds(a.timeTaken) - getSeconds(b.timeTaken);
+
+      return getSeconds(getStageTimeTaken(a)) - getSeconds(getStageTimeTaken(b));
     });
   }
 
@@ -380,7 +458,7 @@ export default function StageDetailsPage() {
   let completed = 0;
   let qualified = 0;
 
-  const roundIndex = job.rounds?.findIndex((r: any) => r.id === stageId) || 0;
+
 
   job.candidates?.forEach((c: any) => {
     const cRoundIndex = job.rounds?.findIndex((r: any) => r.name === c.stage) || 0;
@@ -394,7 +472,7 @@ export default function StageDetailsPage() {
         if (c.status === 'Passed') {
           completed++;
           qualified++;
-        } else if (c.status === 'Rejected' || (c.status === 'In Review' && c.score)) {
+        } else if (c.status === 'Rejected' || (c.status === 'In Review' && getStageScore(c))) {
           completed++;
         }
       }
@@ -402,6 +480,79 @@ export default function StageDetailsPage() {
   });
 
   const passRate = invited > 0 ? Math.round((qualified / invited) * 100) : 0;
+
+  // Analysis Metrics
+  const analysisData = (() => {
+    const scoredCandidates = stageCandidates.filter((c: any) => getStageScore(c));
+    const scorePercentages = scoredCandidates.map((c: any) => {
+      const parts = String(getStageScore(c)).split('/');
+      if (parts.length === 2) {
+        const num = parseFloat(parts[0]);
+        const den = parseFloat(parts[1]);
+        return den > 0 ? (num / den) * 100 : 0;
+      }
+      return parseFloat(getStageScore(c)) || 0;
+    }).sort((a, b) => a - b);
+
+    let avg = 0, highest = 0, lowest = 0, median = 0;
+
+    if (scorePercentages.length > 0) {
+      avg = Math.round(scorePercentages.reduce((a, b) => a + b, 0) / scorePercentages.length);
+      highest = Math.round(scorePercentages[scorePercentages.length - 1]);
+      lowest = Math.round(scorePercentages[0]);
+      const mid = Math.floor(scorePercentages.length / 2);
+      median = scorePercentages.length % 2 !== 0 ? Math.round(scorePercentages[mid]) : Math.round((scorePercentages[mid - 1] + scorePercentages[mid]) / 2);
+    }
+
+    const distribution = [
+      { range: '0-20', count: scorePercentages.filter(s => s <= 20).length },
+      { range: '21-40', count: scorePercentages.filter(s => s > 20 && s <= 40).length },
+      { range: '41-60', count: scorePercentages.filter(s => s > 40 && s <= 60).length },
+      { range: '61-80', count: scorePercentages.filter(s => s > 60 && s <= 80).length },
+      { range: '81-100', count: scorePercentages.filter(s => s > 80).length }
+    ];
+
+    const langCounts: Record<string, number> = { python: 0, cpp: 0, javascript: 0 };
+    const questionSubmissions: Record<string, number> = {};
+
+    scoredCandidates.forEach((c: any) => {
+      const subs = getStageSubmissions(c);
+      if (subs && Array.isArray(subs)) {
+        subs.forEach((sub: any) => {
+          if (sub.language === 'python') langCounts.python++;
+          else if (sub.language === 'cpp') langCounts.cpp++;
+          else if (sub.language === 'javascript') langCounts.javascript++;
+          else langCounts[sub.language] = (langCounts[sub.language] || 0) + 1;
+
+          if (sub.title) {
+            questionSubmissions[sub.title] = (questionSubmissions[sub.title] || 0) + 1;
+          }
+        });
+      }
+    });
+
+    const langChartData = Object.entries(langCounts)
+      .filter(([_, val]) => val > 0)
+      .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
+
+    const questionAccuracyData = Object.entries(questionSubmissions).map(([q, count]) => ({
+      q: q.length > 15 ? q.substring(0, 15) + '...' : q,
+      accuracy: Math.round((count / scoredCandidates.length) * 100)
+    }));
+
+    const completionChartData = [
+      { name: 'Completed', value: completed },
+      { name: 'Incomplete', value: Math.max(0, invited - completed) }
+    ];
+
+    return {
+      avg, highest, lowest, median,
+      distribution,
+      langChartData: langChartData.length > 0 ? langChartData : [{ name: 'No Data', value: 1 }],
+      questionAccuracyData: questionAccuracyData.length > 0 ? questionAccuracyData : [{ q: 'No Data', accuracy: 0 }],
+      completionChartData
+    };
+  })();
 
   // Status logic
   let statusText = 'Draft';
@@ -692,7 +843,7 @@ export default function StageDetailsPage() {
                 />
               </div>
               <div className="flex items-center gap-3">
-                <button 
+                <button
                   onClick={() => setSortConfig(sortConfig === "none" ? "score-desc" : "none")}
                   className={`flex items-center gap-2 px-4 py-2 border text-sm font-semibold rounded-lg transition-colors ${sortConfig === "score-desc" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"}`}
                 >
@@ -739,8 +890,12 @@ export default function StageDetailsPage() {
                     <th className="px-6 py-4">Email</th>
                     <th className="px-6 py-4">Status</th>
                     <th className="px-6 py-4">Score</th>
-                    <th className="px-6 py-4">Submission Time</th>
-                    <th className="px-6 py-4">Time Taken</th>
+                    {currentStage.type === 'Online Assessment' && (
+                      <>
+                        <th className="px-6 py-4">Submission Time</th>
+                        <th className="px-6 py-4">Time Taken</th>
+                      </>
+                    )}
                     <th className="px-6 py-4">Qualified</th>
                     <th className="px-6 py-4 text-right">Action</th>
                   </tr>
@@ -754,27 +909,45 @@ export default function StageDetailsPage() {
                       <td className="px-6 py-4 font-semibold text-slate-900">{c.name}</td>
                       <td className="px-6 py-4 text-slate-500">{c.email}</td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${c.status === "Passed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                            c.status === "In Review" ? "bg-amber-50 text-amber-700 border-amber-200" :
-                              "bg-rose-50 text-rose-700 border-rose-200"
-                          }`}>
-                          {c.status}
-                        </span>
+                        {isAdvanced(c) ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            Passed (Advanced)
+                          </span>
+                        ) : (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${c.status === "Passed" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                              c.status === "In Review" ? "bg-amber-50 text-amber-700 border border-amber-200" :
+                                c.status === "Pending" ? "bg-slate-100 text-slate-700 border border-slate-200" :
+                                  "bg-rose-50 text-rose-700 border border-rose-200"
+                            }`}>
+                            {c.status}
+                          </span>
+                        )}
                       </td>
-                      <td className="px-6 py-4 font-medium text-slate-700">{c.score || '-'}</td>
-                      <td className="px-6 py-4 text-slate-500">
-                        {c.timeTaken && c.timeTaken.includes('_')
-                          ? new Date(c.timeTaken.split('_')[1]).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
-                          : '-'}
-                      </td>
-                      <td className="px-6 py-4 text-slate-500">
-                        {c.timeTaken ? c.timeTaken.split('_')[0] : '-'}
-                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-700">{getStageScore(c) || '-'}</td>
+                      {currentStage.type === 'Online Assessment' && (
+                        <>
+                          <td className="px-6 py-4 text-slate-500">
+                            {getStageTimeTaken(c) && getStageTimeTaken(c).includes('_')
+                              ? new Date(getStageTimeTaken(c).split('_')[1]).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+                              : '-'}
+                          </td>
+                          <td className="px-6 py-4 text-slate-500">
+                            {getStageTimeTaken(c) ? getStageTimeTaken(c).split('_')[0] : '-'}
+                          </td>
+                        </>
+                      )}
                       <td className="px-6 py-4">
                         {c.status === 'Passed' ? <span className="text-emerald-600 font-semibold">Yes</span> : <span className="text-slate-400">No</span>}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button className="text-blue-600 hover:text-blue-700 font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity">Review</button>
+                        {!isAdvanced(c) && (
+                          <button
+                            onClick={() => setSelectedCandidateForReview(c)}
+                            className="text-blue-600 hover:text-blue-700 font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            Review
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -856,8 +1029,8 @@ export default function StageDetailsPage() {
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{qType}</span>
                             <span className="text-slate-300">•</span>
                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${q.difficulty === 'EASY' ? 'bg-emerald-50 text-emerald-700' :
-                                q.difficulty === 'MEDIUM' ? 'bg-amber-50 text-amber-700' :
-                                  'bg-rose-50 text-rose-700'
+                              q.difficulty === 'MEDIUM' ? 'bg-amber-50 text-amber-700' :
+                                'bg-rose-50 text-rose-700'
                               }`}>
                               {q.difficulty}
                             </span>
@@ -903,26 +1076,26 @@ export default function StageDetailsPage() {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Average Score</div>
-                <div className="text-2xl font-bold text-slate-900">84<span className="text-sm text-slate-400 font-normal">/100</span></div>
+                <div className="text-2xl font-bold text-slate-900">{analysisData.avg}<span className="text-sm text-slate-400 font-normal">%</span></div>
               </div>
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Highest</div>
-                <div className="text-2xl font-bold text-emerald-600">98</div>
+                <div className="text-2xl font-bold text-emerald-600">{analysisData.highest}%</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Lowest</div>
-                <div className="text-2xl font-bold text-rose-600">32</div>
+                <div className="text-2xl font-bold text-rose-600">{analysisData.lowest}%</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Median</div>
-                <div className="text-2xl font-bold text-slate-900">86</div>
+                <div className="text-2xl font-bold text-slate-900">{analysisData.median}%</div>
               </div>
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                 <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Pass Rate</div>
                 <div className="text-2xl font-bold text-blue-600">
                   {stageCandidates.length > 0
-                    ? Math.round((stageCandidates.filter((c: any) => c.status === 'Passed').length / stageCandidates.length) * 100) + '%'
-                    : '76%'}
+                    ? Math.round((stageCandidates.filter((c: any) => isAdvanced(c) || c.status === 'Passed').length / stageCandidates.length) * 100) + '%'
+                    : '0%'}
                 </div>
               </div>
             </div>
@@ -935,13 +1108,7 @@ export default function StageDetailsPage() {
                 <h4 className="text-sm font-bold text-slate-900 mb-4">Score Distribution</h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={[
-                      { range: '0-20', count: 2 },
-                      { range: '21-40', count: 5 },
-                      { range: '41-60', count: 12 },
-                      { range: '61-80', count: 38 },
-                      { range: '81-100', count: 24 }
-                    ]}>
+                    <BarChart data={analysisData.distribution}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                       <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
@@ -954,20 +1121,14 @@ export default function StageDetailsPage() {
 
               {/* Question Wise Accuracy */}
               <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                <h4 className="text-sm font-bold text-slate-900 mb-4">Question Wise Accuracy</h4>
+                <h4 className="text-sm font-bold text-slate-900 mb-4">Question Submission Rate</h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={[
-                      { q: 'Q1', accuracy: 92 },
-                      { q: 'Q2', accuracy: 78 },
-                      { q: 'Q3', accuracy: 45 },
-                      { q: 'Q4', accuracy: 64 },
-                      { q: 'Q5', accuracy: 88 }
-                    ]} layout="vertical">
+                    <BarChart data={analysisData.questionAccuracyData} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                       <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                      <YAxis dataKey="q" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} />
-                      <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                      <YAxis dataKey="q" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} width={80} />
+                      <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number) => [`${value}%`, 'Submission Rate']} />
                       <Bar dataKey="accuracy" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -982,21 +1143,15 @@ export default function StageDetailsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={[
-                            { name: 'Python', value: 45 },
-                            { name: 'Java', value: 30 },
-                            { name: 'C++', value: 15 },
-                            { name: 'JavaScript', value: 10 }
-                          ]}
+                          data={analysisData.langChartData}
                           cx="50%" cy="50%"
                           innerRadius={50} outerRadius={70}
                           paddingAngle={2}
                           dataKey="value"
                         >
-                          <Cell fill="#3b82f6" />
-                          <Cell fill="#f59e0b" />
-                          <Cell fill="#10b981" />
-                          <Cell fill="#f43f5e" />
+                          {analysisData.langChartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={['#3b82f6', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6'][index % 5]} />
+                          ))}
                         </Pie>
                         <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                       </PieChart>
@@ -1010,10 +1165,7 @@ export default function StageDetailsPage() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={[
-                            { name: 'Completed', value: 82 },
-                            { name: 'Incomplete', value: 18 }
-                          ]}
+                          data={analysisData.completionChartData}
                           cx="50%" cy="50%"
                           innerRadius={60} outerRadius={70}
                           startAngle={90} endAngle={-270}
@@ -1023,37 +1175,13 @@ export default function StageDetailsPage() {
                           <Cell fill="#3b82f6" />
                           <Cell fill="#e2e8f0" />
                         </Pie>
+                        <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                       </PieChart>
                     </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-bold text-slate-900">82%</span>
-                      <span className="text-xs text-slate-500">Submitted</span>
+                    <div className="absolute inset-0 flex items-center justify-center flex-col">
+                      <span className="text-2xl font-bold text-slate-900">{invited > 0 ? Math.round((completed / invited) * 100) : 0}%</span>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Submission Timeline */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                <h4 className="text-sm font-bold text-slate-900 mb-4">Submission Timeline</h4>
-                <div className="h-48 mt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsLineChart data={[
-                      { time: '10:00', count: 0 },
-                      { time: '10:15', count: 5 },
-                      { time: '10:30', count: 12 },
-                      { time: '10:45', count: 35 },
-                      { time: '11:00', count: 80 },
-                      { time: '11:15', count: 120 },
-                      { time: '11:30', count: 145 }
-                    ]}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} />
-                      <RechartsTooltip cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                      <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6, fill: '#6366f1', strokeWidth: 0 }} />
-                    </RechartsLineChart>
-                  </ResponsiveContainer>
                 </div>
               </div>
 
@@ -1446,6 +1574,196 @@ export default function StageDetailsPage() {
               <button onClick={handleBankDone} className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors">
                 Done
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Candidate Review Slide-over Panel */}
+      <div className={`fixed inset-0 z-50 flex justify-end transition-all duration-300 ${selectedCandidateForReview ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}`}>
+        <div className={`absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity duration-300 ${selectedCandidateForReview ? "opacity-100" : "opacity-0"}`} onClick={() => setSelectedCandidateForReview(null)}></div>
+        <div className={`relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out rounded-l-2xl overflow-hidden ${selectedCandidateForReview ? "translate-x-0" : "translate-x-full"}`}>
+          <div className="flex items-center justify-between p-6 border-b border-slate-100">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Review Candidate</h2>
+              <p className="text-sm text-slate-500 mt-1">{selectedCandidateForReview?.name || ""}</p>
+            </div>
+            <button
+              onClick={() => setSelectedCandidateForReview(null)}
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Email</span>
+                <span className="text-slate-900 font-semibold">{selectedCandidateForReview?.email || ""}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Score</span>
+                <span className="text-slate-900 font-semibold">{getStageScore(selectedCandidateForReview) || "N/A"}</span>
+              </div>
+              {currentStage.type === 'Online Assessment' && (
+                <>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500 font-medium">Time Taken</span>
+                    <span className="text-slate-900 font-semibold">
+                      {getStageTimeTaken(selectedCandidateForReview)
+                        ? getStageTimeTaken(selectedCandidateForReview).split('_')[0]
+                        : "N/A"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500 font-medium">Submission Time</span>
+                    <span className="text-slate-900 font-semibold">
+                      {getStageTimeTaken(selectedCandidateForReview) && getStageTimeTaken(selectedCandidateForReview).includes('_')
+                        ? new Date(getStageTimeTaken(selectedCandidateForReview).split('_')[1]).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+                        : "N/A"}
+                    </span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-slate-500 font-medium">Current Status</span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${selectedCandidateForReview?.status === "Passed" ? "bg-emerald-100 text-emerald-700" :
+                    selectedCandidateForReview?.status === "In Review" ? "bg-amber-100 text-amber-700" :
+                      "bg-rose-100 text-rose-700"
+                  }`}>
+                  {selectedCandidateForReview?.status || "N/A"}
+                </span>
+              </div>
+            </div>
+
+            {currentStage.type === 'Online Assessment' && (
+              <div className="border border-blue-100 bg-blue-50/50 rounded-xl p-4">
+                <h3 className="text-sm font-bold text-blue-900 mb-2">Automated Assessment</h3>
+                <p className="text-xs text-blue-700/80 leading-relaxed mb-4">
+                  The candidate's score has been automatically calculated based on the test cases they passed. You can review their performance above and make a final decision on whether to pass them to the next stage or reject them.
+                </p>
+
+                {getStageSubmissions(selectedCandidateForReview) && getStageSubmissions(selectedCandidateForReview).length > 0 ? (
+                  <button
+                    onClick={() => {
+                      setActiveCodeTabIndex(0);
+                      setIsCodeReviewModalOpen(true);
+                    }}
+                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm flex items-center justify-center gap-2 shadow-sm transition-colors"
+                  >
+                    <Code2 size={16} /> Review Source Code
+                  </button>
+                ) : (
+                  <div className="bg-white rounded-lg p-3 border border-slate-200 text-xs text-slate-500 italic text-center">
+                    No source code was saved for this submission.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3">
+            <button
+              onClick={() => handleUpdateCandidateStatus('Rejected')}
+              disabled={isUpdatingStatus || selectedCandidateForReview?.status === 'Rejected'}
+              className="flex-1 px-4 py-2.5 bg-white border border-rose-200 text-rose-600 font-bold rounded-lg hover:bg-rose-50 transition-colors disabled:opacity-50 text-sm"
+            >
+              Reject Candidate
+            </button>
+            <button
+              onClick={() => handleUpdateCandidateStatus('Passed')}
+              disabled={isUpdatingStatus || selectedCandidateForReview?.status === 'Passed'}
+              className="flex-1 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 text-sm"
+            >
+              {isUpdatingStatus ? 'Updating...' : 'Pass to Next Round'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Fullscreen Code Review Modal */}
+      {isCodeReviewModalOpen && selectedCandidateForReview && getStageSubmissions(selectedCandidateForReview) && (
+        <div className="fixed inset-0 z-[60] bg-slate-900 flex flex-col animate-in fade-in duration-200">
+          {/* Header */}
+          <div className="h-16 border-b border-slate-800 bg-slate-900 flex items-center justify-between px-6 shrink-0">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Code2 className="text-blue-400" size={20} />
+                Code Review: {selectedCandidateForReview.name}
+              </h2>
+              <span className="px-2.5 py-1 bg-slate-800 text-slate-300 rounded-md text-xs font-mono border border-slate-700">
+                Score: {getStageScore(selectedCandidateForReview) || 'N/A'}
+              </span>
+            </div>
+            <button
+              onClick={() => setIsCodeReviewModalOpen(false)}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 flex overflow-hidden">
+            {/* Sidebar (Questions List) */}
+            <div className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
+              <div className="p-4 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Submitted Questions
+              </div>
+              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                {getStageSubmissions(selectedCandidateForReview).map((sub: any, index: number) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveCodeTabIndex(index)}
+                    className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-all border ${activeCodeTabIndex === index
+                        ? "bg-blue-600/10 border-blue-500/30 text-blue-400"
+                        : "bg-transparent border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                      }`}
+                  >
+                    <div className="font-semibold truncate">{sub.title || `Question ${index + 1}`}</div>
+                    <div className="text-xs opacity-60 mt-1 flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      {sub.language}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Code Editor Area */}
+            <div className="flex-1 bg-[#1e1e1e] flex flex-col relative">
+              {getStageSubmissions(selectedCandidateForReview)[activeCodeTabIndex] ? (
+                <>
+                  <div className="h-10 bg-[#252526] border-b border-[#3c3c3c] flex items-center px-4">
+                    <span className="text-xs font-mono text-slate-400">
+                      {getStageSubmissions(selectedCandidateForReview)[activeCodeTabIndex].title || `Question ${activeCodeTabIndex + 1}`}
+                      .{getStageSubmissions(selectedCandidateForReview)[activeCodeTabIndex].language === 'cpp' ? 'cpp' :
+                        getStageSubmissions(selectedCandidateForReview)[activeCodeTabIndex].language === 'python' ? 'py' : 'js'}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <Editor
+                      height="100%"
+                      language={getStageSubmissions(selectedCandidateForReview)[activeCodeTabIndex].language}
+                      theme="vs-dark"
+                      value={getStageSubmissions(selectedCandidateForReview)[activeCodeTabIndex].code || "// No code submitted"}
+                      options={{
+                        readOnly: true,
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+                        scrollBeyondLastLine: false,
+                        wordWrap: "on",
+                        padding: { top: 16 }
+                      }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-slate-500">
+                  Select a question to review code
+                </div>
+              )}
             </div>
           </div>
         </div>
