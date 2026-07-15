@@ -827,27 +827,27 @@ export default function StageDetailsPage() {
                 <input
                   type="text"
                   placeholder="Search candidates by name or email..."
-                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-900"
+                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                 />
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setSortConfig(sortConfig === "none" ? "score-desc" : "none")}
-                  className={`flex items-center gap-2 px-4 py-2 border text-sm font-semibold rounded-lg transition-colors ${sortConfig === "score-desc" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"}`}
+                  className={`flex items-center gap-2 px-4 py-2 border text-sm font-semibold rounded-lg transition-colors ${sortConfig === "score-desc" ? "bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400" : "bg-white dark:bg-[#0f172a] border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"}`}
                 >
                   Sort by Score
                 </button>
                 <div className="relative group z-10">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">
+                  <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <Filter size={16} /> Filters <ChevronDown size={14} />
                   </button>
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <div className="p-2 flex flex-col gap-1 text-sm text-slate-700">
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300" /> Qualified</label>
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300" /> Rejected</label>
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300" /> Pending</label>
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300" /> Absent</label>
-                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300" /> Cheating Flagged</label>
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                    <div className="p-2 flex flex-col gap-1 text-sm text-slate-700 dark:text-slate-300">
+                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /> Qualified</label>
+                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /> Rejected</label>
+                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /> Pending</label>
+                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /> Absent</label>
+                      <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /> Cheating Flagged</label>
                     </div>
                   </div>
                 </div>
@@ -856,24 +856,24 @@ export default function StageDetailsPage() {
                   <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition-colors shadow-sm">
                     Bulk Actions <ChevronDown size={14} />
                   </button>
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <div className="py-1 flex flex-col text-sm text-slate-700">
-                      <button className="px-4 py-2 text-left hover:bg-slate-50">Export</button>
-                      <button className="px-4 py-2 text-left hover:bg-slate-50">Email</button>
-                      <button className="px-4 py-2 text-left hover:bg-slate-50">Move to Next Round</button>
-                      <button className="px-4 py-2 text-left hover:bg-slate-50 text-rose-600">Reject</button>
-                      <button className="px-4 py-2 text-left hover:bg-slate-50">Download Reports</button>
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                    <div className="py-1 flex flex-col text-sm text-slate-700 dark:text-slate-300">
+                      <button className="px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800">Export</button>
+                      <button className="px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800">Email</button>
+                      <button className="px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800">Move to Next Round</button>
+                      <button className="px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800 text-rose-600 dark:text-rose-400">Reject</button>
+                      <button className="px-4 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800">Download Reports</button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-x-auto">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-x-auto">
               <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+                <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-semibold">
                   <tr>
-                    <th className="px-6 py-4 w-10"><input type="checkbox" className="rounded border-slate-300" /></th>
+                    <th className="px-6 py-4 w-10"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /></th>
                     <th className="px-6 py-4">Name</th>
                     <th className="px-6 py-4">Email</th>
                     <th className="px-6 py-4">Status</th>
@@ -888,50 +888,50 @@ export default function StageDetailsPage() {
                     <th className="px-6 py-4 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                   {stageCandidates.length === 0 ? (
-                    <tr><td colSpan={9} className="px-6 py-8 text-center text-slate-500">No candidates currently in this stage.</td></tr>
+                    <tr><td colSpan={9} className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">No candidates currently in this stage.</td></tr>
                   ) : stageCandidates.map((c: any) => (
-                    <tr key={c.id} className="hover:bg-slate-50 transition-colors group">
-                      <td className="px-6 py-4"><input type="checkbox" className="rounded border-slate-300" /></td>
-                      <td className="px-6 py-4 font-semibold text-slate-900">{c.name}</td>
-                      <td className="px-6 py-4 text-slate-500">{c.email}</td>
+                    <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                      <td className="px-6 py-4"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /></td>
+                      <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">{c.name}</td>
+                      <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{c.email}</td>
                       <td className="px-6 py-4">
                         {isAdvanced(c) ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20">
                             Passed (Advanced)
                           </span>
                         ) : (
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${c.status === "Passed" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
-                            c.status === "In Review" ? "bg-amber-50 text-amber-700 border border-amber-200" :
-                              c.status === "Pending" ? "bg-slate-100 text-slate-700 border border-slate-200" :
-                                "bg-rose-50 text-rose-700 border border-rose-200"
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${c.status === "Passed" ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20" :
+                            c.status === "In Review" ? "bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20" :
+                              c.status === "Pending" ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700" :
+                                "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20"
                             }`}>
                             {c.status}
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 font-medium text-slate-700">{getStageScore(c) || '-'}</td>
+                      <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">{getStageScore(c) || '-'}</td>
                       {currentStage.type === 'Online Assessment' && (
                         <>
-                          <td className="px-6 py-4 text-slate-500">
+                          <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
                             {getStageTimeTaken(c) && getStageTimeTaken(c).includes('_')
                               ? new Date(getStageTimeTaken(c).split('_')[1]).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
                               : '-'}
                           </td>
-                          <td className="px-6 py-4 text-slate-500">
+                          <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
                             {getStageTimeTaken(c) ? getStageTimeTaken(c).split('_')[0] : '-'}
                           </td>
                         </>
                       )}
                       <td className="px-6 py-4">
-                        {c.status === 'Passed' ? <span className="text-emerald-600 font-semibold">Yes</span> : <span className="text-slate-400">No</span>}
+                        {c.status === 'Passed' ? <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Yes</span> : <span className="text-slate-400">No</span>}
                       </td>
                       <td className="px-6 py-4 text-right">
                         {!isAdvanced(c) && (
                           <button
                             onClick={() => setSelectedCandidateForReview(c)}
-                            className="text-blue-600 hover:text-blue-700 font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             Review
                           </button>
@@ -950,19 +950,19 @@ export default function StageDetailsPage() {
           <div className="space-y-6">
 
             {/* Top Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#0f172a] p-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
               <div className="flex items-center gap-2">
-                <FileCode size={20} className="text-blue-600" />
-                <h3 className="text-lg font-bold text-slate-900">Assessment Questions</h3>
+                <FileCode size={20} className="text-blue-600 dark:text-blue-500" />
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Assessment Questions</h3>
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-                <button onClick={openBankModal} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
+                <button onClick={openBankModal} className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-nowrap">
                   <Library size={16} /> Question Bank
                 </button>
-                <button onClick={handleRandomize} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
+                <button onClick={handleRandomize} className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-nowrap">
                   <Shuffle size={16} /> Randomize
                 </button>
-                <button onClick={handleImport} className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors whitespace-nowrap">
+                <button onClick={handleImport} className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-nowrap">
                   <Download size={16} /> Import
                 </button>
                 <button onClick={() => setIsAddQuestionModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap">
@@ -974,23 +974,23 @@ export default function StageDetailsPage() {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Left Sidebar (Question Types) */}
               <div className="w-full md:w-56 shrink-0">
-                <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Categories</div>
                   <div className="space-y-1">
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-blue-700 bg-blue-50 rounded-lg transition-colors">
-                      Coding <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Coding').length}</span>
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 rounded-lg transition-colors">
+                      Coding <span className="bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Coding').length}</span>
                     </button>
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      MCQ <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'MCQ').length}</span>
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                      MCQ <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'MCQ').length}</span>
                     </button>
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      SQL <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'SQL').length}</span>
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                      SQL <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'SQL').length}</span>
                     </button>
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      Debugging <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Debugging').length}</span>
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                      Debugging <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Debugging').length}</span>
                     </button>
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
-                      Subjective <span className="bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Subjective').length}</span>
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                      Subjective <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Subjective').length}</span>
                     </button>
                   </div>
                 </div>
@@ -999,10 +999,10 @@ export default function StageDetailsPage() {
               {/* Question Cards List */}
               <div className="flex-1 space-y-4">
                 {roundQuestions.length === 0 ? (
-                  <div className="bg-white border border-slate-200 rounded-xl p-8 text-center shadow-sm">
-                    <FileCode size={32} className="mx-auto text-slate-300 mb-3" />
-                    <h4 className="text-slate-900 font-semibold mb-1">No questions added yet</h4>
-                    <p className="text-slate-500 text-sm mb-4">Click "Add Question" to create one or select from the Question Bank.</p>
+                  <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-8 text-center shadow-sm">
+                    <FileCode size={32} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
+                    <h4 className="text-slate-900 dark:text-white font-semibold mb-1">No questions added yet</h4>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">Click "Add Question" to create one or select from the Question Bank.</p>
                   </div>
                 ) : (
                   roundQuestions.map((q: any) => {
@@ -1011,39 +1011,39 @@ export default function StageDetailsPage() {
                     const qTags = q.boilerplate?.tags || [];
 
                     return (
-                      <div key={q.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div key={q.id} className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow group flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{qType}</span>
-                            <span className="text-slate-300">•</span>
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${q.difficulty === 'EASY' ? 'bg-emerald-50 text-emerald-700' :
-                              q.difficulty === 'MEDIUM' ? 'bg-amber-50 text-amber-700' :
-                                'bg-rose-50 text-rose-700'
+                            <span className="text-slate-300 dark:text-slate-600">•</span>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${q.difficulty === 'EASY' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' :
+                              q.difficulty === 'MEDIUM' ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400' :
+                                'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400'
                               }`}>
                               {q.difficulty}
                             </span>
                           </div>
-                          <h4 className="text-lg font-bold text-slate-900 mb-2">{q.title}</h4>
+                          <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{q.title}</h4>
                           <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-lg">
-                              <span className="text-blue-600 font-bold">{qMarks}</span> Marks
+                            <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-2.5 py-1 rounded-lg">
+                              <span className="text-blue-600 dark:text-blue-400 font-bold">{qMarks}</span> Marks
                             </div>
                             <div className="flex gap-1.5">
                               {qTags.map((t: string) => (
-                                <span key={t} className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md">{t}</span>
+                                <span key={t} className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">{t}</span>
                               ))}
                             </div>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger" title="Preview">
+                          <button className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors tooltip-trigger" title="Preview">
                             <Eye size={18} />
                           </button>
-                          <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors tooltip-trigger" title="Edit">
+                          <button className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors tooltip-trigger" title="Edit">
                             <Edit2 size={18} />
                           </button>
-                          <button onClick={() => handleDeleteQuestion(q.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors tooltip-trigger" title="Delete">
+                          <button onClick={() => handleDeleteQuestion(q.id)} className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors tooltip-trigger" title="Delete">
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -1062,25 +1062,25 @@ export default function StageDetailsPage() {
 
             {/* Top Cards */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Average Score</div>
-                <div className="text-2xl font-bold text-slate-900">{analysisData.avg}<span className="text-sm text-slate-400 font-normal">%</span></div>
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
+                <div className="text-slate-500 dark:text-slate-400 font-medium text-xs mb-1 uppercase tracking-wider">Average Score</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">{analysisData.avg}<span className="text-sm text-slate-400 dark:text-slate-500 font-normal">%</span></div>
               </div>
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Highest</div>
-                <div className="text-2xl font-bold text-emerald-600">{analysisData.highest}%</div>
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
+                <div className="text-slate-500 dark:text-slate-400 font-medium text-xs mb-1 uppercase tracking-wider">Highest</div>
+                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{analysisData.highest}%</div>
               </div>
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Lowest</div>
-                <div className="text-2xl font-bold text-rose-600">{analysisData.lowest}%</div>
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
+                <div className="text-slate-500 dark:text-slate-400 font-medium text-xs mb-1 uppercase tracking-wider">Lowest</div>
+                <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">{analysisData.lowest}%</div>
               </div>
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Median</div>
-                <div className="text-2xl font-bold text-slate-900">{analysisData.median}%</div>
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
+                <div className="text-slate-500 dark:text-slate-400 font-medium text-xs mb-1 uppercase tracking-wider">Median</div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white">{analysisData.median}%</div>
               </div>
-              <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                <div className="text-slate-500 font-medium text-xs mb-1 uppercase tracking-wider">Pass Rate</div>
-                <div className="text-2xl font-bold text-blue-600">
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
+                <div className="text-slate-500 dark:text-slate-400 font-medium text-xs mb-1 uppercase tracking-wider">Pass Rate</div>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {stageCandidates.length > 0
                     ? Math.round((stageCandidates.filter((c: any) => isAdvanced(c) || c.status === 'Passed').length / stageCandidates.length) * 100) + '%'
                     : '0%'}
@@ -1092,15 +1092,15 @@ export default function StageDetailsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
               {/* Score Distribution */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                <h4 className="text-sm font-bold text-slate-900 mb-4">Score Distribution</h4>
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-5 shadow-sm">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Score Distribution</h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={analysisData.distribution}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                       <XAxis dataKey="range" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
-                      <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                      <RechartsTooltip cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} wrapperClassName="!bg-white dark:!bg-slate-800 !text-slate-900 dark:!text-white rounded-lg" />
                       <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -1108,15 +1108,15 @@ export default function StageDetailsPage() {
               </div>
 
               {/* Question Wise Accuracy */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                <h4 className="text-sm font-bold text-slate-900 mb-4">Question Submission Rate</h4>
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-5 shadow-sm">
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Question Submission Rate</h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={analysisData.questionAccuracyData} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
                       <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                       <YAxis dataKey="q" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} width={80} />
-                      <RechartsTooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(value: number) => [`${value}%`, 'Submission Rate']} />
+                      <RechartsTooltip cursor={{ fill: 'rgba(148, 163, 184, 0.1)' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} wrapperClassName="!bg-white dark:!bg-slate-800 !text-slate-900 dark:!text-white rounded-lg" formatter={(value: number) => [`${value}%`, 'Submission Rate']} />
                       <Bar dataKey="accuracy" fill="#10b981" radius={[0, 4, 4, 0]} barSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -1124,9 +1124,9 @@ export default function StageDetailsPage() {
               </div>
 
               {/* Language Usage & Completion Rate */}
-              <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row gap-6">
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-5 shadow-sm flex flex-col sm:flex-row gap-6">
                 <div className="flex-1">
-                  <h4 className="text-sm font-bold text-slate-900 mb-4">Language Usage</h4>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Language Usage</h4>
                   <div className="h-48 flex items-center justify-center relative">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -1141,14 +1141,14 @@ export default function StageDetailsPage() {
                             <Cell key={`cell-${index}`} fill={['#3b82f6', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6'][index % 5]} />
                           ))}
                         </Pie>
-                        <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                        <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} wrapperClassName="!bg-white dark:!bg-slate-800 !text-slate-900 dark:!text-white rounded-lg" />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
                 <div className="flex-1">
-                  <h4 className="text-sm font-bold text-slate-900 mb-4">Completion Rate</h4>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Completion Rate</h4>
                   <div className="h-48 flex items-center justify-center relative">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -1163,11 +1163,11 @@ export default function StageDetailsPage() {
                           <Cell fill="#3b82f6" />
                           <Cell fill="#e2e8f0" />
                         </Pie>
-                        <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                        <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} wrapperClassName="!bg-white dark:!bg-slate-800 !text-slate-900 dark:!text-white rounded-lg" />
                       </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex items-center justify-center flex-col">
-                      <span className="text-2xl font-bold text-slate-900">{invited > 0 ? Math.round((completed / invited) * 100) : 0}%</span>
+                      <span className="text-2xl font-bold text-slate-900 dark:text-white">{invited > 0 ? Math.round((completed / invited) * 100) : 0}%</span>
                     </div>
                   </div>
                 </div>
@@ -1182,8 +1182,8 @@ export default function StageDetailsPage() {
           <div className="max-w-4xl space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Assessment Schedule</h3>
-                <p className="text-slate-500 text-sm">Configure timing and access rules for this round.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Assessment Schedule</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Configure timing and access rules for this round.</p>
               </div>
               <div className="flex items-center gap-4">
                 {(!currentStage.config?.questions || currentStage.config.questions.length === 0) && (
@@ -1199,51 +1199,51 @@ export default function StageDetailsPage() {
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-slate-100">
-                <h4 className="text-base font-bold text-slate-900 mb-4">Timing Details</h4>
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">Timing Details</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Date</label>
-                    <input type="date" value={scheduleForm.date} onChange={e => setScheduleForm({ ...scheduleForm, date: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Date</label>
+                    <input type="date" value={scheduleForm.date} onChange={e => setScheduleForm({ ...scheduleForm, date: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Timezone</label>
-                    <select value={scheduleForm.timeZone} onChange={e => setScheduleForm({ ...scheduleForm, timeZone: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Timezone</label>
+                    <select value={scheduleForm.timeZone} onChange={e => setScheduleForm({ ...scheduleForm, timeZone: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option value="Asia/Kolkata (IST)">Asia/Kolkata (IST)</option>
                       <option value="UTC">UTC</option>
                       <option value="America/New_York (EST)">America/New_York (EST)</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Start Time</label>
-                    <input type="time" value={scheduleForm.startTime} onChange={e => setScheduleForm({ ...scheduleForm, startTime: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Start Time</label>
+                    <input type="time" value={scheduleForm.startTime} onChange={e => setScheduleForm({ ...scheduleForm, startTime: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">End Time</label>
-                    <input type="time" value={scheduleForm.endTime} onChange={e => setScheduleForm({ ...scheduleForm, endTime: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">End Time</label>
+                    <input type="time" value={scheduleForm.endTime} onChange={e => setScheduleForm({ ...scheduleForm, endTime: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Duration</label>
-                    <input type="text" value={scheduleForm.duration} onChange={e => setScheduleForm({ ...scheduleForm, duration: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 90 mins" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Duration</label>
+                    <input type="text" value={scheduleForm.duration} onChange={e => setScheduleForm({ ...scheduleForm, duration: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 90 mins" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Registration Deadline</label>
-                    <input type="datetime-local" value={scheduleForm.deadline} onChange={e => setScheduleForm({ ...scheduleForm, deadline: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Registration Deadline</label>
+                    <input type="datetime-local" value={scheduleForm.deadline} onChange={e => setScheduleForm({ ...scheduleForm, deadline: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
-                <h4 className="text-base font-bold text-slate-900 mb-4">Extra Options</h4>
+                <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">Extra Options</h4>
                 <div className="space-y-5">
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Allow Late Join</div>
-                      <div className="text-xs text-slate-500">Permit candidates to start the assessment after the start time.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Allow Late Join</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Permit candidates to start the assessment after the start time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" checked={scheduleForm.allowLateJoin} onChange={e => setScheduleForm({ ...scheduleForm, allowLateJoin: e.target.checked })} className="sr-only peer" />
@@ -1253,10 +1253,10 @@ export default function StageDetailsPage() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Grace Period</div>
-                      <div className="text-xs text-slate-500">Additional time allowed before auto-submission.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Grace Period</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Additional time allowed before auto-submission.</div>
                     </div>
-                    <select value={scheduleForm.gracePeriod} onChange={e => setScheduleForm({ ...scheduleForm, gracePeriod: e.target.value })} className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-32">
+                    <select value={scheduleForm.gracePeriod} onChange={e => setScheduleForm({ ...scheduleForm, gracePeriod: e.target.value })} className="px-3 py-1.5 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-32">
                       <option value="5 mins">5 mins</option>
                       <option value="10 mins">10 mins</option>
                       <option value="15 mins">15 mins</option>
@@ -1265,8 +1265,8 @@ export default function StageDetailsPage() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Auto Start</div>
-                      <div className="text-xs text-slate-500">Automatically start the assessment at the scheduled time.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Auto Start</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Automatically start the assessment at the scheduled time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" checked={scheduleForm.autoStart} onChange={e => setScheduleForm({ ...scheduleForm, autoStart: e.target.checked })} className="sr-only peer" />
@@ -1276,8 +1276,8 @@ export default function StageDetailsPage() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Auto End</div>
-                      <div className="text-xs text-slate-500">Automatically submit all active assessments at the end time.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Auto End</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Automatically submit all active assessments at the end time.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" checked={scheduleForm.autoEnd} onChange={e => setScheduleForm({ ...scheduleForm, autoEnd: e.target.checked })} className="sr-only peer" />
@@ -1287,8 +1287,8 @@ export default function StageDetailsPage() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Publish Schedule</div>
-                      <div className="text-xs text-slate-500">Make this schedule visible to invited candidates.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Publish Schedule</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Make this schedule visible to invited candidates.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" checked={scheduleForm.publishSchedule} onChange={e => setScheduleForm({ ...scheduleForm, publishSchedule: e.target.checked })} className="sr-only peer" />
@@ -1307,8 +1307,8 @@ export default function StageDetailsPage() {
           <div className="max-w-4xl space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Stage Settings</h3>
-                <p className="text-slate-500 text-sm">Configure security, proctoring, and general round settings.</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Stage Settings</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">Configure security, proctoring, and general round settings.</p>
               </div>
               <button
                 onClick={handleSettingsSubmit}
@@ -1319,67 +1319,67 @@ export default function StageDetailsPage() {
             </div>
 
             {/* General Settings Card */}
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
-                <h4 className="text-base font-bold text-slate-900 mb-4">General Settings</h4>
+                <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">General Settings</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Round Name</label>
-                    <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Round Name</label>
+                    <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Round Type</label>
-                    <select value={settingsForm.type} onChange={e => setSettingsForm({ ...settingsForm, type: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Round Type</label>
+                    <select value={settingsForm.type} onChange={e => setSettingsForm({ ...settingsForm, type: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option value="Assessment">Assessment</option>
                       <option value="Interview">Interview</option>
                       <option value="Project">Project</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Status</label>
-                    <select value={settingsForm.status} onChange={e => setSettingsForm({ ...settingsForm, status: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
+                    <select value={settingsForm.status} onChange={e => setSettingsForm({ ...settingsForm, status: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                       <option>Active</option>
                       <option>Draft</option>
                       <option>Archived</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Duration</label>
-                    <input type="text" value={settingsForm.duration} onChange={e => setSettingsForm({ ...settingsForm, duration: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Duration</label>
+                    <input type="text" value={settingsForm.duration} onChange={e => setSettingsForm({ ...settingsForm, duration: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Assessment Settings */}
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
-                <h4 className="text-base font-bold text-slate-900 mb-4">Assessment Settings</h4>
+                <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">Assessment Settings</h4>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Shuffle Questions</div>
-                      <div className="text-xs text-slate-500">Present questions in a random order for each candidate.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Shuffle Questions</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Present questions in a random order for each candidate.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleQuestions} onChange={e => setSettingsForm({ ...settingsForm, shuffleQuestions: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Shuffle MCQs</div>
-                      <div className="text-xs text-slate-500">Randomize the order of options for multiple choice questions.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Shuffle MCQs</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Randomize the order of options for multiple choice questions.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleMCQs} onChange={e => setSettingsForm({ ...settingsForm, shuffleMCQs: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Save Progress</div>
-                      <div className="text-xs text-slate-500">Automatically save answers as the candidate progresses.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Save Progress</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Automatically save answers as the candidate progresses.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.saveProgress} onChange={e => setSettingsForm({ ...settingsForm, saveProgress: e.target.checked })} />
@@ -1391,34 +1391,34 @@ export default function StageDetailsPage() {
             </div>
 
             {/* Security */}
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
-                <h4 className="text-base font-bold text-slate-900 mb-4">Security</h4>
+                <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">Security</h4>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Tab Switching Detection</div>
-                      <div className="text-xs text-slate-500">Flag candidates who switch browser tabs.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Tab Switching Detection</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Flag candidates who switch browser tabs.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.tabSwitching} onChange={e => setSettingsForm({ ...settingsForm, tabSwitching: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Copy Paste Disabled</div>
-                      <div className="text-xs text-slate-500">Prevent candidates from copying or pasting text.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Copy Paste Disabled</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Prevent candidates from copying or pasting text.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.copyPaste} onChange={e => setSettingsForm({ ...settingsForm, copyPaste: e.target.checked })} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Full Screen Mode</div>
-                      <div className="text-xs text-slate-500">Enforce full screen mode during the assessment.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Full Screen Mode</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Enforce full screen mode during the assessment.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.fullScreen} onChange={e => setSettingsForm({ ...settingsForm, fullScreen: e.target.checked })} />
@@ -1430,14 +1430,14 @@ export default function StageDetailsPage() {
             </div>
 
             {/* Submission */}
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
-                <h4 className="text-base font-bold text-slate-900 mb-4">Submission</h4>
+                <h4 className="text-base font-bold text-slate-900 dark:text-white mb-4">Submission</h4>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
                     <div>
-                      <div className="text-sm font-semibold text-slate-900">Auto Submit</div>
-                      <div className="text-xs text-slate-500">Automatically submit when time expires.</div>
+                      <div className="text-sm font-semibold text-slate-900 dark:text-white">Auto Submit</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Automatically submit when time expires.</div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.autoSubmit} onChange={e => setSettingsForm({ ...settingsForm, autoSubmit: e.target.checked })} />
@@ -1568,44 +1568,44 @@ export default function StageDetailsPage() {
       )}
       {/* Candidate Review Slide-over Panel */}
       <div className={`fixed inset-0 z-50 flex justify-end transition-all duration-300 ${selectedCandidateForReview ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}`}>
-        <div className={`absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity duration-300 ${selectedCandidateForReview ? "opacity-100" : "opacity-0"}`} onClick={() => setSelectedCandidateForReview(null)}></div>
-        <div className={`relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out rounded-l-2xl overflow-hidden ${selectedCandidateForReview ? "translate-x-0" : "translate-x-full"}`}>
-          <div className="flex items-center justify-between p-6 border-b border-slate-100">
+        <div className={`absolute inset-0 bg-slate-900/20 dark:bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 ${selectedCandidateForReview ? "opacity-100" : "opacity-0"}`} onClick={() => setSelectedCandidateForReview(null)}></div>
+        <div className={`relative w-full max-w-md bg-white dark:bg-[#0f172a] h-full shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out rounded-l-2xl overflow-hidden ${selectedCandidateForReview ? "translate-x-0" : "translate-x-full"}`}>
+          <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/10">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Review Candidate</h2>
-              <p className="text-sm text-slate-500 mt-1">{selectedCandidateForReview?.name || ""}</p>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Review Candidate</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{selectedCandidateForReview?.name || ""}</p>
             </div>
             <button
               onClick={() => setSelectedCandidateForReview(null)}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+              className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors"
             >
               <X size={20} />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+            <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/10 space-y-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Email</span>
-                <span className="text-slate-900 font-semibold">{selectedCandidateForReview?.email || ""}</span>
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Email</span>
+                <span className="text-slate-900 dark:text-white font-semibold">{selectedCandidateForReview?.email || ""}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Score</span>
-                <span className="text-slate-900 font-semibold">{getStageScore(selectedCandidateForReview) || "N/A"}</span>
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Score</span>
+                <span className="text-slate-900 dark:text-white font-semibold">{getStageScore(selectedCandidateForReview) || "N/A"}</span>
               </div>
               {currentStage.type === 'Online Assessment' && (
                 <>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500 font-medium">Time Taken</span>
-                    <span className="text-slate-900 font-semibold">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">Time Taken</span>
+                    <span className="text-slate-900 dark:text-white font-semibold">
                       {getStageTimeTaken(selectedCandidateForReview)
                         ? getStageTimeTaken(selectedCandidateForReview).split('_')[0]
                         : "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500 font-medium">Submission Time</span>
-                    <span className="text-slate-900 font-semibold">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">Submission Time</span>
+                    <span className="text-slate-900 dark:text-white font-semibold">
                       {getStageTimeTaken(selectedCandidateForReview) && getStageTimeTaken(selectedCandidateForReview).includes('_')
                         ? new Date(getStageTimeTaken(selectedCandidateForReview).split('_')[1]).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
                         : "N/A"}
@@ -1614,10 +1614,10 @@ export default function StageDetailsPage() {
                 </>
               )}
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500 font-medium">Current Status</span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${selectedCandidateForReview?.status === "Passed" ? "bg-emerald-100 text-emerald-700" :
-                  selectedCandidateForReview?.status === "In Review" ? "bg-amber-100 text-amber-700" :
-                    "bg-rose-100 text-rose-700"
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Current Status</span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${selectedCandidateForReview?.status === "Passed" ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400" :
+                  selectedCandidateForReview?.status === "In Review" ? "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400" :
+                    "bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400"
                   }`}>
                   {selectedCandidateForReview?.status || "N/A"}
                 </span>
@@ -1625,17 +1625,17 @@ export default function StageDetailsPage() {
             </div>
 
             {selectedCandidateForReview?.resumeData && (
-              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-xl border border-indigo-100 flex flex-col items-center text-center justify-center space-y-3">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-indigo-600 mb-1">
+              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-500/20 flex flex-col items-center text-center justify-center space-y-3">
+                <div className="w-12 h-12 bg-white dark:bg-[#0f172a] rounded-full flex items-center justify-center shadow-sm text-indigo-600 dark:text-indigo-400 mb-1">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-indigo-900">AI Parsed Profile Available</h3>
-                  <p className="text-xs text-indigo-600/80 mt-1 px-4">Experience, skills, education, and resume document</p>
+                  <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300">AI Parsed Profile Available</h3>
+                  <p className="text-xs text-indigo-600/80 dark:text-indigo-400/80 mt-1 px-4">Experience, skills, education, and resume document</p>
                 </div>
                 <Link
                   href={`/recruiter/drives/${jobId}/candidates/${selectedCandidateForReview.id}`}
-                  className="mt-2 w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm shadow-indigo-200"
+                  className="mt-2 w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm shadow-indigo-200 dark:shadow-none"
                 >
                   View Full Profile <ArrowRight size={16} />
                 </Link>
@@ -1644,9 +1644,9 @@ export default function StageDetailsPage() {
 
 
             {currentStage.type === 'Online Assessment' && (
-              <div className="border border-blue-100 bg-blue-50/50 rounded-xl p-4">
-                <h3 className="text-sm font-bold text-blue-900 mb-2">Automated Assessment</h3>
-                <p className="text-xs text-blue-700/80 leading-relaxed mb-4">
+              <div className="border border-blue-100 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-500/10 rounded-xl p-4">
+                <h3 className="text-sm font-bold text-blue-900 dark:text-blue-300 mb-2">Automated Assessment</h3>
+                <p className="text-xs text-blue-700/80 dark:text-blue-400/80 leading-relaxed mb-4">
                   The candidate's score has been automatically calculated based on the test cases they passed. You can review their performance above and make a final decision on whether to pass them to the next stage or reject them.
                 </p>
 
@@ -1661,32 +1661,32 @@ export default function StageDetailsPage() {
                     <Code2 size={16} /> Review Source Code
                   </button>
                 ) : (
-                  <div className="bg-white rounded-lg p-3 border border-slate-200 text-xs text-slate-500 italic text-center">
+                  <div className="bg-white dark:bg-transparent rounded-lg p-3 border border-slate-200 dark:border-white/10 text-xs text-slate-500 dark:text-slate-400 italic text-center">
                     No source code was saved for this submission.
                   </div>
                 )}
               </div>
             )}
             {currentStage.type !== 'Online Assessment' && getStageScore(selectedCandidateForReview) && (
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                <h3 className="text-sm font-bold text-slate-900">Interview Feedback & Scores</h3>
+              <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/10 space-y-4">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Interview Feedback & Scores</h3>
                 {getStageSubmissions(selectedCandidateForReview)?.map((sub: any, idx: number) => (
                   <div key={idx} className="space-y-1">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{sub.title}</span>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden text-sm">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{sub.title}</span>
+                    <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg overflow-hidden text-sm">
                       {sub.title === 'Detailed Scores' && typeof sub.code === 'string' && sub.code.startsWith('{') 
                         ? (
-                           <div className="grid grid-cols-1 divide-y divide-slate-100">
+                           <div className="grid grid-cols-1 divide-y divide-slate-100 dark:divide-white/10">
                              {Object.entries(JSON.parse(sub.code)).map(([key, val]) => (
-                               <div key={key} className="flex justify-between items-center p-3 hover:bg-slate-50 transition-colors">
-                                 <span className="capitalize text-slate-600 font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                 <span className="font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded text-xs">{String(val)} / 10</span>
+                               <div key={key} className="flex justify-between items-center p-3 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                 <span className="capitalize text-slate-600 dark:text-slate-300 font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                 <span className="font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-white/10 px-2 py-1 rounded text-xs">{String(val)} / 10</span>
                                </div>
                              ))}
                            </div>
                           )
                         : (
-                          <div className="p-3 text-slate-700 whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                          <div className="p-3 text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">
                             {sub.code || "No notes provided."}
                           </div>
                         )}
@@ -1697,9 +1697,9 @@ export default function StageDetailsPage() {
             )}
             
             {currentStage.type !== 'Online Assessment' && (
-              <div className="border border-purple-100 bg-purple-50/50 rounded-xl p-4">
-                <h3 className="text-sm font-bold text-purple-900 mb-2">Live Technical Interview</h3>
-                <p className="text-xs text-purple-700/80 leading-relaxed mb-4">
+              <div className="border border-purple-100 dark:border-purple-500/20 bg-purple-50/50 dark:bg-purple-500/10 rounded-xl p-4">
+                <h3 className="text-sm font-bold text-purple-900 dark:text-purple-300 mb-2">Live Technical Interview</h3>
+                <p className="text-xs text-purple-700/80 dark:text-purple-400/80 leading-relaxed mb-4">
                   This stage requires a live technical interview. Join the room to interact with the candidate, assign questions, and review their code in real-time.
                 </p>
                 <Link
@@ -1713,11 +1713,11 @@ export default function StageDetailsPage() {
             )}
           </div>
 
-          <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3">
+          <div className="p-6 border-t border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex gap-3">
             <button
               onClick={() => handleUpdateCandidateStatus('Rejected')}
               disabled={isUpdatingStatus || selectedCandidateForReview?.status === 'Rejected'}
-              className="flex-1 px-4 py-2.5 bg-white border border-rose-200 text-rose-600 font-bold rounded-lg hover:bg-rose-50 transition-colors disabled:opacity-50 text-sm"
+              className="flex-1 px-4 py-2.5 bg-white dark:bg-transparent border border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 font-bold rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors disabled:opacity-50 text-sm"
             >
               Reject Candidate
             </button>

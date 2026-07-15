@@ -93,8 +93,15 @@ export default function NotificationDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) fetchNotifications();
+          if (!isOpen) {
+            setIsOpen(true);
+            fetchNotifications().then(() => {
+              // Automatically mark as read
+              handleMarkAllAsRead();
+            });
+          } else {
+            setIsOpen(false);
+          }
         }}
         className="relative p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors focus:outline-none"
         aria-label="Notifications"
@@ -111,14 +118,6 @@ export default function NotificationDropdown() {
         <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#0f172a] rounded-xl shadow-xl border border-slate-200 dark:border-white/10 z-50 overflow-hidden flex flex-col">
           <div className="p-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-white/5">
             <h3 className="font-bold text-slate-900 dark:text-white">Notifications</h3>
-            {unreadCount > 0 && (
-              <button
-                onClick={handleMarkAllAsRead}
-                className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline flex items-center gap-1"
-              >
-                <Check className="w-3 h-3" /> Mark all read
-              </button>
-            )}
           </div>
 
           <div className="max-h-96 overflow-y-auto">

@@ -5,7 +5,7 @@ import Image from "next/image";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Library, Users, Settings, LogOut, Briefcase, Search, Filter, LayoutGrid, ChevronLeft, Code2 } from "lucide-react";
+import { LayoutDashboard, Library, Users, Settings, LogOut, Briefcase, Search, Filter, LayoutGrid, ChevronLeft, Code2, FileCode2 } from "lucide-react";
 import NotificationDropdown from "@/components/common/NotificationDropdown";
 import ThemeToggle from "@/components/common/ThemeToggle";
 
@@ -18,6 +18,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
     { name: "Dashboard", href: "/recruiter", icon: LayoutDashboard },
     { name: "Hiring Drives", href: "/recruiter/drives", icon: Briefcase },
     { name: "Question Bank", href: "/recruiter/questions", icon: Library },
+    { name: "Create Question", href: "/recruiter/questions/new", icon: FileCode2 },
   ];
 
   return (
@@ -52,7 +53,13 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
 
         <nav className={`flex-1 py-8 space-y-1.5 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-2" : "px-4"}`}>
           {navItems.map((item) => {
-            const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/recruiter");
+            let isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/recruiter");
+            
+            // Prevent "Question Bank" from highlighting when on "Create Question"
+            if (item.href === "/recruiter/questions" && pathname.startsWith("/recruiter/questions/new")) {
+              isActive = false;
+            }
+            
             const Icon = item.icon;
             
             return (
@@ -102,26 +109,18 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
           <div className="flex-1 hidden md:block"></div>
 
           {/* Central Search Bar */}
-          <div className="w-full max-w-md hidden sm:flex items-center bg-slate-50 dark:bg-[#0f172a] rounded-xl border border-slate-200 dark:border-white/10 transition-colors">
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                <Search size={18} />
+          <div className="w-full max-w-md hidden sm:flex items-center gap-3">
+            <div className="flex-1 flex items-center bg-slate-50 dark:bg-[#0f172a] rounded-full border border-slate-200 dark:border-white/10 transition-colors pl-2 pr-1 py-1">
+              <div className="relative w-full flex items-center">
+                <input
+                  type="text"
+                  placeholder="Search jobs here"
+                  className="block w-full pl-3 pr-4 py-1.5 bg-transparent border-none text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-0"
+                />
+                <button className="flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-full shrink-0 hover:bg-amber-600 transition-colors">
+                  <Search size={16} strokeWidth={2.5} />
+                </button>
               </div>
-              <input
-                type="text"
-                placeholder="Search drives by title, role, or ID..."
-                className="block w-full pl-11 pr-4 py-2 bg-transparent border-none rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-0"
-              />
-            </div>
-            <div className="flex items-center gap-1 pr-2 shrink-0">
-              <button className="inline-flex items-center gap-2 bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 font-medium py-1 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors text-xs border border-slate-200 dark:border-transparent shadow-sm">
-                <Filter size={14} />
-                Filters
-              </button>
-              <div className="w-px h-5 bg-slate-200 dark:bg-white/10 mx-1"></div>
-              <button className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-white/10">
-                <LayoutGrid size={16} />
-              </button>
             </div>
           </div>
 

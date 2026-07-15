@@ -42,8 +42,8 @@ export default function DriveDetails() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 text-slate-500">
-        <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400">
+        <Loader2 className="animate-spin text-amber-600 mb-4" size={32} />
         <p className="text-lg font-medium">Loading drive details...</p>
       </div>
     );
@@ -51,9 +51,9 @@ export default function DriveDetails() {
 
   if (!assessment) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 text-slate-500">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400">
         <p className="text-lg font-medium mb-4">Drive not found or you are not enrolled.</p>
-        <button onClick={() => router.push("/student")} className="text-blue-600 hover:underline font-medium">
+        <button onClick={() => router.push("/student")} className="text-amber-600 hover:underline font-medium">
           Go back to dashboard
         </button>
       </div>
@@ -92,27 +92,27 @@ export default function DriveDetails() {
     <div className="flex flex-col md:flex-row w-full min-h-[calc(100vh-4rem)]">
         
         {/* Sidebar - Flush Left */}
-        <div className="w-64 flex-shrink-0 hidden md:block border-r border-slate-200 bg-slate-50">
+        <div className="w-64 flex-shrink-0 hidden md:block border-r border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5">
           <div className="sticky top-16 pt-10 pb-12 px-4 h-[calc(100vh-4rem)] overflow-y-auto">
 
              <div className="space-y-0.5">
                   <button 
                     onClick={() => setActiveTab("overview")}
-                    className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'overview' ? 'bg-slate-200 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`}
+                    className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'overview' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:bg-white/10 hover:text-slate-900 dark:text-white'}`}
                   >
                     <LayoutDashboard size={20} />
                     <span className="text-sm">Overview</span>
                   </button>
                   <button 
                     onClick={() => setActiveTab("timeline")}
-                    className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'timeline' ? 'bg-slate-200 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`}
+                    className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'timeline' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:bg-white/10 hover:text-slate-900 dark:text-white'}`}
                   >
                     <Activity size={20} />
                     <span className="text-sm">Timeline</span>
                   </button>
                   
-                  <div className="pt-3 pb-2 mt-2 border-t border-slate-200">
-                     <span className="px-3 text-slate-900 font-semibold text-base">Rounds</span>
+                  <div className="pt-3 pb-2 mt-2 border-t border-slate-200 dark:border-white/10">
+                     <span className="px-3 text-slate-900 dark:text-white font-semibold text-base">Rounds</span>
                   </div>
                   
                   {roundSteps.map((step, idx) => {
@@ -127,7 +127,7 @@ export default function DriveDetails() {
                      <button 
                        key={idx} 
                        onClick={() => setActiveTab(tabId)}
-                       className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === tabId ? 'bg-slate-200 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`}
+                       className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === tabId ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:bg-white/10 hover:text-slate-900 dark:text-white'}`}
                      >
                        <Icon size={20} />
                        <span className="text-sm truncate">{step.name}</span>
@@ -135,11 +135,11 @@ export default function DriveDetails() {
                      );
                   })}
                   
-                  <div className="pt-3 pb-2 mt-2 border-t border-slate-200"></div>
+                  <div className="pt-3 pb-2 mt-2 border-t border-slate-200 dark:border-white/10"></div>
                   
                   <button 
                     onClick={() => setActiveTab("final-result")}
-                    className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'final-result' ? 'bg-slate-200 text-slate-900' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'}`}
+                    className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl font-medium transition-colors ${activeTab === 'final-result' ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:bg-white/10 hover:text-slate-900 dark:text-white'}`}
                   >
                     <Trophy size={20} />
                     <span className="text-sm">Final Result</span>
@@ -152,16 +152,16 @@ export default function DriveDetails() {
         <div className="flex-1 flex flex-col min-w-0 pb-16">
           
           {/* Mobile Navigation (Horizontal Tabs) */}
-          <div className="md:hidden overflow-x-auto whitespace-nowrap px-4 py-4 bg-slate-50 border-b border-slate-200 flex gap-2 shadow-inner">
+          <div className="md:hidden overflow-x-auto whitespace-nowrap px-4 py-4 bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 flex gap-2 shadow-inner">
             <button 
               onClick={() => setActiveTab("overview")}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-slate-900 text-white shadow-md' : 'bg-white dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:bg-white/5'}`}
             >
               <LayoutDashboard size={16} /> Overview
             </button>
             <button 
               onClick={() => setActiveTab("timeline")}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === 'timeline' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === 'timeline' ? 'bg-slate-900 text-white shadow-md' : 'bg-white dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:bg-white/5'}`}
             >
               <Activity size={16} /> Timeline
             </button>
@@ -178,7 +178,7 @@ export default function DriveDetails() {
                <button 
                  key={idx} 
                  onClick={() => setActiveTab(tabId)}
-                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === tabId ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}`}
+                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === tabId ? 'bg-slate-900 text-white shadow-md' : 'bg-white dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:bg-white/5'}`}
                >
                  <Icon size={16} /> {step.name}
                </button>
@@ -187,7 +187,7 @@ export default function DriveDetails() {
             
             <button 
               onClick={() => setActiveTab("final-result")}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === 'final-result' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === 'final-result' ? 'bg-slate-900 text-white shadow-md' : 'bg-white dark:bg-[#0f172a] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:bg-white/5'}`}
             >
               <Trophy size={16} /> Final Result
             </button>
@@ -198,34 +198,34 @@ export default function DriveDetails() {
             {activeTab === 'overview' && (
               <>
                 {/* Hero Section */}
-                <div id="overview" className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                <div id="overview" className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-3xl p-8 md:p-10 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
                   
                   <div className="relative z-10 flex flex-col md:flex-row md:justify-between md:items-start gap-8">
                     
                     <div className="space-y-6">
                       <div>
-                        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900">
+                        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900 dark:text-white">
                           {drive.title}
                         </h1>
-                        <div className="flex items-center gap-2 text-slate-600">
+                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                           <Building2 size={18} />
                           <span className="font-semibold text-lg">{drive.department || "Organization"}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="text-slate-500 font-medium">Status:</span>
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${drive.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${drive.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-500'}`}></span>
+                        <span className="text-slate-500 dark:text-slate-400 font-medium">Status:</span>
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold ${drive.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${drive.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-50 dark:bg-white/50'}`}></span>
                           {drive.status}
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-slate-600 font-medium">
+                      <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-slate-600 dark:text-slate-400 font-medium">
                         {startDate && (
                           <div className="flex items-center gap-2">
-                            <Calendar size={18} className="text-blue-500" />
+                            <Calendar size={18} className="text-amber-500" />
                             <span>{startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           </div>
                         )}
@@ -247,21 +247,21 @@ export default function DriveDetails() {
                             Join Live Interview
                           </Link>
                         ) : (
-                          <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95">
+                          <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-md shadow-amber-500/20 transition-all hover:scale-105 active:scale-95">
                             Start Assessment
                           </Link>
                         )
                       ) : currentStageIndex > 0 && currentStageIndex < pipelineSteps.length - 1 ? (
-                        <Link href="/editor" className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 px-6 rounded-xl text-center transition-all">
+                        <Link href="/editor" className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3.5 px-6 rounded-xl text-center transition-all">
                           Take Demo Assessment
                         </Link>
                       ) : (
-                        <button disabled className="bg-slate-100 text-slate-400 font-bold py-3.5 px-6 rounded-xl text-center cursor-not-allowed border border-slate-200">
+                        <button disabled className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-400 font-bold py-3.5 px-6 rounded-xl text-center cursor-not-allowed border border-slate-200 dark:border-slate-700">
                           Assessment Locked
                         </button>
                       )}
                       {currentStageIndex === pipelineSteps.length - 1 && (
-                        <button className="bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold py-3 px-6 rounded-xl text-center transition">
+                        <button className="bg-white dark:bg-[#0f172a] border-2 border-slate-200 dark:border-white/10 hover:border-slate-300 text-slate-700 dark:text-slate-300 font-bold py-3 px-6 rounded-xl text-center transition">
                           View Result
                         </button>
                       )}
@@ -272,46 +272,46 @@ export default function DriveDetails() {
 
                 {/* 3. Current Round Summary */}
                 {currentStageIndex > 0 && currentStageIndex < pipelineSteps.length - 1 && (
-                  <div className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
+                  <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
                     <div className="space-y-1">
-                      <h2 className="text-2xl font-bold text-slate-900">Current Round</h2>
-                      <p className="text-slate-500 font-medium">Your currently active assessment round.</p>
+                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Current Round</h2>
+                      <p className="text-slate-500 dark:text-slate-400 font-medium">Your currently active assessment round.</p>
                     </div>
                     
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-slate-700 space-y-6 w-full lg:w-3/4">
-                      <div className="flex justify-between items-center border-b border-slate-200 pb-4">
-                         <h3 className="text-xl font-bold text-slate-900">{pipelineSteps[currentStageIndex].name}</h3>
-                         <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">Active</span>
+                    <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-6 text-slate-700 dark:text-slate-300 space-y-6 w-full lg:w-3/4">
+                      <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-4">
+                         <h3 className="text-xl font-bold text-slate-900 dark:text-white">{pipelineSteps[currentStageIndex].name}</h3>
+                         <span className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">Active</span>
                       </div>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-blue-500">
+                           <div className="w-10 h-10 rounded-full bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 flex items-center justify-center text-amber-500">
                              <Calendar size={18} />
                            </div>
                            <div>
-                             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Date</div>
-                             <div className="font-semibold text-slate-900">{pipelineSteps[currentStageIndex].startDate ? new Date(pipelineSteps[currentStageIndex].startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'To be determined'}</div>
+                             <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Date</div>
+                             <div className="font-semibold text-slate-900 dark:text-white">{pipelineSteps[currentStageIndex].startDate ? new Date(pipelineSteps[currentStageIndex].startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'To be determined'}</div>
                            </div>
                         </div>
                         
                         <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-amber-500">
+                           <div className="w-10 h-10 rounded-full bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 flex items-center justify-center text-amber-500">
                              <Clock size={18} />
                            </div>
                            <div>
-                             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Time</div>
-                             <div className="font-semibold text-slate-900">{pipelineSteps[currentStageIndex].startDate ? new Date(pipelineSteps[currentStageIndex].startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD'}</div>
+                             <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Time</div>
+                             <div className="font-semibold text-slate-900 dark:text-white">{pipelineSteps[currentStageIndex].startDate ? new Date(pipelineSteps[currentStageIndex].startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD'}</div>
                            </div>
                         </div>
 
                         <div className="flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-emerald-500">
+                           <div className="w-10 h-10 rounded-full bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 flex items-center justify-center text-emerald-500">
                              <Hourglass size={18} />
                            </div>
                            <div>
-                             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Duration</div>
-                             <div className="font-semibold text-slate-900">{pipelineSteps[currentStageIndex].duration || '60 mins'}</div>
+                             <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Duration</div>
+                             <div className="font-semibold text-slate-900 dark:text-white">{pipelineSteps[currentStageIndex].duration || '60 mins'}</div>
                            </div>
                         </div>
                       </div>
@@ -323,7 +323,7 @@ export default function DriveDetails() {
                               Join Live Interview <ChevronRight size={18} />
                             </Link>
                           ) : (
-                            <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
+                            <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
                               Start Assessment <ChevronRight size={18} />
                             </Link>
                           )
@@ -339,20 +339,20 @@ export default function DriveDetails() {
 
                 {/* 9. Recruiter Announcements */}
                 {drive.announcements && drive.announcements.length > 0 && (
-                  <div className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
+                  <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
                     <div className="space-y-1">
-                      <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                        <Megaphone className="text-blue-500" /> Recruiter Announcements
+                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <Megaphone className="text-amber-500" /> Recruiter Announcements
                       </h2>
                     </div>
                     
-                    <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-6 space-y-4 w-full">
+                    <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-6 space-y-4 w-full">
                        {drive.announcements.map((ann: any, idx: number) => (
-                         <div key={idx} className="flex items-start gap-4 p-3 bg-white rounded-xl shadow-sm border border-slate-100">
-                            <div className="mt-0.5"><div className="w-2 h-2 rounded-full bg-blue-500"></div></div>
+                         <div key={idx} className="flex items-start gap-4 p-3 bg-white dark:bg-[#0f172a] rounded-xl shadow-sm border border-slate-100 dark:border-white/5">
+                            <div className="mt-0.5"><div className="w-2 h-2 rounded-full bg-amber-500"></div></div>
                             <div>
-                              <div className="font-semibold text-slate-800">{ann.title}</div>
-                              <div className="text-sm text-slate-500 mt-1">{ann.description}</div>
+                              <div className="font-semibold text-slate-800 dark:text-slate-200">{ann.title}</div>
+                              <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">{ann.description}</div>
                             </div>
                          </div>
                        ))}
@@ -365,13 +365,13 @@ export default function DriveDetails() {
             {activeTab === 'timeline' && (
               <>
                 {/* Drive Progress Section */}
-                <div id="timeline" className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-sm">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">Drive Progress</h2>
-                  <p className="text-slate-500 mb-10 font-medium">Track your current stage in the hiring pipeline.</p>
+                <div id="timeline" className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-3xl p-8 md:p-10 shadow-sm">
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Drive Progress</h2>
+                  <p className="text-slate-500 dark:text-slate-400 mb-10 font-medium">Track your current stage in the hiring pipeline.</p>
 
                   <div className="relative">
                     {/* Vertical Line */}
-                    <div className="absolute left-[15px] top-4 bottom-4 w-[2px] bg-slate-100 z-0"></div>
+                    <div className="absolute left-[15px] top-4 bottom-4 w-[2px] bg-slate-100 dark:bg-white/10 z-0"></div>
 
                     <div className="space-y-4 relative z-10">
                       {pipelineSteps.map((step, index) => {
@@ -383,20 +383,20 @@ export default function DriveDetails() {
                           <div key={index} className="flex gap-4 relative group">
                             
                             {/* Status Indicator */}
-                            <div className="flex-shrink-0 mt-0.5 relative bg-white">
+                            <div className="flex-shrink-0 mt-0.5 relative bg-white dark:bg-[#0f172a]">
                               {stepState === "passed" && (
                                 <div className="w-8 h-8 bg-emerald-50 border-2 border-emerald-500 rounded-full flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-sm">
                                   <CheckCircle2 size={16} className="text-emerald-600" />
                                 </div>
                               )}
                               {stepState === "active" && (
-                                <div className="w-8 h-8 bg-blue-50 border-2 border-blue-600 rounded-full flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-sm">
-                                  <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                                <div className="w-8 h-8 bg-amber-50 dark:bg-amber-500/20 border-2 border-amber-600 dark:border-amber-500 rounded-full flex items-center justify-center relative z-10 transition-transform group-hover:scale-110 shadow-sm">
+                                  <div className="w-2 h-2 bg-amber-600 rounded-full animate-pulse"></div>
                                 </div>
                               )}
                               {stepState === "locked" && (
-                                <div className="w-8 h-8 bg-white border-2 border-slate-200 rounded-full flex items-center justify-center relative z-10 transition-transform group-hover:scale-110">
-                                  <div className="w-2 h-2 bg-slate-200 rounded-full"></div>
+                                <div className="w-8 h-8 bg-white dark:bg-[#0f172a] border-2 border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center relative z-10 transition-transform group-hover:scale-110">
+                                  <div className="w-2 h-2 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
                                 </div>
                               )}
                             </div>
@@ -404,24 +404,24 @@ export default function DriveDetails() {
                             {/* Step Content */}
                             <div className={`flex-1 p-4 rounded-xl border transition-all ${
                               stepState === 'active' 
-                                ? 'bg-blue-50/50 border-blue-200 shadow-sm shadow-blue-500/5' 
+                                ? 'bg-amber-50/50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20 shadow-sm shadow-amber-500/5 dark:shadow-none' 
                                 : stepState === 'passed'
-                                ? 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-sm'
-                                : 'bg-slate-50/50 border-slate-100 opacity-60'
+                                ? 'bg-white dark:bg-[#0f172a] border-slate-100 dark:border-white/5 hover:border-slate-200 dark:border-white/10 hover:shadow-sm'
+                                : 'bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5 opacity-60'
                             }`}>
                               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                                 <div>
                                   <h3 className={`text-base font-bold ${
-                                    stepState === 'active' ? 'text-blue-900' :
-                                    stepState === 'passed' ? 'text-slate-900' :
-                                    'text-slate-500'
+                                    stepState === 'active' ? 'text-amber-900 dark:text-amber-400' :
+                                    stepState === 'passed' ? 'text-slate-900 dark:text-white' :
+                                    'text-slate-500 dark:text-slate-400'
                                   }`}>
                                     {step.name}
                                   </h3>
                                   <p className={`text-xs mt-0.5 font-semibold ${
-                                    stepState === 'active' ? 'text-blue-600' :
+                                    stepState === 'active' ? 'text-amber-600 dark:text-amber-500' :
                                     stepState === 'passed' ? 'text-emerald-600' :
-                                    'text-slate-400'
+                                    'text-slate-400 dark:text-slate-500'
                                   }`}>
                                     {stepState === 'active' ? 'Current Stage' :
                                      stepState === 'passed' ? 'Completed' : 'Locked'}
@@ -429,7 +429,7 @@ export default function DriveDetails() {
                                 </div>
                                 
                                 {stepState === 'active' && step.type !== 'system' && (
-                                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider self-start">
+                                  <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider self-start">
                                     Action Required
                                   </span>
                                 )}
@@ -444,16 +444,16 @@ export default function DriveDetails() {
                 </div>
 
                 {/* 4. Round Timeline Table */}
-                <div className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
+                <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
                    <div className="space-y-1">
-                     <h2 className="text-2xl font-bold text-slate-900">Round Timeline Table</h2>
-                     <p className="text-slate-500 font-medium">Summary of all rounds and their status.</p>
+                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Round Timeline Table</h2>
+                     <p className="text-slate-500 dark:text-slate-400 font-medium">Summary of all rounds and their status.</p>
                    </div>
                    
                    <div className="w-full text-left text-sm mt-6 overflow-x-auto">
                      <table className="w-full min-w-[500px]">
                        <thead>
-                         <tr className="text-slate-400 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
+                         <tr className="text-slate-400 dark:text-slate-500 text-xs uppercase tracking-wider font-bold border-b border-slate-200 dark:border-white/10">
                             <th className="pb-4 font-bold text-left">Round</th>
                             <th className="pb-4 font-bold text-left">Status</th>
                             <th className="pb-4 font-bold text-left">Date</th>
@@ -468,15 +468,15 @@ export default function DriveDetails() {
                             
                             return (
                                <tr key={index} className="group">
-                                  <td className="py-5 font-semibold text-slate-900">{step.name}</td>
+                                  <td className="py-5 font-semibold text-slate-900 dark:text-white">{step.name}</td>
                                   <td className="py-5">
                                      <div className="flex items-center gap-2 font-medium">
-                                       {stepState === "passed" && <><div className="bg-emerald-50 text-emerald-600 p-1.5 rounded-md"><CheckCircle2 size={16}/></div> <span className="text-slate-700">Passed</span></>}
-                                       {stepState === "active" && <><div className="bg-blue-50 text-blue-600 p-1.5 rounded-md"><Hourglass size={16}/></div> <span className="text-slate-700">Upcoming</span></>}
-                                       {stepState === "locked" && <><div className="bg-slate-50 text-slate-400 p-1.5 rounded-md"><Lock size={16}/></div> <span className="text-slate-400">Locked</span></>}
+                                       {stepState === "passed" && <><div className="bg-emerald-50 text-emerald-600 p-1.5 rounded-md"><CheckCircle2 size={16}/></div> <span className="text-slate-700 dark:text-slate-300">Passed</span></>}
+                                       {stepState === "active" && <><div className="bg-amber-50 text-amber-600 p-1.5 rounded-md"><Hourglass size={16}/></div> <span className="text-slate-700 dark:text-slate-300">Upcoming</span></>}
+                                       {stepState === "locked" && <><div className="bg-slate-50 dark:bg-white/5 text-slate-400 dark:text-slate-500 p-1.5 rounded-md"><Lock size={16}/></div> <span className="text-slate-400 dark:text-slate-500">Locked</span></>}
                                      </div>
                                   </td>
-                                  <td className="py-5 text-slate-500 font-medium">
+                                  <td className="py-5 text-slate-500 dark:text-slate-400 font-medium">
                                      {step.startDate ? new Date(step.startDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' }) : '-'}
                                   </td>
                                </tr>
@@ -499,31 +499,31 @@ export default function DriveDetails() {
 
                   return (
                     <div className="space-y-8">
-                      <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2">{round.name}</h2>
-                        <p className="text-slate-500 font-medium mb-6">Details for this specific round.</p>
+                      <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-3xl p-8 shadow-sm">
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">{round.name}</h2>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium mb-6">Details for this specific round.</p>
                         
                         {isAssessment ? (
                           <div className="space-y-8">
-                            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-6 w-full lg:w-3/4">
+                            <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-6 space-y-6 w-full lg:w-3/4">
                               <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                  <div className="text-slate-400 text-xs font-bold uppercase mb-1">Format</div>
-                                  <div className="font-semibold text-slate-900">{round.config?.format || "Standard Assessment"}</div>
+                                <div className="bg-white dark:bg-[#0f172a] p-4 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
+                                  <div className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase mb-1">Format</div>
+                                  <div className="font-semibold text-slate-900 dark:text-white">{round.config?.format || "Standard Assessment"}</div>
                                 </div>
-                                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                  <div className="text-slate-400 text-xs font-bold uppercase mb-1">Time Limit</div>
-                                  <div className="font-semibold text-slate-900">{round.duration || '90'} mins</div>
+                                <div className="bg-white dark:bg-[#0f172a] p-4 rounded-xl border border-slate-100 dark:border-white/5 shadow-sm">
+                                  <div className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase mb-1">Time Limit</div>
+                                  <div className="font-semibold text-slate-900 dark:text-white">{round.duration || '90'} mins</div>
                                 </div>
                               </div>
                               
                               <div className="pt-2">
-                                <div className="text-slate-500 font-semibold mb-3">Allowed Languages</div>
+                                <div className="text-slate-500 dark:text-slate-400 font-semibold mb-3">Allowed Languages</div>
                                 <div className="flex flex-wrap gap-2">
                                   {round.config?.allowedLanguages?.map((lang: string) => (
-                                    <span key={lang} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 shadow-sm">{lang}</span>
+                                    <span key={lang} className="px-3 py-1 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">{lang}</span>
                                   )) || (
-                                    <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 shadow-sm">All</span>
+                                    <span className="px-3 py-1 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm">All</span>
                                   )}
                                 </div>
                               </div>
@@ -549,7 +549,7 @@ export default function DriveDetails() {
                             </div>
                           </div>
                         ) : (
-                          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-slate-700 w-full lg:w-3/4">
+                          <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-6 text-slate-700 dark:text-slate-300 w-full lg:w-3/4">
                             <p>Information for this round will be provided closer to the start date.</p>
                           </div>
                         )}
@@ -563,25 +563,25 @@ export default function DriveDetails() {
             {activeTab === 'final-result' && (
               <>
                 {/* 8. My Performance */}
-                <div id="final-result" className="bg-white border border-slate-200 rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
+                <div id="final-result" className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-3xl p-8 md:p-10 shadow-sm space-y-6">
                   <div className="space-y-1">
-                    <h2 className="text-2xl font-bold text-slate-900">My Performance</h2>
-                    <p className="text-slate-500 font-medium">Available after completing rounds.</p>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">My Performance</h2>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium">Available after completing rounds.</p>
                   </div>
                   
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 w-full lg:w-3/4">
+                  <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-6 w-full lg:w-3/4">
                     <div className="grid grid-cols-3 gap-4 text-center divide-x divide-slate-200">
                       <div>
-                        <div className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-2">Score</div>
-                        <div className="text-3xl font-extrabold text-slate-900">{assessment.score || "-"}</div>
+                        <div className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Score</div>
+                        <div className="text-3xl font-extrabold text-slate-900 dark:text-white">{assessment.score || "-"}</div>
                       </div>
                       <div>
-                        <div className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-2">Rank</div>
-                        <div className="text-3xl font-extrabold text-slate-900">{assessment.rank || "-"}</div>
+                        <div className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Rank</div>
+                        <div className="text-3xl font-extrabold text-slate-900 dark:text-white">{assessment.rank || "-"}</div>
                       </div>
                       <div>
-                        <div className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-2">Result</div>
-                        <div className={`text-2xl font-extrabold mt-1 ${assessment.status === 'Passed' ? 'text-emerald-500' : assessment.status === 'Rejected' ? 'text-red-500' : 'text-slate-900'}`}>{assessment.status || "In Review"}</div>
+                        <div className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wider mb-2">Result</div>
+                        <div className={`text-2xl font-extrabold mt-1 ${assessment.status === 'Passed' ? 'text-emerald-500' : assessment.status === 'Rejected' ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>{assessment.status || "In Review"}</div>
                       </div>
                     </div>
                   </div>

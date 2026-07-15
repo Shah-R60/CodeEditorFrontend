@@ -71,15 +71,15 @@ export default function FinalSelectionPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <CheckCircle className="text-emerald-500" size={24} /> Qualified Candidates
           </h2>
-          <p className="text-sm text-slate-500 mt-1">Candidates who successfully cleared all rounds of this hiring drive.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Candidates who successfully cleared all rounds of this hiring drive.</p>
         </div>
         <button 
           onClick={handleExportCSV}
           disabled={finalCandidates.length === 0}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           <Download size={16} />
           Export Qualified Candidates
@@ -87,7 +87,7 @@ export default function FinalSelectionPage() {
       </div>
 
       {/* Summary */}
-      <div className="bg-slate-900 text-white rounded-xl p-6 shadow-md flex items-center justify-between">
+      <div className="bg-slate-900 dark:bg-[#0f172a] border border-transparent dark:border-white/10 text-white rounded-xl p-6 shadow-md flex items-center justify-between">
         <div>
           <div className="text-slate-400 text-sm font-medium mb-1">Qualified Candidates</div>
           <div className="text-3xl font-bold text-emerald-400">{finalCandidates.length}</div>
@@ -100,10 +100,10 @@ export default function FinalSelectionPage() {
       </div>
 
       {/* Candidates List */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+            <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 font-semibold">
               <tr>
                 <th className="px-6 py-4">Candidate</th>
                 <th className="px-6 py-4">Overall Score</th>
@@ -111,32 +111,32 @@ export default function FinalSelectionPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {finalCandidates.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
-                    <Award size={32} className="mx-auto text-slate-300 mb-4" />
-                    <div className="font-semibold text-slate-900 text-base mb-1">No candidates have completed all hiring rounds yet.</div>
-                    <div className="text-sm text-slate-500 mb-6">Candidates who pass every round will automatically appear here.</div>
-                    <Link href={`/recruiter/drives/${jobId}/pipeline`} className="inline-flex items-center justify-center bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors px-5 py-2 rounded-lg font-semibold text-sm shadow-sm">
+                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                    <Award size={32} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+                    <div className="font-semibold text-slate-900 dark:text-white text-base mb-1">No candidates have completed all hiring rounds yet.</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400 mb-6">Candidates who pass every round will automatically appear here.</div>
+                    <Link href={`/recruiter/drives/${jobId}/pipeline`} className="inline-flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors px-5 py-2 rounded-lg font-semibold text-sm shadow-sm">
                       Go to Pipeline
                     </Link>
                   </td>
                 </tr>
               ) : finalCandidates.map((c: any) => (
-                <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-semibold text-slate-900">{c.name}</div>
-                    <div className="text-slate-500 text-xs mt-0.5">{c.email}</div>
+                    <div className="font-semibold text-slate-900 dark:text-white">{c.name}</div>
+                    <div className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{c.email}</div>
                   </td>
-                  <td className="px-6 py-4 font-bold text-emerald-600">{c.score || '92'}</td>
-                  <td className="px-6 py-4 text-slate-500">
+                  <td className="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400">{c.score || '92'}</td>
+                  <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
                     {new Date(c.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <button 
                       onClick={() => setSelectedCandidate(c)}
-                      className="bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors px-4 py-1.5 rounded-lg font-medium text-sm"
+                      className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors px-4 py-1.5 rounded-lg font-medium text-sm"
                     >
                       View Results
                     </button>

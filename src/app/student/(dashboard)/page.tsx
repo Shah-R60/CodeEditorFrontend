@@ -25,10 +25,11 @@ export default function StudentDashboard() {
         
         if (json.success) {
           // Filter out active and completed assessments
-          const active = json.data.filter((c: any) => c.status !== 'Passed' && c.status !== 'Rejected' && c.hiringDrive?.status === 'Active');
-          const completed = json.data.filter((c: any) => c.status === 'Passed' || c.status === 'Rejected');
-          setAssessments(active);
-          setCompletedAssessments(completed);
+          const sortedData = [...json.data].reverse(); // Latest to oldest
+          const active = sortedData.filter((c: any) => c.status !== 'Passed' && c.status !== 'Rejected' && c.hiringDrive?.status === 'Active');
+          const completed = sortedData.filter((c: any) => c.status === 'Passed' || c.status === 'Rejected');
+          setAssessments(active.slice(0, 3));
+          setCompletedAssessments(completed.slice(0, 3));
         }
       } catch (err) {
         console.error("Failed to fetch assessments", err);
@@ -44,23 +45,23 @@ export default function StudentDashboard() {
     <div className="max-w-7xl w-full mx-auto px-4 md:px-12 py-10 space-y-10">
       {/* Welcome Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome back!</h1>
-        <p className="text-slate-500 mt-2 text-lg">Ready to showcase your coding skills?</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Welcome back!</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">Ready to showcase your coding skills?</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Practice/Sandbox Card */}
-        <div className="col-span-1 md:col-span-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-8 text-white shadow-lg shadow-emerald-500/20 flex flex-col md:flex-row items-center justify-between">
+        <div className="col-span-1 md:col-span-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-8 text-white shadow-lg shadow-amber-500/20 dark:shadow-none flex flex-col md:flex-row items-center justify-between">
           <div className="mb-6 md:mb-0">
             <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-              <Laptop className="text-emerald-100" /> Practice Sandbox
+              <Laptop className="text-amber-100" /> Practice Sandbox
             </h2>
-            <p className="text-emerald-50 max-w-xl">
+            <p className="text-amber-50 max-w-xl">
               Hone your algorithmic skills in our zero-distraction IDE. Practice data structures, dynamic programming, and logic puzzles at your own pace before taking an assessment.
             </p>
           </div>
-          <Link href="/editor" className="whitespace-nowrap px-6 py-3 bg-white text-emerald-600 hover:bg-emerald-50 font-bold rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+          <Link href="/editor" className="whitespace-nowrap px-6 py-3 bg-white dark:bg-[#0f172a] text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-[#0f172a]/90 font-bold rounded-xl shadow-sm transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
             Open CodeEditor <Code size={18} />
           </Link>
         </div>
@@ -68,15 +69,15 @@ export default function StudentDashboard() {
         {/* Active Assessments */}
         <div className="col-span-1 md:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Clock className="text-blue-500" /> Active Assessments
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Clock className="text-amber-500" /> Active Assessments
             </h2>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden transition-colors">
             {loading ? (
-              <div className="p-8 text-center text-slate-500 flex flex-col items-center justify-center">
-                <Loader2 className="animate-spin text-blue-500 mb-2" size={24} />
+              <div className="p-8 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center justify-center">
+                <Loader2 className="animate-spin text-amber-500 mb-2" size={24} />
                 <p>Loading your active assessments...</p>
               </div>
             ) : assessments.length > 0 ? (
@@ -96,38 +97,38 @@ export default function StudentDashboard() {
 
                 if (!startDate) {
                   actionElement = (
-                    <span className="flex items-center gap-2 text-sm font-bold text-slate-400 cursor-not-allowed">
+                    <span className="flex items-center gap-2 text-sm font-bold text-slate-400 dark:text-slate-500 cursor-not-allowed">
                       Upcoming Assessment <Clock size={16} />
                     </span>
                   );
                 } else if (startDate > now) {
                   const formattedTime = startDate.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
                   actionElement = (
-                    <span className="flex items-center gap-2 text-sm font-bold text-slate-500 cursor-not-allowed">
+                    <span className="flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 cursor-not-allowed">
                       Starts: {formattedTime} <Clock size={16} />
                     </span>
                   );
                 } else {
                   actionElement = (
-                    <Link href="/editor" className="flex items-center gap-2 text-sm font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
+                    <Link href="/editor" className="flex items-center gap-2 text-sm font-bold text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform">
                       Start Assessment <ChevronRight size={16} />
                     </Link>
                   );
                 }
 
                 return (
-                  <div key={assessment.id} onClick={() => router.push(`/student/drives/${drive?.id}`)} className="p-6 border-b border-slate-100 hover:bg-slate-50 transition cursor-pointer group">
+                  <div key={assessment.id} onClick={() => router.push(`/student/drives/${drive?.id}`)} className="p-6 border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition cursor-pointer group">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition">{drive?.title}</h3>
-                        <p className="text-slate-500 text-sm mt-1">{drive?.department}</p>
+                        <h3 className="font-bold text-lg text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">{drive?.title}</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{drive?.department}</p>
                       </div>
-                      <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">Active</span>
+                      <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-bold px-3 py-1 rounded-full">Active</span>
                     </div>
-                    <div className="mt-4 flex items-center gap-4 text-sm text-slate-500">
+                    <div className="mt-4 flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                       <span className="flex items-center gap-1"><Clock size={16} /> {duration} mins</span>
                       <span className="flex items-center gap-1"><Code size={16} /> {totalRounds} Tasks</span>
-                      <span className="flex items-center gap-1 ml-auto font-medium text-slate-700">Status: {assessment.status}</span>
+                      <span className="flex items-center gap-1 ml-auto font-medium text-slate-700 dark:text-slate-300">Status: {assessment.status}</span>
                     </div>
                     <div className="mt-6 flex justify-end">
                       {actionElement}
@@ -136,7 +137,7 @@ export default function StudentDashboard() {
                 );
               })
             ) : (
-              <div className="p-8 text-center text-slate-500 bg-slate-50/50">
+              <div className="p-8 text-center text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-white/5">
                 No active assessments at this time.
               </div>
             )}
@@ -145,7 +146,7 @@ export default function StudentDashboard() {
 
         {/* Stats / Past Assessments */}
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
              <Trophy className="text-yellow-500" /> Your Stats
           </h2>
           
@@ -159,20 +160,20 @@ export default function StudentDashboard() {
               : 0;
 
             return (
-              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 grid grid-cols-2 gap-4">
-                <div className="p-4 bg-slate-50 rounded-xl text-center">
-                  <div className="text-3xl font-extrabold text-emerald-600">{completedCount}</div>
-                  <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Completed</div>
+              <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm p-6 grid grid-cols-2 gap-4 transition-colors">
+                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl text-center">
+                  <div className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{completedCount}</div>
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Completed</div>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-xl text-center">
-                  <div className="text-3xl font-extrabold text-blue-600">{avgScore}%</div>
-                  <div className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">Avg Score</div>
+                <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-xl text-center">
+                  <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400">{avgScore}%</div>
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Avg Score</div>
                 </div>
               </div>
             );
           })()}
 
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2 mt-8">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mt-8">
             <CheckCircle2 className="text-emerald-500" /> Completed
           </h2>
           
@@ -181,20 +182,20 @@ export default function StudentDashboard() {
                completedAssessments.map(assessment => {
                  const drive = assessment.hiringDrive;
                  return (
-                   <div key={assessment.id} className="bg-white border border-slate-200 rounded-xl p-4 flex justify-between items-center hover:border-slate-300 transition cursor-default">
+                   <div key={assessment.id} className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 flex justify-between items-center hover:border-slate-300 dark:hover:border-white/20 transition cursor-default">
                      <div>
-                       <div className="font-semibold text-slate-900 text-sm">{drive?.title}</div>
-                       <div className="text-xs text-slate-500">{drive?.department}</div>
+                       <div className="font-semibold text-slate-900 dark:text-white text-sm">{drive?.title}</div>
+                       <div className="text-xs text-slate-500 dark:text-slate-400">{drive?.department}</div>
                      </div>
                      <div className="text-right">
-                       <div className={`font-bold ${assessment.status === 'Passed' ? 'text-emerald-600' : 'text-rose-600'}`}>{assessment.score || assessment.status}</div>
-                       <div className="text-xs text-slate-400">{new Date(assessment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                       <div className={`font-bold ${assessment.status === 'Passed' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{assessment.score || assessment.status}</div>
+                       <div className="text-xs text-slate-400 dark:text-slate-500">{new Date(assessment.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                      </div>
                    </div>
                  );
                })
              ) : (
-               <div className="p-6 text-center text-slate-500 bg-slate-50/50 rounded-xl border border-slate-200 border-dashed">
+               <div className="p-6 text-center text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/10 border-dashed">
                  No completed assessments yet.
                </div>
              )}

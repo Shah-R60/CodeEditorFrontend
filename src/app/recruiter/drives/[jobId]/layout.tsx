@@ -1,9 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { LayoutDashboard, Map, Users, CheckCircle, ArrowLeft, Loader2, GitMerge, Search, Filter, LayoutGrid } from "lucide-react";
-import { useEffect, useState } from "react";
 import NotificationDropdown from "@/components/common/NotificationDropdown";
 import ThemeToggle from "@/components/common/ThemeToggle";
 
@@ -74,11 +75,17 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#070b14] flex font-sans text-slate-900 dark:text-white selection:bg-amber-100 dark:selection:bg-amber-900/30">
       {/* Sidebar */}
-      <aside className="w-64 bg-white dark:bg-[#0f172a] border-r border-slate-200 dark:border-white/10 flex flex-col fixed inset-y-0 z-10 transition-colors">
+      <aside className="w-64 bg-white dark:bg-[#0f172a] border-r border-slate-200 dark:border-transparent flex flex-col fixed inset-y-0 z-10 transition-colors">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-white/10">
-          <Link href="/recruiter/drives" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition font-medium text-sm">
-            <ArrowLeft size={16} />
-            Back to Drives
+          <Link href="/recruiter" className="flex items-center hover:opacity-90 transition">
+            <Image 
+              src="/logo.png" 
+              alt="CodeCanvas Logo" 
+              width={160} 
+              height={40} 
+              className="object-contain"
+              priority
+            />
           </Link>
         </div>
 
@@ -178,32 +185,22 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
           
           {/* Left Spacer for Centering / Page Title */}
           <div className="flex-1 hidden md:block">
-            <div className="text-lg font-semibold text-slate-800 dark:text-white">
-              {currentNav}
-            </div>
+            {/* Page title removed as requested */}
           </div>
 
           {/* Central Search Bar */}
-          <div className="w-full max-w-md hidden sm:flex items-center bg-slate-50 dark:bg-[#0f172a] rounded-xl border border-slate-200 dark:border-white/10 transition-colors">
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                <Search size={18} />
+          <div className="w-full max-w-md hidden sm:flex items-center gap-3">
+            <div className="flex-1 flex items-center bg-slate-50 dark:bg-[#0f172a] rounded-full border border-slate-200 dark:border-white/10 transition-colors pl-2 pr-1 py-1">
+              <div className="relative w-full flex items-center">
+                <input
+                  type="text"
+                  placeholder="Search jobs here"
+                  className="block w-full pl-3 pr-4 py-1.5 bg-transparent border-none text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-0"
+                />
+                <button className="flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-full shrink-0 hover:bg-amber-600 transition-colors">
+                  <Search size={16} strokeWidth={2.5} />
+                </button>
               </div>
-              <input
-                type="text"
-                placeholder="Search candidates by name, email..."
-                className="block w-full pl-11 pr-4 py-2 bg-transparent border-none rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-0"
-              />
-            </div>
-            <div className="flex items-center gap-1 pr-2 shrink-0">
-              <button className="inline-flex items-center gap-2 bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 font-medium py-1 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors text-xs border border-slate-200 dark:border-transparent shadow-sm">
-                <Filter size={14} />
-                Filters
-              </button>
-              <div className="w-px h-5 bg-slate-200 dark:bg-white/10 mx-1"></div>
-              <button className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-white/10">
-                <LayoutGrid size={16} />
-              </button>
             </div>
           </div>
 
