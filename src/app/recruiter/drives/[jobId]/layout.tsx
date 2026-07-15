@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { LayoutDashboard, Map, Users, CheckCircle, ArrowLeft, Loader2, GitMerge } from "lucide-react";
 import { useEffect, useState } from "react";
+import NotificationDropdown from "@/components/common/NotificationDropdown";
 
 export default function JobDetailsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -177,6 +178,7 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
             >
               {copied ? "Copied!" : "Share Apply Link"}
             </button>
+            <NotificationDropdown />
             <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
               R
             </div>

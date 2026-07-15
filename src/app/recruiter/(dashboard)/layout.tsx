@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Library, Users, Settings, LogOut, Briefcase } from "lucide-react";
+import NotificationDropdown from "@/components/common/NotificationDropdown";
 
 export default function RecruiterLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -73,6 +74,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
             {navItems.find(item => pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/recruiter"))?.name || "Dashboard"}
           </div>
           <div className="flex items-center gap-4">
+            <NotificationDropdown />
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200">
               R
             </div>

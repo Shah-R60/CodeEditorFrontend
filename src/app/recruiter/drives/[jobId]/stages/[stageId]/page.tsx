@@ -651,28 +651,6 @@ export default function StageDetailsPage() {
             >
               <RefreshCw size={18} />
             </button>
-            <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm">
-              Edit Round
-            </button>
-            <button
-              className="bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-sm hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!currentStage.config?.questions || currentStage.config.questions.length === 0}
-              onClick={() => {
-                if (!currentStage.config?.questions || currentStage.config.questions.length === 0) {
-                  alert("You must select questions before publishing this round.");
-                } else {
-                  alert('Published successfully!');
-                }
-              }}
-            >
-              Publish
-            </button>
-            <button className="p-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors shadow-sm tooltip-trigger" title="Share Link">
-              <Share2 size={18} />
-            </button>
-            <button className="p-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors shadow-sm tooltip-trigger" title="More Options">
-              <MoreHorizontal size={18} />
-            </button>
           </div>
         </div>
       </div>

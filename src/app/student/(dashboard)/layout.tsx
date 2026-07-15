@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Code2, LogOut, Laptop, LayoutDashboard } from "lucide-react";
+import NotificationDropdown from "@/components/common/NotificationDropdown";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           <Link href="/student/profile" className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold border border-emerald-200 ml-4 hover:ring-2 hover:ring-emerald-500 hover:ring-offset-2 transition-all">
             C
           </Link>
+          <NotificationDropdown />
           <button onClick={handleLogout} className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-rose-600 transition ml-2">
             <LogOut size={18} />
             <span className="hidden sm:inline">Log Out</span>
