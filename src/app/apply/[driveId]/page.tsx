@@ -15,6 +15,7 @@ export default function ApplyPage() {
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [resume, setResume] = useState<File | null>(null);
   
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -63,10 +64,16 @@ export default function ApplyPage() {
     setError("");
 
     try {
-      const res = await fetch(`http://localhost:3001/db/drives/${driveId}/apply`, {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      if (resume) {
+        formData.append("resume", resume);
+      }
+
+      const res = await fetch(`http://localhost:3001/db/drives/${driveId}/apply-with-resume`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email })
+        body: formData
       });
       const json = await res.json();
       
@@ -185,6 +192,30 @@ export default function ApplyPage() {
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm"
                 />
                 <p className="text-xs text-slate-500 mt-1">We'll send your assessment instructions to this email.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Upload Resume (Optional)</label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-blue-500 transition-colors bg-slate-50 cursor-pointer" onClick={() => document.getElementById('resume-upload')?.click()}>
+                  <div className="space-y-1 text-center">
+                    <svg className="mx-auto h-10 w-10 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="flex text-sm text-slate-600 justify-center">
+                      <label htmlFor="resume-upload" className="relative cursor-pointer bg-slate-50 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                        <span>{resume ? resume.name : "Upload a file"}</span>
+                        <input id="resume-upload" name="resume-upload" type="file" accept=".pdf" className="sr-only" onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            setResume(e.target.files[0]);
+                          }
+                        }} />
+                      </label>
+                      {!resume && <p className="pl-1">or drag and drop</p>}
+                    </div>
+                    {!resume && <p className="text-xs text-slate-500">PDF up to 10MB</p>}
+                    {resume && <p className="text-xs text-blue-500 font-semibold mt-2">Resume attached. AI will parse your profile!</p>}
+                  </div>
+                </div>
               </div>
 
               <button 

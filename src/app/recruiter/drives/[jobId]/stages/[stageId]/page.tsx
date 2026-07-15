@@ -1646,6 +1646,25 @@ export default function StageDetailsPage() {
               </div>
             </div>
 
+            {selectedCandidateForReview?.resumeData && (
+              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-xl border border-indigo-100 flex flex-col items-center text-center justify-center space-y-3">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm text-indigo-600 mb-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-indigo-900">AI Parsed Profile Available</h3>
+                  <p className="text-xs text-indigo-600/80 mt-1 px-4">Experience, skills, education, and resume document</p>
+                </div>
+                <Link
+                  href={`/recruiter/drives/${jobId}/candidates/${selectedCandidateForReview.id}`}
+                  className="mt-2 w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm shadow-indigo-200"
+                >
+                  View Full Profile <ArrowRight size={16} />
+                </Link>
+              </div>
+            )}
+
+
             {currentStage.type === 'Online Assessment' && (
               <div className="border border-blue-100 bg-blue-50/50 rounded-xl p-4">
                 <h3 className="text-sm font-bold text-blue-900 mb-2">Automated Assessment</h3>
@@ -1679,7 +1698,7 @@ export default function StageDetailsPage() {
                     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden text-sm">
                       {sub.title === 'Detailed Scores' && typeof sub.code === 'string' && sub.code.startsWith('{') 
                         ? (
-                           <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+                           <div className="grid grid-cols-1 divide-y divide-slate-100">
                              {Object.entries(JSON.parse(sub.code)).map(([key, val]) => (
                                <div key={key} className="flex justify-between items-center p-3 hover:bg-slate-50 transition-colors">
                                  <span className="capitalize text-slate-600 font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
