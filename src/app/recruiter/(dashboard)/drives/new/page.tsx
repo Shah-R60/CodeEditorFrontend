@@ -111,58 +111,58 @@ export default function CreateDrivePage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-20">
       <div>
-        <Link href="/recruiter/drives" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors mb-4 text-sm font-medium bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg">
+        <Link href="/recruiter/drives" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors mb-4 text-sm font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg">
           <ArrowLeft size={16} />
           Back to Drives
         </Link>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Create Hiring Drive</h1>
-        <p className="text-slate-500 mt-2 text-sm max-w-lg">Define the role, build a custom assessment pipeline, and configure scheduling for each round.</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Create Hiring Drive</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-lg">Define the role, build a custom assessment pipeline, and configure scheduling for each round.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         
         {/* Basic Details */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs">1</span>
+        <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm p-6 sm:p-8 transition-colors">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-[#1e293b] text-slate-500 dark:text-slate-400 text-xs">1</span>
             Basic Details
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-900 block">Drive Title</label>
+              <label className="text-sm font-semibold text-slate-900 dark:text-slate-200 block">Drive Title</label>
               <input 
                 type="text" 
                 required
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. Senior Backend Engineer - Q3"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-900 block">Department (Optional)</label>
+              <label className="text-sm font-semibold text-slate-900 dark:text-slate-200 block">Department (Optional)</label>
               <input 
                 type="text"
                 value={department}
                 onChange={e => setDepartment(e.target.value)}
                 placeholder="e.g. Engineering, Data, Marketing"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm"
               />
             </div>
           </div>
         </div>
 
         {/* Pipeline Builder */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+        <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm p-6 sm:p-8 transition-colors">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-500 text-xs">2</span>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-[#1e293b] text-slate-500 dark:text-slate-400 text-xs">2</span>
               Assessment Pipeline
             </h2>
             <button 
               type="button" 
               onClick={addRound}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
             >
               <Plus size={16} /> Add Round
             </button>
@@ -179,11 +179,11 @@ export default function CreateDrivePage() {
                           <div 
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`border rounded-xl bg-white overflow-hidden transition-shadow ${snapshot.isDragging ? 'shadow-xl border-blue-400 ring-4 ring-blue-50' : 'border-slate-200 shadow-sm hover:border-slate-300'}`}
+                            className={`border rounded-xl bg-white dark:bg-[#070b14] overflow-hidden transition-shadow ${snapshot.isDragging ? 'shadow-xl border-blue-400 ring-4 ring-blue-50 dark:ring-blue-900/20' : 'border-slate-200 dark:border-white/10 shadow-sm hover:border-slate-300 dark:hover:border-white/20'}`}
                           >
                             {/* Round Header */}
-                            <div className="flex items-center p-2 bg-slate-50/50">
-                              <div {...provided.dragHandleProps} className="p-2 text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing">
+                            <div className="flex items-center p-2 bg-slate-50/50 dark:bg-[#1e293b]/50">
+                              <div {...provided.dragHandleProps} className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing">
                                 <GripVertical size={20} />
                               </div>
                               <div 
@@ -191,11 +191,11 @@ export default function CreateDrivePage() {
                                 onClick={() => setExpandedRoundId(expandedRoundId === round.id ? null : round.id)}
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">
+                                  <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold">
                                     {index + 1}
                                   </div>
-                                  <span className="font-semibold text-slate-900">{round.name}</span>
-                                  <span className="px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-slate-100 text-slate-500">
+                                  <span className="font-semibold text-slate-900 dark:text-white">{round.name}</span>
+                                  <span className="px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                                     {round.type}
                                   </span>
                                 </div>
@@ -203,7 +203,7 @@ export default function CreateDrivePage() {
                                   <button 
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); removeRound(round.id); }}
-                                    className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors"
+                                    className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-md transition-colors"
                                   >
                                     <Trash2 size={16} />
                                   </button>
@@ -213,59 +213,59 @@ export default function CreateDrivePage() {
 
                             {/* Round Configuration Body (Expandable) */}
                             {expandedRoundId === round.id && (
-                              <div className="p-5 border-t border-slate-100 space-y-6">
+                              <div className="p-5 border-t border-slate-100 dark:border-white/5 space-y-6">
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                   <div className="space-y-1.5">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Round Name</label>
+                                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Round Name</label>
                                     <input 
                                       type="text" 
                                       value={round.name}
                                       onChange={(e) => updateRound(round.id, 'name', e.target.value)}
-                                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 shadow-sm"
+                                      className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 shadow-sm"
                                     />
                                   </div>
                                   <div className="space-y-1.5">
-                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Round Type</label>
+                                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Round Type</label>
                                     <select 
                                       value={round.type}
                                       onChange={(e) => updateRound(round.id, 'type', e.target.value)}
-                                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 shadow-sm"
+                                      className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 shadow-sm"
                                     >
                                       {ROUND_TYPES.map(rt => <option key={rt} value={rt}>{rt}</option>)}
                                     </select>
                                   </div>
                                 </div>
 
-                                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-4">
-                                  <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <div className="p-4 bg-slate-50 dark:bg-[#1e293b]/30 rounded-xl border border-slate-100 dark:border-white/5 space-y-4">
+                                  <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
                                     <Calendar size={16} className="text-blue-500" /> Optional Scheduling
                                   </div>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-1.5">
-                                      <label className="text-xs font-semibold text-slate-500">Start Date</label>
+                                      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Start Date</label>
                                       <input 
                                         type="datetime-local" 
                                         value={round.startDate || ''}
                                         onChange={(e) => updateRound(round.id, 'startDate', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none shadow-sm"
+                                        className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg text-sm dark:text-white focus:outline-none shadow-sm style-color-scheme"
                                       />
                                     </div>
                                     <div className="space-y-1.5">
-                                      <label className="text-xs font-semibold text-slate-500">End Date</label>
+                                      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">End Date</label>
                                       <input 
                                         type="datetime-local" 
                                         value={round.endDate || ''}
                                         onChange={(e) => updateRound(round.id, 'endDate', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none shadow-sm"
+                                        className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg text-sm dark:text-white focus:outline-none shadow-sm style-color-scheme"
                                       />
                                     </div>
                                     <div className="space-y-1.5">
-                                      <label className="text-xs font-semibold text-slate-500">Time Zone</label>
+                                      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Time Zone</label>
                                       <select 
                                         value={round.timeZone || 'Asia/Kolkata'}
                                         onChange={(e) => updateRound(round.id, 'timeZone', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none shadow-sm"
+                                        className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg text-sm dark:text-white focus:outline-none shadow-sm"
                                       >
                                         <option value="Asia/Kolkata">IST (Indian Standard Time)</option>
                                         <option value="UTC">UTC (Coordinated Universal Time)</option>
@@ -275,34 +275,34 @@ export default function CreateDrivePage() {
                                       </select>
                                     </div>
                                     <div className="space-y-1.5">
-                                      <label className="text-xs font-semibold text-slate-500">Duration</label>
+                                      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Duration</label>
                                       <input 
                                         type="text" 
                                         placeholder="e.g. 60 mins"
                                         value={round.duration || ''}
                                         onChange={(e) => updateRound(round.id, 'duration', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none shadow-sm"
+                                        className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg text-sm dark:text-white focus:outline-none shadow-sm"
                                       />
                                     </div>
                                   </div>
                                 </div>
 
                                 {round.type === "Online Assessment" && (
-                                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-3">
-                                     <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                  <div className="p-4 bg-slate-50 dark:bg-[#1e293b]/30 rounded-xl border border-slate-100 dark:border-white/5 space-y-3">
+                                     <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
                                       <Settings2 size={16} className="text-blue-500" /> Assessment Configuration
                                     </div>
                                     <div className="flex flex-wrap gap-4 text-sm">
-                                      <label className="flex items-center gap-2 text-slate-700 cursor-pointer">
-                                        <input type="checkbox" className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-600" />
+                                      <label className="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                        <input type="checkbox" className="w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-slate-300 dark:border-white/20 focus:ring-blue-600 dark:focus:ring-blue-500 dark:bg-[#0f172a]" />
                                         Enable Webcam Proctoring
                                       </label>
-                                      <label className="flex items-center gap-2 text-slate-700 cursor-pointer">
-                                        <input type="checkbox" className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-600" />
+                                      <label className="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                        <input type="checkbox" className="w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-slate-300 dark:border-white/20 focus:ring-blue-600 dark:focus:ring-blue-500 dark:bg-[#0f172a]" />
                                         Tab Switching Detection
                                       </label>
-                                      <label className="flex items-center gap-2 text-slate-700 cursor-pointer">
-                                        <input type="checkbox" className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-600" />
+                                      <label className="flex items-center gap-2 text-slate-700 dark:text-slate-300 cursor-pointer">
+                                        <input type="checkbox" className="w-4 h-4 text-blue-600 dark:text-blue-500 rounded border-slate-300 dark:border-white/20 focus:ring-blue-600 dark:focus:ring-blue-500 dark:bg-[#0f172a]" />
                                         Auto Evaluation
                                       </label>
                                     </div>
@@ -322,22 +322,22 @@ export default function CreateDrivePage() {
             </DragDropContext>
 
             {rounds.length === 0 && (
-              <div className="p-8 text-center bg-slate-50 border border-slate-200 border-dashed rounded-xl">
-                <p className="text-slate-500 text-sm">No rounds added yet. Click "Add Round" to build your pipeline.</p>
+              <div className="p-8 text-center bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 border-dashed rounded-xl">
+                <p className="text-slate-500 dark:text-slate-400 text-sm">No rounds added yet. Click "Add Round" to build your pipeline.</p>
               </div>
             )}
           </div>
         </div>
 
         {/* Form Actions */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-200">
-          <Link href="/recruiter/drives" className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all">
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-200 dark:border-white/10">
+          <Link href="/recruiter/drives" className="px-5 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">
             Cancel
           </Link>
           <button 
             type="submit"
             disabled={loading || rounds.length === 0 || !title}
-            className="px-6 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:hover:shadow-sm"
+            className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold rounded-xl hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:hover:shadow-sm"
           >
             {loading ? (
               <span className="flex items-center gap-2">

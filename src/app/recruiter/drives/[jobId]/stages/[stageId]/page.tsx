@@ -566,7 +566,7 @@ export default function StageDetailsPage() {
 
   // Status logic
   let statusText = 'Draft';
-  let statusColor = 'bg-slate-200 text-slate-700';
+  let statusColor = 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300';
   let startsInText = '';
 
   if (currentStage.startDate) {
@@ -575,7 +575,7 @@ export default function StageDetailsPage() {
 
     if (start > now) {
       statusText = 'Scheduled';
-      statusColor = 'bg-emerald-100 text-emerald-700';
+      statusColor = 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400';
       const diffTime = Math.abs(start.getTime() - now.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       startsInText = `${diffDays} Day${diffDays > 1 ? 's' : ''}`;
@@ -584,16 +584,16 @@ export default function StageDetailsPage() {
         const end = new Date(currentStage.endDate);
         if (end < now) {
           statusText = 'Completed';
-          statusColor = 'bg-slate-100 text-slate-700';
+          statusColor = 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
           startsInText = 'Ended';
         } else {
           statusText = 'Live';
-          statusColor = 'bg-blue-100 text-blue-700';
+          statusColor = 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400';
           startsInText = 'Started';
         }
       } else {
         statusText = 'Live';
-        statusColor = 'bg-blue-100 text-blue-700';
+        statusColor = 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400';
         startsInText = 'Started';
       }
     }
@@ -602,19 +602,19 @@ export default function StageDetailsPage() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-8 py-6">
+      <div className="bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-white/10 px-8 py-6 transition-colors">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 text-sm font-medium text-slate-500 mb-3">
-              <Link href={`/recruiter/drives/${jobId}`} className="hover:text-slate-900 transition-colors">Software Engineer</Link>
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">
+              <Link href={`/recruiter/drives/${jobId}`} className="hover:text-slate-900 dark:hover:text-white transition-colors">Software Engineer</Link>
               <span>/</span>
-              <Link href={`/recruiter/drives/${jobId}/pipeline`} className="hover:text-slate-900 transition-colors">Pipeline</Link>
+              <Link href={`/recruiter/drives/${jobId}/pipeline`} className="hover:text-slate-900 dark:hover:text-white transition-colors">Pipeline</Link>
               <span>/</span>
-              <span className="text-slate-900">Round Details</span>
+              <span className="text-slate-900 dark:text-slate-200">Round Details</span>
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-4">{currentStage.name}</h1>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">{currentStage.name}</h1>
 
-            <div className="flex flex-wrap items-center gap-y-3 gap-x-5 text-sm text-slate-600 font-medium">
+            <div className="flex flex-wrap items-center gap-y-3 gap-x-5 text-sm text-slate-600 dark:text-slate-300 font-medium">
               <span className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${statusColor}`}>
                 <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
                 {statusText}
@@ -637,16 +637,16 @@ export default function StageDetailsPage() {
                 <span className="flex items-center gap-1.5"><Calendar size={16} className="text-slate-400" /> No Schedule</span>
               )}
 
-              <span className="flex items-center gap-1.5 border-l border-slate-200 pl-5"><Clock size={16} className="text-slate-400" /> {currentStage.duration || '90 mins'}</span>
-              <span className="flex items-center gap-1.5 border-l border-slate-200 pl-5"><Users size={16} className="text-slate-400" /> {invited} Candidates</span>
-              <span className="flex items-center gap-1.5 border-l border-slate-200 pl-5"><Activity size={16} className="text-slate-400" /> {passRate}% Pass Rate</span>
+              <span className="flex items-center gap-1.5 border-l border-slate-200 dark:border-white/10 pl-5"><Clock size={16} className="text-slate-400" /> {currentStage.duration || '90 mins'}</span>
+              <span className="flex items-center gap-1.5 border-l border-slate-200 dark:border-white/10 pl-5"><Users size={16} className="text-slate-400" /> {invited} Candidates</span>
+              <span className="flex items-center gap-1.5 border-l border-slate-200 dark:border-white/10 pl-5"><Activity size={16} className="text-slate-400" /> {passRate}% Pass Rate</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={fetchJobAndQuestions}
-              className="p-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors shadow-sm tooltip-trigger"
+              className="p-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-colors shadow-sm tooltip-trigger"
               title="Refresh Data"
             >
               <RefreshCw size={18} />
@@ -656,40 +656,40 @@ export default function StageDetailsPage() {
       </div>
 
       {/* Internal Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 overflow-x-auto px-4 md:px-8">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <LayoutDashboard size={16} /> Overview
         </button>
         <button
           onClick={() => setActiveTab("candidates")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'candidates' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'candidates' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <Users size={16} /> Candidates ({stageCandidates.length})
         </button>
         <button
           onClick={() => setActiveTab("questions")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'questions' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'questions' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <FileCode size={16} /> Questions
         </button>
         <button
           onClick={() => setActiveTab("schedule")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'schedule' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'schedule' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <Calendar size={16} /> Schedule
         </button>
         <button
           onClick={() => setActiveTab("analysis")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'analysis' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'analysis' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <LineChart size={16} /> Analysis
         </button>
         <button
           onClick={() => setActiveTab("settings")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'settings' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'settings' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <SettingsIcon size={16} /> Settings
         </button>
@@ -703,111 +703,111 @@ export default function StageDetailsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Candidates Card */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2 mb-6">
                 <Users className="text-slate-400" size={20} />
-                <h3 className="text-lg font-bold text-slate-900">Candidates</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Candidates</h3>
               </div>
               <div className="space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-slate-500 font-medium">Invited</span>
-                  <span className="text-slate-900 font-bold text-lg">{invited}</span>
+                <div className="flex justify-between items-center border-b border-slate-50 dark:border-white/5 pb-3">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Invited</span>
+                  <span className="text-slate-900 dark:text-white font-bold text-lg">{invited}</span>
                 </div>
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-slate-500 font-medium">Appeared</span>
-                  <span className="text-slate-900 font-bold text-lg">{completed}</span>
+                <div className="flex justify-between items-center border-b border-slate-50 dark:border-white/5 pb-3">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Appeared</span>
+                  <span className="text-slate-900 dark:text-white font-bold text-lg">{completed}</span>
                 </div>
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-slate-500 font-medium">Qualified</span>
-                  <span className="text-slate-900 font-bold text-lg">{qualified}</span>
+                <div className="flex justify-between items-center border-b border-slate-50 dark:border-white/5 pb-3">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Qualified</span>
+                  <span className="text-slate-900 dark:text-white font-bold text-lg">{qualified}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-slate-500 font-medium">Pass Rate</span>
-                  <span className="text-emerald-600 font-bold text-lg bg-emerald-50 px-2.5 py-1 rounded-lg">{passRate}%</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Pass Rate</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-lg bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-lg">{passRate}%</span>
                 </div>
               </div>
             </div>
 
             {/* Assessment Card */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2 mb-6">
                 <FileCode className="text-slate-400" size={20} />
-                <h3 className="text-lg font-bold text-slate-900">Assessment</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Assessment</h3>
               </div>
               <div className="space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-slate-500 font-medium">Duration</span>
-                  <span className="text-slate-900 font-bold">{currentStage.duration}</span>
+                <div className="flex justify-between items-center border-b border-slate-50 dark:border-white/5 pb-3">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Duration</span>
+                  <span className="text-slate-900 dark:text-white font-bold">{currentStage.duration}</span>
                 </div>
-                <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                  <span className="text-slate-500 font-medium">Format</span>
-                  <span className="text-slate-900 font-medium text-right text-sm">
+                <div className="flex justify-between items-center border-b border-slate-50 dark:border-white/5 pb-3">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Format</span>
+                  <span className="text-slate-900 dark:text-white font-medium text-right text-sm">
                     {currentStage.config?.questions?.length || 0} Coding Problems<br />
                     {currentStage.config?.mcqs?.length || 0} MCQs
                   </span>
                 </div>
                 <div className="flex justify-between items-start pt-2">
-                  <span className="text-slate-500 font-medium">Languages</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Languages</span>
                   <div className="flex gap-2">
-                    <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-2 py-1 rounded">C++</span>
-                    <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-2 py-1 rounded">Java</span>
-                    <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-2 py-1 rounded">Python</span>
+                    <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded">C++</span>
+                    <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded">Java</span>
+                    <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded">Python</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Schedule Card */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2 mb-6">
                 <Calendar className="text-slate-400" size={20} />
-                <h3 className="text-lg font-bold text-slate-900">Schedule</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Schedule</h3>
               </div>
               {currentStage.startDate ? (
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                    <span className="text-slate-500 font-medium">Date</span>
-                    <span className="text-slate-900 font-bold">{new Date(currentStage.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                  <div className="flex justify-between items-center border-b border-slate-50 dark:border-white/5 pb-3">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">Date</span>
+                    <span className="text-slate-900 dark:text-white font-bold">{new Date(currentStage.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                   </div>
-                  <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                    <span className="text-slate-500 font-medium">Time Window</span>
+                  <div className="flex justify-between items-center border-b border-slate-50 dark:border-white/5 pb-3">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">Time Window</span>
                     <div className="text-right">
-                      <div className="text-slate-900 font-bold">{new Date(currentStage.startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</div>
+                      <div className="text-slate-900 dark:text-white font-bold">{new Date(currentStage.startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</div>
                       <div className="text-slate-400 text-xs text-center">to</div>
-                      <div className="text-slate-900 font-bold">{currentStage.endDate ? new Date(currentStage.endDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD'}</div>
+                      <div className="text-slate-900 dark:text-white font-bold">{currentStage.endDate ? new Date(currentStage.endDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD'}</div>
                     </div>
                   </div>
                   <div className="flex justify-between items-center pt-2">
-                    <span className="text-slate-500 font-medium">Timezone</span>
-                    <span className="text-slate-700 font-medium bg-slate-100 px-2 py-1 rounded text-sm">{currentStage.timeZone || 'UTC'}</span>
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">Timezone</span>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-sm">{currentStage.timeZone || 'UTC'}</span>
                   </div>
                 </div>
               ) : (
-                <div className="py-8 text-center text-slate-500 flex flex-col items-center">
-                  <Calendar size={24} className="mb-2 text-slate-300" />
+                <div className="py-8 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center">
+                  <Calendar size={24} className="mb-2 text-slate-300 dark:text-slate-600" />
                   No schedule set
                 </div>
               )}
             </div>
 
             {/* Status Card */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-2 mb-6">
                 <Activity className="text-slate-400" size={20} />
-                <h3 className="text-lg font-bold text-slate-900">Status</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Status</h3>
               </div>
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">Current Status</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Current Status</span>
                   <span className={`px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2 ${statusColor}`}>
                     <div className="w-2 h-2 rounded-full bg-current"></div>
                     {statusText}
                   </span>
                 </div>
                 {startsInText && (
-                  <div className="flex justify-between items-center p-4 bg-slate-50 rounded-lg">
-                    <span className="text-slate-500 font-medium">{statusText === 'Scheduled' ? 'Starts in' : 'Timing'}</span>
-                    <span className="text-slate-900 font-bold text-xl">{startsInText}</span>
+                  <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-[#1e293b]/50 rounded-lg">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">{statusText === 'Scheduled' ? 'Starts in' : 'Timing'}</span>
+                    <span className="text-slate-900 dark:text-white font-bold text-xl">{startsInText}</span>
                   </div>
                 )}
               </div>

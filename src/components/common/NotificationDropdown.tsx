@@ -96,25 +96,25 @@ export default function NotificationDropdown() {
           setIsOpen(!isOpen);
           if (!isOpen) fetchNotifications();
         }}
-        className="relative p-2 text-slate-600 hover:text-emerald-600 hover:bg-slate-100 rounded-full transition-colors focus:outline-none"
+        className="relative p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors focus:outline-none"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white shadow-[0_0_0_2px_white]">
+          <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white shadow-[0_0_0_2px_white] dark:shadow-[0_0_0_2px_#0f172a]">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-            <h3 className="font-bold text-slate-900">Notifications</h3>
+        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#0f172a] rounded-xl shadow-xl border border-slate-200 dark:border-white/10 z-50 overflow-hidden flex flex-col">
+          <div className="p-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-white/5">
+            <h3 className="font-bold text-slate-900 dark:text-white">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1"
+                className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline flex items-center gap-1"
               >
                 <Check className="w-3 h-3" /> Mark all read
               </button>
@@ -123,17 +123,17 @@ export default function NotificationDropdown() {
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 flex flex-col items-center">
-                <Bell className="w-8 h-8 mb-2 text-slate-300" />
+              <div className="p-8 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center">
+                <Bell className="w-8 h-8 mb-2 text-slate-300 dark:text-slate-600" />
                 <p className="text-sm">You're all caught up!</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-100 dark:divide-white/10">
                 {notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={`relative p-4 hover:bg-slate-50 transition-colors ${
-                      !n.isRead ? 'bg-emerald-50/30' : ''
+                    className={`relative p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${
+                      !n.isRead ? 'bg-emerald-50/30 dark:bg-emerald-500/10' : ''
                     }`}
                   >
                     {!n.isRead && (
@@ -144,16 +144,16 @@ export default function NotificationDropdown() {
                       <div className="flex-1 min-w-0">
                         {n.actionLink ? (
                           <Link href={n.actionLink} onClick={() => setIsOpen(false)} className="block">
-                            <p className="text-sm font-semibold text-slate-900 mb-1">{n.title}</p>
-                            <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{n.message}</p>
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{n.title}</p>
+                            <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">{n.message}</p>
                           </Link>
                         ) : (
                           <div>
-                            <p className="text-sm font-semibold text-slate-900 mb-1">{n.title}</p>
-                            <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{n.message}</p>
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{n.title}</p>
+                            <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">{n.message}</p>
                           </div>
                         )}
-                        <div className="flex items-center gap-1 mt-2 text-[10px] text-slate-400 font-medium">
+                        <div className="flex items-center gap-1 mt-2 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
                           <Clock className="w-3 h-3" />
                           <span>{formatDate(n.createdAt)}</span>
                         </div>
@@ -162,7 +162,7 @@ export default function NotificationDropdown() {
                       {!n.isRead && (
                         <button
                           onClick={(e) => handleMarkAsRead(n.id, e)}
-                          className="text-slate-400 hover:text-emerald-600 p-1 -mr-1 rounded-md hover:bg-slate-100 transition-colors"
+                          className="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 p-1 -mr-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
                           title="Mark as read"
                         >
                           <Check className="w-4 h-4" />
@@ -176,7 +176,7 @@ export default function NotificationDropdown() {
           </div>
           
           {notifications.length > 0 && (
-            <div className="p-3 bg-slate-50 border-t border-slate-100 text-center text-xs text-slate-500 font-medium">
+            <div className="p-3 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
               Showing latest {notifications.length} notifications
             </div>
           )}

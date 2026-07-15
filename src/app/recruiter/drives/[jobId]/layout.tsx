@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
-import { LayoutDashboard, Map, Users, CheckCircle, ArrowLeft, Loader2, GitMerge } from "lucide-react";
+import { LayoutDashboard, Map, Users, CheckCircle, ArrowLeft, Loader2, GitMerge, Search, Filter, LayoutGrid } from "lucide-react";
 import { useEffect, useState } from "react";
 import NotificationDropdown from "@/components/common/NotificationDropdown";
+import ThemeToggle from "@/components/common/ThemeToggle";
 
 export default function JobDetailsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -71,21 +72,21 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
   const currentNav = allNavItems.find(item => item.exact ? pathname === item.href : pathname.startsWith(item.href))?.name || "Dashboard";
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900 selection:bg-blue-100">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070b14] flex font-sans text-slate-900 dark:text-white selection:bg-amber-100 dark:selection:bg-amber-900/30">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 z-10">
-        <div className="h-16 flex items-center px-6 border-b border-slate-200">
-          <Link href="/recruiter/drives" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition font-medium text-sm">
+      <aside className="w-64 bg-white dark:bg-[#0f172a] border-r border-slate-200 dark:border-white/10 flex flex-col fixed inset-y-0 z-10 transition-colors">
+        <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-white/10">
+          <Link href="/recruiter/drives" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition font-medium text-sm">
             <ArrowLeft size={16} />
             Back to Drives
           </Link>
         </div>
 
-        <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="font-bold text-slate-900 truncate" title={job.title}>{job.title}</h2>
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 transition-colors">
+          <h2 className="font-bold text-slate-900 dark:text-white truncate" title={job.title}>{job.title}</h2>
           <div className="flex items-center gap-2 mt-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-            <span className="text-xs font-medium text-slate-500">{job.status}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{job.status}</span>
           </div>
         </div>
 
@@ -103,10 +104,12 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
                     key={item.name}
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-                      isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      isActive 
+                        ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-500" 
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    <Icon size={18} className={isActive ? "text-blue-600" : "text-slate-400"} />
+                    <Icon size={18} className={isActive ? "text-amber-600 dark:text-amber-500" : "text-slate-400 dark:text-slate-500"} />
                     {item.name}
                   </Link>
                 );
@@ -127,10 +130,12 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
                     key={item.name}
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-                      isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      isActive 
+                        ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-500" 
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    <Icon size={18} className={isActive ? "text-blue-600" : "text-slate-400"} />
+                    <Icon size={18} className={isActive ? "text-amber-600 dark:text-amber-500" : "text-slate-400 dark:text-slate-500"} />
                     <span className="truncate">{item.name}</span>
                   </Link>
                 );
@@ -150,10 +155,12 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
                     key={item.name}
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-                      isActive ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      isActive 
+                        ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-500" 
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    <Icon size={18} className={isActive ? "text-blue-600" : "text-slate-400"} />
+                    <Icon size={18} className={isActive ? "text-amber-600 dark:text-amber-500" : "text-slate-400 dark:text-slate-500"} />
                     {item.name}
                   </Link>
                 );
@@ -165,21 +172,52 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 min-h-screen flex flex-col bg-slate-50">
+      <main className="flex-1 ml-64 min-h-screen flex flex-col transition-colors">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-          <div className="text-lg font-semibold text-slate-800">
-            {currentNav}
+        <header className="h-16 bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-8 sticky top-0 z-10 transition-colors gap-6">
+          
+          {/* Left Spacer for Centering / Page Title */}
+          <div className="flex-1 hidden md:block">
+            <div className="text-lg font-semibold text-slate-800 dark:text-white">
+              {currentNav}
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+
+          {/* Central Search Bar */}
+          <div className="w-full max-w-md hidden sm:flex items-center bg-slate-50 dark:bg-[#0f172a] rounded-xl border border-slate-200 dark:border-white/10 transition-colors">
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <Search size={18} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search candidates by name, email..."
+                className="block w-full pl-11 pr-4 py-2 bg-transparent border-none rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-0"
+              />
+            </div>
+            <div className="flex items-center gap-1 pr-2 shrink-0">
+              <button className="inline-flex items-center gap-2 bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 font-medium py-1 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors text-xs border border-slate-200 dark:border-transparent shadow-sm">
+                <Filter size={14} />
+                Filters
+              </button>
+              <div className="w-px h-5 bg-slate-200 dark:bg-white/10 mx-1"></div>
+              <button className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-white/10">
+                <LayoutGrid size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Right Action Icons */}
+          <div className="flex-1 flex items-center justify-end gap-4 shrink-0">
             <button 
               onClick={handleCopyLink}
-              className="text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors border border-blue-200"
+              className="text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 border-amber-200 dark:text-amber-500 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:border-amber-500/20 px-4 py-2 rounded-lg transition-colors border"
             >
               {copied ? "Copied!" : "Share Apply Link"}
             </button>
+            <ThemeToggle />
             <NotificationDropdown />
-            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
+            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center text-amber-700 dark:text-amber-500 font-bold border border-amber-200 dark:border-amber-500/30">
               R
             </div>
           </div>

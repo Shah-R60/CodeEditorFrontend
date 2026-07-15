@@ -1,35 +1,56 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Library, Users, Settings, LogOut, Briefcase } from "lucide-react";
+import { LayoutDashboard, Library, Users, Settings, LogOut, Briefcase, Search, Filter, LayoutGrid, ChevronLeft, Code2 } from "lucide-react";
 import NotificationDropdown from "@/components/common/NotificationDropdown";
+import ThemeToggle from "@/components/common/ThemeToggle";
 
 export default function RecruiterLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const navItems = [
     { name: "Dashboard", href: "/recruiter", icon: LayoutDashboard },
     { name: "Hiring Drives", href: "/recruiter/drives", icon: Briefcase },
     { name: "Question Bank", href: "/recruiter/questions", icon: Library },
-    { name: "Settings", href: "/recruiter/settings", icon: Settings },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-900 selection:bg-blue-100">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070b14] flex font-sans text-slate-900 dark:text-white selection:bg-amber-100 dark:selection:bg-amber-900/30">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 z-10">
-        <div className="h-16 flex items-center px-6 border-b border-slate-200">
-          <Link href="/recruiter" className="flex items-center gap-2 hover:opacity-90 transition">
-            <div className="bg-blue-600 p-1.5 rounded-lg shadow-sm">
-              <Briefcase className="text-white h-5 w-5" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">CodeCanvas</span>
+      <aside className={`bg-white dark:bg-[#0f172a] border-r border-slate-200 dark:border-transparent flex flex-col fixed inset-y-0 z-20 transition-all duration-300 ${isCollapsed ? "w-20" : "w-60"}`}>
+        
+        {/* Collapse Button */}
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="absolute -right-3 top-24 w-6 h-6 bg-amber-500 text-slate-900 rounded-full flex items-center justify-center hover:bg-amber-400 transition-colors z-50 hidden sm:flex shadow-sm"
+        >
+          <ChevronLeft size={14} strokeWidth={3} className={`transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`} />
+        </button>
+
+        <div className={`h-16 flex items-center border-b border-slate-200 dark:border-white/10 ${isCollapsed ? "justify-center px-0" : "px-6"}`}>
+          <Link href="/recruiter" className="flex items-center hover:opacity-90 transition">
+            {isCollapsed ? (
+              <Code2 size={28} className="text-amber-600 dark:text-amber-500" />
+            ) : (
+              <Image 
+                src="/logo.png" 
+                alt="CodeCanvas Logo" 
+                width={160} 
+                height={40} 
+                className="object-contain"
+                priority
+              />
+            )}
           </Link>
         </div>
 
-        <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
+        <nav className={`flex-1 py-8 space-y-1.5 overflow-y-auto overflow-x-hidden ${isCollapsed ? "px-2" : "px-4"}`}>
           {navItems.map((item) => {
             const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/recruiter");
             const Icon = item.icon;
@@ -38,44 +59,77 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium transition-colors ${
+                title={isCollapsed ? item.name : undefined}
+                className={`flex items-center py-2.5 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  isCollapsed ? "justify-center rounded-xl" : "gap-3 px-3 rounded-xl"
+                } ${
                   isActive 
-                    ? "bg-blue-50 text-blue-700" 
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-amber-500 text-slate-900 shadow-sm" 
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
-                <Icon size={20} className={isActive ? "text-blue-600" : "text-slate-400"} />
-                {item.name}
+                <Icon size={18} className={`shrink-0 ${isActive ? "text-slate-900" : "text-slate-400 dark:text-slate-500"}`} />
+                {!isCollapsed && <span>{item.name}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-slate-200">
+        <div className={`p-4 border-t border-slate-200 dark:border-white/10 ${isCollapsed ? "flex justify-center px-2" : ""}`}>
           <button 
             onClick={() => {
               localStorage.removeItem('userId');
               localStorage.removeItem('userRole');
               router.push('/login/recruiter');
             }}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-colors group"
+            title={isCollapsed ? "Log Out" : undefined}
+            className={`flex items-center gap-3 py-2.5 rounded-xl font-medium text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 transition-colors group ${
+              isCollapsed ? "justify-center px-0 w-12" : "px-3 w-full"
+            }`}
           >
-            <LogOut size={20} className="text-slate-400 group-hover:text-rose-500 transition-colors" />
-            Log Out
+            <LogOut size={20} className="shrink-0 text-slate-400 dark:text-slate-500 group-hover:text-rose-500 dark:group-hover:text-rose-400 transition-colors" />
+            {!isCollapsed && <span>Log Out</span>}
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-64 min-h-screen flex flex-col">
+      <main className={`flex-1 min-h-screen flex flex-col transition-all duration-300 ${isCollapsed ? "ml-20" : "ml-60"}`}>
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-          <div className="text-lg font-semibold text-slate-800">
-            {navItems.find(item => pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/recruiter"))?.name || "Dashboard"}
+        <header className="h-16 bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-8 sticky top-0 z-10 transition-colors gap-6">
+          
+          {/* Left Spacer for Centering */}
+          <div className="flex-1 hidden md:block"></div>
+
+          {/* Central Search Bar */}
+          <div className="w-full max-w-md hidden sm:flex items-center bg-slate-50 dark:bg-[#0f172a] rounded-xl border border-slate-200 dark:border-white/10 transition-colors">
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <Search size={18} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search drives by title, role, or ID..."
+                className="block w-full pl-11 pr-4 py-2 bg-transparent border-none rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-0"
+              />
+            </div>
+            <div className="flex items-center gap-1 pr-2 shrink-0">
+              <button className="inline-flex items-center gap-2 bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 font-medium py-1 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors text-xs border border-slate-200 dark:border-transparent shadow-sm">
+                <Filter size={14} />
+                Filters
+              </button>
+              <div className="w-px h-5 bg-slate-200 dark:bg-white/10 mx-1"></div>
+              <button className="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-white/10">
+                <LayoutGrid size={16} />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+
+          {/* Right Action Icons */}
+          <div className="flex-1 flex items-center justify-end gap-4 shrink-0">
+            <ThemeToggle />
             <NotificationDropdown />
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200">
+            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center text-amber-700 dark:text-amber-500 font-bold border border-amber-200 dark:border-amber-500/30">
               R
             </div>
           </div>

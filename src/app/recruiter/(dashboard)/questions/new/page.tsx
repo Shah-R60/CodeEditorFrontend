@@ -83,14 +83,14 @@ export default function CreateQuestion() {
 
   return (
     <div className="max-w-4xl mx-auto pb-12">
-      <Link href="/recruiter/questions" className="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-600 transition-colors mb-6 text-sm font-medium">
+      <Link href="/recruiter/questions" className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors mb-6 text-sm font-medium">
         <ArrowLeft size={16} />
         Back to Library
       </Link>
       
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Create Coding Question</h1>
-        <p className="text-slate-500 mt-1">Add a new problem to your assessment library.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Create Coding Question</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">Add a new problem to your assessment library.</p>
       </div>
       
       {message && (
@@ -106,25 +106,25 @@ export default function CreateQuestion() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Info */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-          <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Basic Information</h2>
+        <div className="bg-white dark:bg-[#0f172a] p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm space-y-6 transition-colors">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/10 pb-4">Basic Information</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Title</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Title</label>
               <input
                 {...register("title", { required: true })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white transition-all shadow-sm"
+                className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white dark:focus:bg-[#0f172a] transition-all shadow-sm"
                 placeholder="e.g. Two Sum"
               />
               {errors.title && <span className="text-rose-500 text-xs mt-1.5 font-medium block">Title is required</span>}
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Difficulty</label>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Difficulty</label>
               <select
                 {...register("difficulty")}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white transition-all shadow-sm appearance-none font-medium"
+                className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white dark:focus:bg-[#0f172a] transition-all shadow-sm appearance-none font-medium"
               >
                 <option value="EASY">EASY</option>
                 <option value="MEDIUM">MEDIUM</option>
@@ -134,11 +134,11 @@ export default function CreateQuestion() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Description</label>
             <textarea
               {...register("description", { required: true })}
               rows={6}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white transition-all shadow-sm resize-y"
+              className="w-full bg-slate-50 dark:bg-[#070b14] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-600/20 focus:border-emerald-600 focus:bg-white dark:focus:bg-[#0f172a] transition-all shadow-sm resize-y"
               placeholder="Provide a detailed description of the problem, constraints, and examples..."
             />
             {errors.description && <span className="text-rose-500 text-xs mt-1.5 font-medium block">Description is required</span>}
@@ -146,60 +146,60 @@ export default function CreateQuestion() {
         </div>
 
         {/* Boilerplates */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-          <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Initial Boilerplate Code</h2>
-          <p className="text-sm text-slate-500 -mt-2">This is the starter code the candidate will see.</p>
+        <div className="bg-white dark:bg-[#0f172a] p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm space-y-6 transition-colors">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-white/10 pb-4">Initial Boilerplate Code</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 -mt-2">This is the starter code the candidate will see.</p>
           
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-blue-500"></span> C++ Boilerplate
               </label>
               <textarea
                 {...register("boilerplate.cpp")}
-                rows={4}
+                rows={12}
                 placeholder="#include <iostream>..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-yellow-400"></span> Python Boilerplate
               </label>
               <textarea
                 {...register("boilerplate.python")}
-                rows={4}
+                rows={12}
                 placeholder="def solve():..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-yellow-500"></span> JavaScript Boilerplate
               </label>
               <textarea
                 {...register("boilerplate.javascript")}
-                rows={4}
+                rows={12}
                 placeholder="function solve() {..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
               />
             </div>
           </div>
         </div>
 
         {/* Test Cases */}
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+        <div className="bg-white dark:bg-[#0f172a] p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4 border-b border-slate-100 dark:border-white/10 pb-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Test Cases</h2>
-              <p className="text-sm text-slate-500 mt-1">Define the inputs and expected outputs to evaluate candidate code.</p>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Test Cases</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Define the inputs and expected outputs to evaluate candidate code.</p>
             </div>
             <button
               type="button"
               onClick={() => append({ input: "", expectedOutput: "", isHidden: false })}
-              className="flex items-center justify-center gap-2 bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:text-emerald-700 hover:bg-emerald-50 text-slate-700 px-4 py-2 rounded-xl transition-all shadow-sm font-semibold text-sm whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl transition-all shadow-sm font-semibold text-sm whitespace-nowrap"
             >
               <Plus size={16} /> Add Test Case
             </button>
@@ -207,9 +207,9 @@ export default function CreateQuestion() {
 
           <div className="space-y-6">
             {fields.map((field, index) => (
-              <div key={field.id} className="p-5 md:p-6 bg-slate-50/50 rounded-xl border border-slate-200 relative group">
+              <div key={field.id} className="p-5 md:p-6 bg-slate-50/50 dark:bg-[#070b14]/50 rounded-xl border border-slate-200 dark:border-white/10 relative group">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Test Case {index + 1}</h3>
+                  <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Test Case {index + 1}</h3>
                   <button
                     type="button"
                     onClick={() => remove(index)}
@@ -222,7 +222,7 @@ export default function CreateQuestion() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wider">Input</label>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">Input</label>
                     <textarea
                       {...register(`testCases.${index}.input`, { required: true })}
                       rows={3}
@@ -231,7 +231,7 @@ export default function CreateQuestion() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wider">Expected Output</label>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wider">Expected Output</label>
                     <textarea
                       {...register(`testCases.${index}.expectedOutput`, { required: true })}
                       rows={3}
@@ -241,7 +241,7 @@ export default function CreateQuestion() {
                   </div>
                 </div>
                 
-                <div className="mt-5 flex items-center bg-white p-3 border border-slate-200 rounded-lg w-fit">
+                <div className="mt-5 flex items-center bg-white dark:bg-[#0f172a] p-3 border border-slate-200 dark:border-white/10 rounded-lg w-fit transition-colors">
                   <div className="flex items-center">
                     <input
                       id={`hidden-${index}`}
@@ -249,7 +249,7 @@ export default function CreateQuestion() {
                       {...register(`testCases.${index}.isHidden`)}
                       className="h-4 w-4 text-emerald-600 focus:ring-emerald-600/20 border-slate-300 rounded cursor-pointer"
                     />
-                    <label htmlFor={`hidden-${index}`} className="ml-2.5 block text-sm font-medium text-slate-700 cursor-pointer select-none">
+                    <label htmlFor={`hidden-${index}`} className="ml-2.5 block text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                       Hide from candidate
                     </label>
                   </div>
@@ -258,8 +258,8 @@ export default function CreateQuestion() {
             ))}
             
             {fields.length === 0 && (
-              <div className="text-center py-12 bg-slate-50 border border-slate-200 border-dashed rounded-xl">
-                <p className="text-slate-500 font-medium">No test cases added yet.</p>
+              <div className="text-center py-12 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 border-dashed rounded-xl transition-colors">
+                <p className="text-slate-500 dark:text-slate-400 font-medium">No test cases added yet.</p>
                 <button
                   type="button"
                   onClick={() => append({ input: "", expectedOutput: "", isHidden: false })}

@@ -62,8 +62,8 @@ export default function RecruiterDashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Welcome back, Recruiter!</h1>
-        <p className="text-slate-500 mt-1">Here's what's happening with your technical assessments today.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome back, Recruiter!</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">Here's what's happening with your technical assessments today.</p>
       </div>
 
       {/* Stats Grid */}
@@ -71,19 +71,19 @@ export default function RecruiterDashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.name} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div key={stat.name} className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border border-slate-200 dark:border-white/10 shadow-sm transition-colors">
               <div className="flex items-center justify-between">
-                <div className={`p-3 rounded-xl ${stat.bg}`}>
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
+                <div className={`p-3 rounded-xl ${stat.bg} dark:bg-opacity-20`}>
+                  <Icon className={`w-6 h-6 ${stat.color} dark:brightness-125`} />
                 </div>
-                <span className="flex items-center text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
+                <span className="flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded-full border border-blue-100 dark:border-blue-500/20">
                   <TrendingUp className="w-4 h-4 mr-1" />
                   {stat.change}
                 </span>
               </div>
               <div className="mt-4">
-                <h3 className="text-slate-500 text-sm font-medium">{stat.name}</h3>
-                <p className="text-3xl font-bold text-slate-900 mt-1">{stat.value}</p>
+                <h3 className="text-slate-500 dark:text-slate-400 text-sm font-medium">{stat.name}</h3>
+                <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">{stat.value}</p>
               </div>
             </div>
           );
@@ -92,25 +92,25 @@ export default function RecruiterDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Activity Table */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="px-6 py-5 border-b border-slate-200 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-slate-900">Recent Candidate Activity</h2>
-            <Link href="/recruiter/candidates" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+        <div className="lg:col-span-2 bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden flex flex-col transition-colors">
+          <div className="px-6 py-5 border-b border-slate-200 dark:border-white/10 flex justify-between items-center">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Candidate Activity</h2>
+            <Link href="/recruiter/candidates" className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
               View all
             </Link>
           </div>
           <div className="overflow-x-auto min-h-[300px]">
             {isLoading ? (
                <div className="flex justify-center items-center h-[300px]">
-                 <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                 <Loader2 className="w-8 h-8 text-blue-500 dark:text-blue-400 animate-spin" />
                </div>
             ) : recentActivity.length === 0 ? (
-               <div className="flex justify-center items-center h-[300px] text-slate-500">
+               <div className="flex justify-center items-center h-[300px] text-slate-500 dark:text-slate-400">
                  No candidate activity found. Let's create an assessment!
                </div>
             ) : (
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+              <thead className="text-xs text-slate-500 dark:text-slate-400 uppercase bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10">
                 <tr>
                   <th className="px-6 py-4 font-semibold">Candidate</th>
                   <th className="px-6 py-4 font-semibold">Assessment</th>
@@ -118,20 +118,20 @@ export default function RecruiterDashboard() {
                   <th className="px-6 py-4 font-semibold">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-slate-200 dark:divide-white/10">
                 {recentActivity.map((activity) => (
-                  <tr key={activity.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={activity.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-slate-900">{activity.candidate}</div>
-                      <div className="text-slate-500 text-xs flex items-center mt-1">
+                      <div className="font-medium text-slate-900 dark:text-white">{activity.candidate}</div>
+                      <div className="text-slate-500 dark:text-slate-400 text-xs flex items-center mt-1">
                         <Clock className="w-3 h-3 mr-1" /> {activity.time}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 font-medium">{activity.test}</td>
-                    <td className="px-6 py-4 font-bold text-slate-900">{activity.score}</td>
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300 font-medium">{activity.test}</td>
+                    <td className="px-6 py-4 font-bold text-slate-900 dark:text-white">{activity.score}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                        activity.status === 'Passed' ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'
+                        activity.status === 'Passed' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' : 'bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-400'
                       }`}>
                         {activity.status}
                       </span>
@@ -145,26 +145,26 @@ export default function RecruiterDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 h-fit">
-          <h2 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h2>
+        <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm p-6 h-fit transition-colors">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Quick Actions</h2>
           <div className="space-y-3">
-            <Link href="/recruiter/questions/new" className="flex items-center p-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group">
-              <div className="bg-blue-100 p-2.5 rounded-lg text-blue-600 mr-4 group-hover:bg-blue-200 transition-colors">
+            <Link href="/recruiter/questions/new" className="flex items-center p-4 border border-slate-200 dark:border-white/10 rounded-xl hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-white/5 transition-all group">
+              <div className="bg-blue-100 dark:bg-blue-500/20 p-2.5 rounded-lg text-blue-600 dark:text-blue-400 mr-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-500/30 transition-colors">
                 <FileCode2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">Create Question</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Add a new coding problem</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">Create Question</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Add a new coding problem</p>
               </div>
             </Link>
             
-            <button className="w-full flex items-center p-4 border border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group text-left">
-              <div className="bg-blue-100 p-2.5 rounded-lg text-blue-600 mr-4 group-hover:bg-blue-200 transition-colors">
+            <button className="w-full flex items-center p-4 border border-slate-200 dark:border-white/10 rounded-xl hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-white/5 transition-all group text-left">
+              <div className="bg-blue-100 dark:bg-blue-500/20 p-2.5 rounded-lg text-blue-600 dark:text-blue-400 mr-4 group-hover:bg-blue-200 dark:group-hover:bg-blue-500/30 transition-colors">
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">Invite Candidate</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Send an assessment link</p>
+                <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">Invite Candidate</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Send an assessment link</p>
               </div>
             </button>
           </div>

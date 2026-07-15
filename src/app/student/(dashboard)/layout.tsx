@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Code2, LogOut, Laptop, LayoutDashboard } from "lucide-react";
@@ -19,11 +21,15 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900 selection:bg-blue-100">
       {/* Top Navbar */}
       <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 md:px-12 sticky top-0 z-50">
-        <Link href="/student" className="flex items-center gap-2 hover:opacity-90 transition">
-          <div className="bg-emerald-600 p-1.5 rounded-lg shadow-sm">
-            <Code2 className="text-white h-5 w-5" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-slate-900">CodeCanvas</span>
+        <Link href="/student" className="flex items-center hover:opacity-90 transition">
+          <Image 
+            src="/logo.png" 
+            alt="CodeCanvas Logo" 
+            width={160} 
+            height={40} 
+            className="object-contain"
+            priority
+          />
         </Link>
 
         <div className="flex items-center gap-4">
