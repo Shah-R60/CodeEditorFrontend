@@ -242,9 +242,15 @@ export default function DriveDetails() {
 
                     <div className="flex flex-col gap-3 min-w-[200px]">
                       {isCurrentRoundLive ? (
-                        <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95">
-                          Start Assessment
-                        </Link>
+                        pipelineSteps[currentStageIndex].type !== 'Online Assessment' ? (
+                          <Link href={`/interview/live_${assessment.id}?role=candidate&stageId=${pipelineSteps[currentStageIndex].id}`} className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-md shadow-purple-500/20 transition-all hover:scale-105 active:scale-95">
+                            Join Live Interview
+                          </Link>
+                        ) : (
+                          <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95">
+                            Start Assessment
+                          </Link>
+                        )
                       ) : currentStageIndex > 0 && currentStageIndex < pipelineSteps.length - 1 ? (
                         <Link href="/editor" className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 px-6 rounded-xl text-center transition-all">
                           Take Demo Assessment
@@ -312,9 +318,15 @@ export default function DriveDetails() {
                       
                       <div className="pt-4 flex">
                         {isCurrentRoundLive ? (
-                          <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
-                            Start Assessment <ChevronRight size={18} />
-                          </Link>
+                          pipelineSteps[currentStageIndex].type !== 'Online Assessment' ? (
+                            <Link href={`/interview/live_${assessment.id}?role=candidate&stageId=${pipelineSteps[currentStageIndex].id}`} className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
+                              Join Live Interview <ChevronRight size={18} />
+                            </Link>
+                          ) : (
+                            <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
+                              Start Assessment <ChevronRight size={18} />
+                            </Link>
+                          )
                         ) : (
                           <Link href="/editor" className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
                             Take Demo Assessment <ChevronRight size={18} />

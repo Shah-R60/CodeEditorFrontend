@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   StreamVideo,
   StreamVideoClient,
@@ -9,7 +10,8 @@ import {
   CallControls,
   Call,
   useCallStateHooks,
-  ParticipantView
+  ParticipantView,
+  PaginatedGridLayout
 } from '@stream-io/video-react-sdk';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 
@@ -20,27 +22,9 @@ interface VideoSidebarProps {
   callId: string;
 }
 
-const CustomVerticalLayout = () => {
-  const { useParticipants } = useCallStateHooks();
-  const participants = useParticipants();
-
-  return (
-    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-      {participants.length === 0 && (
-        <div className="flex aspect-video items-center justify-center rounded-xl border border-dashed border-gray-700 text-sm text-gray-500">
-          Waiting for others...
-        </div>
-      )}
-      {participants.map((participant) => (
-        <div key={participant.sessionId} className="w-full relative aspect-video rounded-xl bg-gray-800 overflow-hidden border border-gray-700 shadow-md">
-          <ParticipantView participant={participant} />
-        </div>
-      ))}
-    </div>
-  );
-};
 
 export default function VideoSidebar({ token, apiKey, userId, callId }: VideoSidebarProps) {
+  const router = useRouter();
   const [client, setClient] = useState<StreamVideoClient | null>(null);
   const [call, setCall] = useState<Call | null>(null);
 
@@ -93,9 +77,15 @@ export default function VideoSidebar({ token, apiKey, userId, callId }: VideoSid
         <StreamCall call={call}>
           <StreamTheme className="h-full w-full absolute inset-0">
             <div className="flex-1 h-full w-full flex flex-col overflow-hidden bg-gray-950">
-              <CustomVerticalLayout />
+              <PaginatedGridLayout />
               <div className="border-t border-gray-800 bg-gray-900 pb-2 pt-2">
-                <CallControls />
+                <CallControls 
+                  onLeave={() => {
+                    if (window.confirm("Are you sure you want to end the meeting?")) {
+                      router.back();
+                    }
+                  }} 
+                />
               </div>
             </div>
           </StreamTheme>

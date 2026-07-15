@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { Play, Lock, Users, ChevronDown, ChevronUp, Terminal, FileText } from "lucide-react";
+import { Panel, Group, Separator } from "react-resizable-panels";
 import * as Y from "yjs";
 import { io, Socket } from "socket.io-client";
 import VideoSidebar from "./VideoSidebar";
@@ -59,6 +60,26 @@ const languageMeta: Record<LanguageKey, { label: string; monaco: string }> = {
 export default function InterviewRoom() {
   const params = useParams();
   const roomId = params?.roomId as string;
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role') || 'candidate';
+  const stageId = searchParams.get('stageId');
+
+  const [isQuestionBankOpen, setIsQuestionBankOpen] = useState(false);
+  const [globalQuestions, setGlobalQuestions] = useState<Question[]>([]);
+  const [isGradingModalOpen, setIsGradingModalOpen] = useState(false);
+  const [interviewerScore, setInterviewerScore] = useState({
+    communication: 0,
+    coding: 0,
+    core: 0,
+    systemDesign: 0
+  });
+  
+  const totalScore = useMemo(() => {
+    return Object.values(interviewerScore).reduce((a, b) => a + (Number(b) || 0), 0);
+  }, [interviewerScore]);
+
+  const [interviewerNotes, setInterviewerNotes] = useState("");
+  const [isSubmittingGrade, setIsSubmittingGrade] = useState(false);
 
   const [language, setLanguage] = useState<LanguageKey>("python");
   const [question, setQuestion] = useState<Question | null>(null);
@@ -72,6 +93,7 @@ export default function InterviewRoom() {
   const [connectedUsers, setConnectedUsers] = useState<number>(1);
   
   // Layout State
+  const [viewMode, setViewMode] = useState<"video" | "coding" | "notepad">("video");
   const [bottomPanelOpen, setBottomPanelOpen] = useState(true);
   const [bottomTab, setBottomTab] = useState<'problem' | 'terminal'>('problem');
 
@@ -90,8 +112,8 @@ export default function InterviewRoom() {
       setIsLoading(true);
       setErrorBanner("");
       setResults(null);
-      setBottomPanelOpen(true); // Auto-open panel on run
-      setBottomTab('terminal'); // Switch to terminal tab
+      setBottomPanelOpen(true);
+      setBottomTab('terminal');
     });
 
     socket.on("execution-result", (data: ExecuteResponse) => {
@@ -101,6 +123,20 @@ export default function InterviewRoom() {
       setBottomPanelOpen(true);
       setBottomTab('terminal');
     });
+
+    socket.on("active-question-changed", (q: Question) => {
+      setQuestion(q);
+    });
+
+    if (role === 'interviewer') {
+      const url = stageId ? `${API_BASE_URL}/db/rounds/${stageId}/questions` : `${API_BASE_URL}/db/questions`;
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setGlobalQuestions(data.data);
+        })
+        .catch(console.error);
+    }
 
     // Fetch GetStream.io token
     fetch(`${API_BASE_URL}/stream/token`, {
@@ -122,7 +158,7 @@ export default function InterviewRoom() {
     return () => {
       socket.disconnect();
     };
-  }, [roomId]);
+  }, [roomId, stageId, role, userId]);
 
   const handleEditorDidMount: OnMount = async (editor, monaco) => {
     editorRef.current = editor;
@@ -156,6 +192,10 @@ export default function InterviewRoom() {
       if (syncedQuestion) {
         setQuestion(syncedQuestion);
       }
+      const syncedViewMode = state.get("viewMode") as "video" | "coding" | "notepad" | undefined;
+      if (syncedViewMode) {
+        setViewMode(syncedViewMode);
+      }
     });
 
     provider.on("sync", (isSynced: boolean) => {
@@ -173,6 +213,10 @@ export default function InterviewRoom() {
               }
             })
             .catch(console.error);
+        }
+        
+        if (!state.get("viewMode")) {
+          state.set("viewMode", "video");
         }
       }
     });
@@ -253,261 +297,448 @@ export default function InterviewRoom() {
     }
   };
 
+  const handlePushQuestion = (q: Question) => {
+    setQuestion(q);
+    socketRef.current?.emit("push-question", { roomId, question: q });
+    setIsQuestionBankOpen(false);
+  };
+
+  const submitInterview = async () => {
+    setIsSubmittingGrade(true);
+    try {
+      const candidateId = roomId.replace('live_', '');
+      const stageId = searchParams.get('stageId') || "";
+      
+      const userId = localStorage.getItem("userId");
+      
+      await fetch(`${API_BASE_URL}/db/users/${userId}/assessments/${candidateId}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          score: `${totalScore}/40`, 
+          timeTaken: `live_${new Date().toISOString()}`, 
+          stageId,
+          submissions: [
+            { title: 'Notes', code: interviewerNotes },
+            { title: 'Detailed Scores', code: JSON.stringify(interviewerScore, null, 2) }
+          ] 
+        })
+      });
+      alert("Interview graded successfully!");
+      window.close();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit grade");
+    } finally {
+      setIsSubmittingGrade(false);
+    }
+  };
+
   return (
-    <div className="flex h-screen flex-col bg-gray-950 text-white overflow-hidden">
-      {/* Top Navbar */}
-      <nav className="flex shrink-0 items-center justify-between border-b border-gray-800 bg-gray-950/70 px-6 py-4 backdrop-blur">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold tracking-[0.3em] text-emerald-400">
-            CODE
-          </span>
-          <span className="text-lg font-semibold">Live Interview</span>
-          <span className="ml-4 rounded-full bg-gray-800 px-3 py-1 text-xs text-gray-300">
-            Room: {roomId}
-          </span>
-        </div>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <Users className="h-4 w-4 text-emerald-400" />
-            <span>{connectedUsers} Online</span>
-          </div>
+    <div className="relative h-screen w-full">
+      <div className="flex h-full flex-col bg-[#0a0a0a] text-white overflow-hidden">
+        {/* Top Navbar (Matching OA Style) */}
+        <nav className="flex h-14 shrink-0 items-center justify-between border-b border-gray-800 bg-[#161616] px-6">
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase text-gray-400">Language</span>
+            <span className="text-sm font-semibold tracking-[0.1em] text-emerald-500 uppercase">
+              Live Interview
+            </span>
+            <span className="text-sm font-semibold text-gray-200">| Room: {roomId.replace('live_', '')}</span>
+          </div>
+          <div className="flex items-center gap-4">
+            {role === 'interviewer' && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    const newState = viewMode === 'coding' ? 'video' : 'coding';
+                    setViewMode(newState);
+                    providerRef.current?.doc.getMap('state').set('viewMode', newState);
+                  }}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-md transition ${viewMode === 'coding' ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md' : 'bg-[#262626] border border-gray-700 hover:bg-[#333333] text-gray-300'}`}
+                >
+                  {viewMode === 'coding' ? 'Hide Code Editor' : 'Show Code Editor'}
+                </button>
+                <button
+                  onClick={() => {
+                    const newState = viewMode === 'notepad' ? 'video' : 'notepad';
+                    setViewMode(newState);
+                    providerRef.current?.doc.getMap('state').set('viewMode', newState);
+                  }}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-md transition ${viewMode === 'notepad' ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md' : 'bg-[#262626] border border-gray-700 hover:bg-[#333333] text-gray-300'}`}
+                >
+                  {viewMode === 'notepad' ? 'Hide Notepad' : 'Show Notepad'}
+                </button>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-sm text-gray-300 bg-[#262626] px-3 py-1 rounded-md border border-gray-700">
+              <Users className="h-4 w-4 text-emerald-400" />
+              <span>{connectedUsers} Online</span>
+            </div>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value as LanguageKey)}
-              className="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white shadow-sm outline-none transition focus:border-emerald-500"
+              className="rounded-md border border-gray-700 bg-[#262626] px-3 py-1 text-xs text-gray-200 shadow-sm outline-none transition focus:border-emerald-500"
             >
               {Object.entries(languageMeta).map(([key, meta]) => (
-                <option key={key} value={key} className="bg-gray-900">
+                <option key={key} value={key}>
                   {meta.label}
                 </option>
               ))}
             </select>
           </div>
-          <button
-            onClick={handleRun}
-            disabled={isLoading}
-            className="flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-2 text-sm font-semibold text-gray-900 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Play className="h-4 w-4" />
-            {isLoading ? "Running..." : "Run Code"}
-          </button>
-        </div>
-      </nav>
+        </nav>
 
-      {/* Main Content Area */}
-      <div className="flex flex-1 overflow-hidden">
-        
-        {/* Left Side (70%): Editor + Bottom Panel */}
-        <div className="flex w-[70%] flex-col">
-          
-          {/* Editor Area */}
-          <div className="flex-1 overflow-hidden p-4">
-            <div className="flex h-full flex-col rounded-2xl border border-gray-800 bg-gray-900/70 shadow-lg">
-              <div className="flex items-center justify-between px-4 py-2 text-sm text-gray-400 border-b border-gray-800">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span>Shared Editor</span>
-                </div>
-                <span className="text-xs">{languageMeta[language].label}</span>
-              </div>
-              <div className="flex-1 p-2">
-                <Editor
-                  height="100%"
-                  theme="vs-dark"
-                  language={languageMeta[language].monaco}
-                  onMount={handleEditorDidMount}
-                  options={{
-                    fontSize: 14,
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: "on",
-                    padding: { top: 16, bottom: 16 }
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Panel (Collapsible) */}
-          <div className={`flex flex-col border-t border-gray-800 bg-gray-900 transition-all duration-300 ease-in-out ${bottomPanelOpen ? 'h-[45%]' : 'h-12'}`}>
-            {/* Panel Tabs */}
-            <div className="flex h-12 shrink-0 items-center justify-between border-b border-gray-800 px-4 bg-gray-950">
-              <div className="flex gap-2 h-full">
-                <button 
-                  onClick={() => { setBottomTab('problem'); setBottomPanelOpen(true); }}
-                  className={`flex h-full items-center gap-2 border-b-2 px-4 text-sm font-medium transition ${bottomTab === 'problem' && bottomPanelOpen ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-400 hover:text-gray-200'}`}
-                >
-                  <FileText className="h-4 w-4" />
-                  Problem
-                </button>
-                <button 
-                  onClick={() => { setBottomTab('terminal'); setBottomPanelOpen(true); }}
-                  className={`flex h-full items-center gap-2 border-b-2 px-4 text-sm font-medium transition ${bottomTab === 'terminal' && bottomPanelOpen ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-400 hover:text-gray-200'}`}
-                >
-                  <Terminal className="h-4 w-4" />
-                  Terminal
-                </button>
-              </div>
-              <button 
-                onClick={() => setBottomPanelOpen(!bottomPanelOpen)}
-                className="flex items-center justify-center rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-800 hover:text-white"
-              >
-                {bottomPanelOpen ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
-              </button>
-            </div>
-
-            {/* Panel Content */}
-            {bottomPanelOpen && (
-              <div className="flex-1 overflow-y-auto p-4">
-                {bottomTab === 'problem' ? (
-                  /* Problem Description Tab */
-                  <div className="mx-auto max-w-3xl">
+        <div className="flex-1 relative flex min-h-0 overflow-hidden">
+          {/* Main Interview Area (Coding Layout) */}
+          <div className={`absolute inset-0 flex transition-opacity duration-500 ${viewMode !== 'video' ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}>
+            <div className="flex-1 p-2 min-h-0 overflow-hidden">
+              <Group orientation="horizontal" className="flex">
+              
+              {/* Left Panel: Problem */}
+              {viewMode === 'coding' && (
+                <Panel defaultSize={45} minSize={25} className="flex flex-col rounded-xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
+                  <div className="flex shrink-0 items-center bg-[#262626] px-4 py-2 border-b border-gray-800">
+                    <span className="text-sm font-semibold text-gray-300">Description</span>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                     {!question ? (
-                      <div className="flex items-center justify-center py-10 text-sm text-gray-400">Loading problem...</div>
+                      <div className="flex h-full items-center justify-center text-sm text-gray-500">Waiting for interviewer to assign a problem...</div>
                     ) : (
-                      <div className="flex flex-col gap-4">
-                        <div className="flex items-center gap-4">
-                          <h2 className="text-xl font-bold">{question.title}</h2>
-                          <span className={`rounded-full border px-3 py-1 text-xs uppercase ${
-                            question.difficulty === 'HARD' ? 'border-rose-500/50 bg-rose-500/10 text-rose-300' :
-                            question.difficulty === 'MEDIUM' ? 'border-amber-500/50 bg-amber-500/10 text-amber-300' :
-                            'border-emerald-500/50 bg-emerald-500/10 text-emerald-300'
+                      <>
+                        <div className="flex items-center gap-4 mb-6">
+                          <h1 className="text-2xl font-bold text-gray-100">{question.title}</h1>
+                          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            question.difficulty === 'HARD' ? 'bg-rose-500/10 text-rose-400' :
+                            question.difficulty === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400' :
+                            'bg-emerald-500/10 text-emerald-400'
                           }`}>
                             {question.difficulty}
                           </span>
                         </div>
-                        <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-300">
-                          {question.description}
-                        </p>
-                      </div>
+                        <div className="prose prose-invert max-w-none text-sm leading-relaxed text-gray-300">
+                          <p className="whitespace-pre-wrap">{question.description}</p>
+                        </div>
+                      </>
                     )}
                   </div>
-                ) : (
-                  /* Terminal Tab */
-                  <div className="mx-auto max-w-4xl">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold">Test Results</h2>
-                      <div className={`text-sm font-semibold ${verdictTone || "text-gray-300"}`}>
+                </Panel>
+              )}
+
+              {viewMode === 'coding' && (
+                <Separator className="w-2 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition flex flex-col justify-center items-center group cursor-col-resize">
+                  <div className="h-8 w-1 rounded-full bg-gray-800 group-hover:bg-emerald-500/50 transition"></div>
+                </Separator>
+              )}
+
+              {/* Right Panel: Editor + Results */}
+              <Panel defaultSize={viewMode === 'coding' ? 55 : 100} minSize={30} className="flex flex-col">
+                <div className="flex-1 flex flex-col min-h-0">
+                  <Group orientation="vertical" className="flex flex-col">
+                    
+                    {/* Top Half: Editor */}
+                    <Panel defaultSize={viewMode === 'coding' ? 60 : 100} minSize={20} className="flex flex-col rounded-xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
+                    <div className="flex shrink-0 items-center justify-between bg-[#262626] px-4 py-2 border-b border-gray-800">
+                      <span className="text-sm font-semibold text-gray-300 flex items-center gap-2">
+                        <span className="text-emerald-500">&lt;/&gt;</span> Code
+                      </span>
+                      <span className="text-xs text-gray-400">{languageMeta[language].label}</span>
+                    </div>
+                    <div className="relative flex-1">
+                      <div className="absolute inset-0 pt-2">
+                        <Editor
+                          height="100%"
+                          theme="vs-dark"
+                          language={languageMeta[language].monaco}
+                          onMount={handleEditorDidMount}
+                          options={{
+                            fontSize: 14,
+                            minimap: { enabled: false },
+                            scrollBeyondLastLine: false,
+                            wordWrap: "on",
+                            automaticLayout: true,
+                            padding: { top: 16, bottom: 16 }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </Panel>
+
+                  {viewMode === 'coding' && (
+                    <Separator className="h-2 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition flex justify-center items-center group cursor-row-resize">
+                      <div className="w-8 h-1 rounded-full bg-gray-800 group-hover:bg-emerald-500/50 transition"></div>
+                    </Separator>
+                  )}
+
+                  {/* Bottom Half: Test Results */}
+                  {viewMode === 'coding' && (
+                    <Panel defaultSize={40} minSize={20} className="flex flex-col rounded-xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
+                    <div className="flex shrink-0 items-center justify-between bg-[#262626] px-4 py-2 border-b border-gray-800">
+                      <h2 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
+                        <span className="text-emerald-500">☑</span> Testcase
+                      </h2>
+                      <div className={`text-xs font-semibold ${verdictTone || "text-gray-500"}`}>
                         {verdictLabel}
                       </div>
                     </div>
 
-                    {errorBanner ? (
-                      <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                        {errorBanner}
-                      </div>
-                    ) : null}
-
-                    {isLoading ? (
-                      <div className="flex py-10 items-center justify-center rounded-xl border border-dashed border-gray-700 text-sm text-gray-400">
-                        Running shared code...
-                      </div>
-                    ) : results ? (
-                      <div className="flex flex-col gap-4">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {results.results.map((result, index) => (
-                            <button
-                              key={result.testCase}
-                              onClick={() => setActiveTab(index)}
-                              className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
-                                index === activeTab
-                                  ? "bg-emerald-500/20 text-emerald-300"
-                                  : "bg-gray-800 text-gray-300 hover:text-white"
-                              }`}
-                            >
-                              Test {result.testCase}
-                            </button>
-                          ))}
+                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                      {errorBanner ? (
+                        <div className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+                          {errorBanner}
                         </div>
+                      ) : null}
 
-                        <div className="flex flex-col gap-4 rounded-xl border border-gray-800 bg-gray-950/70 p-4">
-                          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-400">
-                            <span>
-                              Passed {results.totalPassed} / {results.totalTests}
-                            </span>
-                            {selectedResult ? (
-                              <span>
-                                {selectedResult.passed ? "Accepted" : "Rejected"} in {" "}
-                                {selectedResult.timeMs}ms
-                              </span>
-                            ) : null}
+                      {isLoading ? (
+                        <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                          Running shared code...
+                        </div>
+                      ) : results ? (
+                        <div className="flex flex-col gap-4">
+                          <div className="flex flex-wrap items-center gap-2 border-b border-gray-800 pb-2">
+                            {results.results.map((result, index) => (
+                              <button
+                                key={result.testCase}
+                                onClick={() => setActiveTab(index)}
+                                className={`rounded-md px-4 py-1.5 text-xs font-semibold transition ${
+                                  index === activeTab
+                                    ? "bg-[#333333] text-gray-100"
+                                    : "bg-transparent text-gray-500 hover:bg-[#262626] hover:text-gray-300"
+                                }`}
+                              >
+                                Case {result.testCase}
+                              </button>
+                            ))}
                           </div>
 
-                          <div className="flex flex-col gap-3 text-sm">
+                          <div className="flex flex-col gap-4">
+                            <div className="flex items-center gap-4 text-xs">
+                              <span className="text-gray-400">
+                                Passed <strong className="text-gray-200">{results.totalPassed}</strong> / {results.totalTests}
+                              </span>
+                              {selectedResult && (
+                                <span className={selectedResult.passed ? "text-emerald-400" : "text-rose-400"}>
+                                  {selectedResult.passed ? "Accepted" : "Rejected"} in {selectedResult.timeMs}ms
+                                </span>
+                              )}
+                            </div>
+
                             {selectedTestCase?.isHidden ? (
-                              <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-800 bg-gray-900/80 p-8 text-gray-400">
+                              <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-800 bg-[#161616] p-8 text-gray-400">
                                 <Lock className="h-6 w-6" />
                                 <span className="text-sm font-semibold">Hidden Test Case</span>
-                                <p className="text-xs text-center max-w-xs">Input and Expected Output are hidden. Your code must handle edge cases automatically.</p>
+                                <p className="text-xs text-center max-w-xs text-gray-500">Input and Expected Output are hidden. Your code must handle edge cases automatically.</p>
                               </div>
                             ) : (
-                              <>
-                                <div>
-                                  <p className="text-xs uppercase text-gray-400">Input</p>
-                                  <pre className="mt-2 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/80 p-3 text-xs text-gray-200">
-                                    {selectedTestCase?.input || ""}
+                              <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-1.5">
+                                  <div className="text-xs font-medium text-gray-400">Input</div>
+                                  <pre className="rounded-lg border border-gray-800 bg-[#161616] p-3 text-xs text-gray-300 font-mono whitespace-pre-wrap">{selectedTestCase?.input || ""}</pre>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <div className="text-xs font-medium text-gray-400">Expected Output</div>
+                                  <pre className="rounded-lg border border-gray-800 bg-[#161616] p-3 text-xs text-gray-300 font-mono whitespace-pre-wrap">{selectedResult?.expected || ""}</pre>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <div className="text-xs font-medium text-gray-400">Your Output</div>
+                                  <pre className={`rounded-lg border p-3 text-xs font-mono whitespace-pre-wrap ${
+                                    selectedResult?.stderr 
+                                      ? "border-rose-500/20 bg-rose-500/5 text-rose-400" 
+                                      : "border-gray-800 bg-[#161616] text-gray-300"
+                                  }`}>
+                                    {selectedResult?.stderr || selectedResult?.stdout || ""}
                                   </pre>
                                 </div>
-                                <div>
-                                  <p className="text-xs uppercase text-gray-400">
-                                    {selectedResult?.stderr ? "Error" : "Your Output"}
-                                  </p>
-                                  <pre
-                                    className={`mt-2 overflow-x-auto rounded-lg border p-3 text-xs ${
-                                      selectedResult?.stderr
-                                        ? "border-rose-500/40 bg-rose-500/10 text-rose-200"
-                                        : "border-gray-800 bg-gray-900/80 text-gray-200"
-                                    }`}
-                                  >
-                                    {selectedResult?.stderr
-                                      ? selectedResult.stderr
-                                      : selectedResult?.stdout || ""}
-                                  </pre>
-                                </div>
-                                <div>
-                                  <p className="text-xs uppercase text-gray-400">Expected</p>
-                                  <pre className="mt-2 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/80 p-3 text-xs text-gray-200">
-                                    {selectedResult?.expected || ""}
-                                  </pre>
-                                </div>
-                              </>
+                              </div>
                             )}
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex py-10 items-center justify-center rounded-xl border border-dashed border-gray-800 text-sm text-gray-400">
-                        Code execution results will appear here.
-                      </div>
-                    )}
-                  </div>
-                )}
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                          Run your code to see results.
+                        </div>
+                      )}
+                    </div>
+
+                  </Panel>
+                  )}
+                </Group>
+                </div>
+                
+                {/* Bottom Action Bar (Always Visible) */}
+                <div className="flex shrink-0 items-center justify-end bg-[#1e1e1e] px-4 py-3 border border-gray-800 rounded-xl mt-2 gap-3 shadow-sm">
+                  <button
+                    onClick={handleRun}
+                    disabled={isLoading}
+                    className="flex items-center gap-2 rounded-md bg-[#262626] border border-gray-700 px-6 py-1.5 text-sm font-semibold text-gray-300 transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Play className="h-4 w-4" fill="currentColor" />
+                    {isLoading ? "Running" : "Run Code"}
+                  </button>
+
+                  {role === 'interviewer' && (
+                    <>
+                      <button
+                        onClick={() => setIsQuestionBankOpen(true)}
+                        className="flex items-center gap-2 rounded-md bg-blue-600 px-6 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-sm"
+                      >
+                        Question Bank
+                      </button>
+                      <button
+                        onClick={() => setIsGradingModalOpen(true)}
+                        className="flex items-center gap-2 rounded-md bg-emerald-600 px-6 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
+                      >
+                        End Interview
+                      </button>
+                    </>
+                  )}
+                </div>
+              </Panel>
+            </Group>
+            </div>
+            <div className="w-[30%] min-w-[300px] shrink-0"></div>
+          </div>
+
+          {/* Right Side: Video Sidebar */}
+          <div className={`absolute right-0 top-0 bottom-0 transition-all duration-500 z-20 bg-[#0a0a0a] ${viewMode !== 'video' ? 'w-[30%] min-w-[300px] border-l border-gray-800 shadow-2xl' : 'w-full'}`}>
+            {streamToken && streamApiKey ? (
+              <VideoSidebar 
+                token={streamToken} 
+                apiKey={streamApiKey} 
+                userId={userId} 
+                callId={roomId} 
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center p-6 text-center">
+                <div className="text-sm text-gray-500">
+                  {errorBanner ? "Failed to load video" : "Connecting to video service..."}
+                </div>
               </div>
             )}
           </div>
         </div>
+      </div>
 
-        {/* Right Side (30%): Video Sidebar */}
-        <div className="w-[30%] border-l border-gray-800">
-          {streamToken && streamApiKey ? (
-            <VideoSidebar 
-              token={streamToken} 
-              apiKey={streamApiKey} 
-              userId={userId} 
-              callId={roomId} 
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center p-6 text-center">
-              <div className="text-sm text-gray-500">
-                {errorBanner ? "Failed to load video" : "Connecting to video service..."}
+      {/* Question Bank Modal */}
+      {isQuestionBankOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#1e1e1e] border border-gray-700 rounded-xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+              <h2 className="text-xl font-bold text-white">Question Bank</h2>
+              <button onClick={() => setIsQuestionBankOpen(false)} className="text-gray-400 hover:text-white">
+                <ChevronDown className="w-6 h-6 rotate-90" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+              {globalQuestions.map((q) => (
+                <div key={q.id} className="bg-[#262626] border border-gray-800 rounded-lg p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-emerald-400">{q.title}</h3>
+                    <span className="text-xs px-2 py-1 bg-gray-800 rounded text-gray-300">{q.difficulty}</span>
+                  </div>
+                  <p className="text-sm text-gray-400 line-clamp-2">{q.description}</p>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => handlePushQuestion(q)}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded text-sm font-bold transition"
+                    >
+                      Send to Candidate
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {globalQuestions.length === 0 && (
+                <div className="text-gray-500 text-center py-10">No questions available.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Grading Modal */}
+      {isGradingModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#1e1e1e] border border-gray-700 rounded-xl w-full max-w-md flex flex-col shadow-2xl p-6">
+            <h2 className="text-xl font-bold text-white mb-4">End Interview & Grade</h2>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Communication /10</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={interviewerScore.communication || ""}
+                    onChange={(e) => setInterviewerScore({...interviewerScore, communication: parseInt(e.target.value) || 0})}
+                    className="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Coding /10</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={interviewerScore.coding || ""}
+                    onChange={(e) => setInterviewerScore({...interviewerScore, coding: parseInt(e.target.value) || 0})}
+                    className="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Core Concepts /10</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={interviewerScore.core || ""}
+                    onChange={(e) => setInterviewerScore({...interviewerScore, core: parseInt(e.target.value) || 0})}
+                    className="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">System Design /10</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={interviewerScore.systemDesign || ""}
+                    onChange={(e) => setInterviewerScore({...interviewerScore, systemDesign: parseInt(e.target.value) || 0})}
+                    className="w-full bg-[#262626] border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+              <div className="bg-[#262626] p-3 rounded-lg border border-gray-700 flex justify-between items-center">
+                <span className="text-sm font-semibold text-gray-300">Total Score:</span>
+                <span className="text-lg font-bold text-emerald-400">{totalScore} <span className="text-sm text-gray-500">/ 40</span></span>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Interviewer Notes</label>
+                <textarea
+                  value={interviewerNotes}
+                  onChange={(e) => setInterviewerNotes(e.target.value)}
+                  rows={4}
+                  className="w-full bg-[#262626] border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500 resize-none"
+                  placeholder="Enter qualitative feedback and notes..."
+                />
               </div>
             </div>
-          )}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setIsGradingModalOpen(false)}
+                className="flex-1 bg-[#262626] hover:bg-[#333333] border border-gray-700 text-white px-4 py-2 rounded-lg font-bold transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitInterview}
+                disabled={isSubmittingGrade}
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold transition disabled:opacity-50"
+              >
+                {isSubmittingGrade ? "Submitting..." : "Submit & End"}
+              </button>
+            </div>
+          </div>
         </div>
-
-      </div>
+      )}
     </div>
   );
 }

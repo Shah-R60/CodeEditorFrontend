@@ -17,20 +17,30 @@ export default function StageDetailsPage() {
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper functions to get round-specific data safely
+  const parseStageData = (data: any) => {
+    if (!data) return {};
+    if (typeof data === 'string') {
+      try { return JSON.parse(data); } catch { return {}; }
+    }
+    return data;
+  };
+
   const getStageScore = (c: any) => {
     if (!c) return undefined;
-    if (c.stageData && c.stageData[currentStage?.id]) return c.stageData[currentStage.id].score;
+    const sd = parseStageData(c.stageData);
+    if (sd && sd[currentStage?.id]) return sd[currentStage.id].score;
     return currentStage?.type === 'Online Assessment' ? c.score : undefined;
   };
   const getStageTimeTaken = (c: any) => {
     if (!c) return undefined;
-    if (c.stageData && c.stageData[currentStage?.id]) return c.stageData[currentStage.id].timeTaken;
+    const sd = parseStageData(c.stageData);
+    if (sd && sd[currentStage?.id]) return sd[currentStage.id].timeTaken;
     return currentStage?.type === 'Online Assessment' ? c.timeTaken : undefined;
   };
   const getStageSubmissions = (c: any) => {
     if (!c) return [];
-    if (c.stageData && c.stageData[currentStage?.id]) return c.stageData[currentStage.id].submissions;
+    const sd = parseStageData(c.stageData);
+    if (sd && sd[currentStage?.id]) return sd[currentStage.id].submissions || [];
     return currentStage?.type === 'Online Assessment' ? c.submissions : [];
   };
 
@@ -492,12 +502,12 @@ export default function StageDetailsPage() {
         return den > 0 ? (num / den) * 100 : 0;
       }
       return parseFloat(getStageScore(c)) || 0;
-    }).sort((a, b) => a - b);
+    }).sort((a: any, b: any) => a - b);
 
     let avg = 0, highest = 0, lowest = 0, median = 0;
 
     if (scorePercentages.length > 0) {
-      avg = Math.round(scorePercentages.reduce((a, b) => a + b, 0) / scorePercentages.length);
+      avg = Math.round(scorePercentages.reduce((a: any, b: any) => a + b, 0) / scorePercentages.length);
       highest = Math.round(scorePercentages[scorePercentages.length - 1]);
       lowest = Math.round(scorePercentages[0]);
       const mid = Math.floor(scorePercentages.length / 2);
@@ -505,11 +515,11 @@ export default function StageDetailsPage() {
     }
 
     const distribution = [
-      { range: '0-20', count: scorePercentages.filter(s => s <= 20).length },
-      { range: '21-40', count: scorePercentages.filter(s => s > 20 && s <= 40).length },
-      { range: '41-60', count: scorePercentages.filter(s => s > 40 && s <= 60).length },
-      { range: '61-80', count: scorePercentages.filter(s => s > 60 && s <= 80).length },
-      { range: '81-100', count: scorePercentages.filter(s => s > 80).length }
+      { range: '0-20', count: scorePercentages.filter((s: any) => s <= 20).length },
+      { range: '21-40', count: scorePercentages.filter((s: any) => s > 20 && s <= 40).length },
+      { range: '41-60', count: scorePercentages.filter((s: any) => s > 40 && s <= 60).length },
+      { range: '61-80', count: scorePercentages.filter((s: any) => s > 60 && s <= 80).length },
+      { range: '81-100', count: scorePercentages.filter((s: any) => s > 80).length }
     ];
 
     const langCounts: Record<string, number> = { python: 0, cpp: 0, javascript: 0 };
@@ -915,9 +925,9 @@ export default function StageDetailsPage() {
                           </span>
                         ) : (
                           <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${c.status === "Passed" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
-                              c.status === "In Review" ? "bg-amber-50 text-amber-700 border border-amber-200" :
-                                c.status === "Pending" ? "bg-slate-100 text-slate-700 border border-slate-200" :
-                                  "bg-rose-50 text-rose-700 border border-rose-200"
+                            c.status === "In Review" ? "bg-amber-50 text-amber-700 border border-amber-200" :
+                              c.status === "Pending" ? "bg-slate-100 text-slate-700 border border-slate-200" :
+                                "bg-rose-50 text-rose-700 border border-rose-200"
                             }`}>
                             {c.status}
                           </span>
@@ -1628,8 +1638,8 @@ export default function StageDetailsPage() {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-500 font-medium">Current Status</span>
                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${selectedCandidateForReview?.status === "Passed" ? "bg-emerald-100 text-emerald-700" :
-                    selectedCandidateForReview?.status === "In Review" ? "bg-amber-100 text-amber-700" :
-                      "bg-rose-100 text-rose-700"
+                  selectedCandidateForReview?.status === "In Review" ? "bg-amber-100 text-amber-700" :
+                    "bg-rose-100 text-rose-700"
                   }`}>
                   {selectedCandidateForReview?.status || "N/A"}
                 </span>
@@ -1658,6 +1668,50 @@ export default function StageDetailsPage() {
                     No source code was saved for this submission.
                   </div>
                 )}
+              </div>
+            )}
+            {currentStage.type !== 'Online Assessment' && getStageScore(selectedCandidateForReview) && (
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                <h3 className="text-sm font-bold text-slate-900">Interview Feedback & Scores</h3>
+                {getStageSubmissions(selectedCandidateForReview)?.map((sub: any, idx: number) => (
+                  <div key={idx} className="space-y-1">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{sub.title}</span>
+                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden text-sm">
+                      {sub.title === 'Detailed Scores' && typeof sub.code === 'string' && sub.code.startsWith('{') 
+                        ? (
+                           <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+                             {Object.entries(JSON.parse(sub.code)).map(([key, val]) => (
+                               <div key={key} className="flex justify-between items-center p-3 hover:bg-slate-50 transition-colors">
+                                 <span className="capitalize text-slate-600 font-medium">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                 <span className="font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded text-xs">{String(val)} / 10</span>
+                               </div>
+                             ))}
+                           </div>
+                          )
+                        : (
+                          <div className="p-3 text-slate-700 whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                            {sub.code || "No notes provided."}
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {currentStage.type !== 'Online Assessment' && (
+              <div className="border border-purple-100 bg-purple-50/50 rounded-xl p-4">
+                <h3 className="text-sm font-bold text-purple-900 mb-2">Live Technical Interview</h3>
+                <p className="text-xs text-purple-700/80 leading-relaxed mb-4">
+                  This stage requires a live technical interview. Join the room to interact with the candidate, assign questions, and review their code in real-time.
+                </p>
+                <Link
+                  href={`/interview/live_${selectedCandidateForReview?.id}?role=interviewer&stageId=${currentStage.id}`}
+                  target="_blank"
+                  className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg text-sm flex items-center justify-center gap-2 shadow-sm transition-colors"
+                >
+                  Join Live Interview
+                </Link>
               </div>
             )}
           </div>
@@ -1716,8 +1770,8 @@ export default function StageDetailsPage() {
                     key={index}
                     onClick={() => setActiveCodeTabIndex(index)}
                     className={`w-full text-left px-4 py-3 rounded-lg text-sm transition-all border ${activeCodeTabIndex === index
-                        ? "bg-blue-600/10 border-blue-500/30 text-blue-400"
-                        : "bg-transparent border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                      ? "bg-blue-600/10 border-blue-500/30 text-blue-400"
+                      : "bg-transparent border-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                       }`}
                   >
                     <div className="font-semibold truncate">{sub.title || `Question ${index + 1}`}</div>
