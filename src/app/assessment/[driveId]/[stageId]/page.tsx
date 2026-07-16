@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Editor from "@monaco-editor/react";
-import { Play, Lock, Clock } from "lucide-react";
+import { Play, Lock, Clock, XCircle } from "lucide-react";
 import { Panel, Group, Separator } from "react-resizable-panels";
 
 type LanguageKey = "python" | "javascript" | "cpp";
@@ -111,9 +111,27 @@ export default function Assessment() {
   const [securityConfig, setSecurityConfig] = useState<any>({});
   const [tabViolations, setTabViolations] = useState<number>(0);
   const [showWarningModal, setShowWarningModal] = useState<boolean>(false);
+  const [showBackDialog, setShowBackDialog] = useState<boolean>(false);
+  const [assessmentEndedState, setAssessmentEndedState] = useState<"VIOLATION" | "ALREADY_SUBMITTED" | null>(null);
 
   const [driveName, setDriveName] = useState<string>("Online Assessment");
   const [roundName, setRoundName] = useState<string>("Active Round");
+
+  const currentTotalScore = useMemo(() => {
+    let total = 0;
+    Object.values(bestResults).forEach(s => total += s);
+    return total;
+  }, [bestResults]);
+
+  const maxPossibleScore = useMemo(() => {
+    let total = 0;
+    questions.forEach((q: any) => {
+      if (q.difficulty === 'MEDIUM') total += 15;
+      else if (q.difficulty === 'HARD') total += 20;
+      else total += 10;
+    });
+    return total;
+  }, [questions]);
 
   useEffect(() => {
     const fetchDriveDetails = async () => {
@@ -135,6 +153,13 @@ export default function Assessment() {
           if (driveData && driveData.hiringDrive) {
             setCandidateId(driveData.id);
             setDriveName(driveData.hiringDrive.title);
+
+            const stageDataObj = typeof driveData.stageData === 'string' ? JSON.parse(driveData.stageData) : (driveData.stageData || {});
+            if (stageDataObj[stageId]) {
+              setAssessmentEndedState("ALREADY_SUBMITTED");
+              return;
+            }
+
             const round = driveData.hiringDrive.rounds?.find((r: any) => r.id === stageId);
             
             if (round) {
@@ -174,7 +199,44 @@ export default function Assessment() {
     fetchDriveDetails();
   }, [driveId, stageId]);
 
-  const submitAssessment = async () => {
+  const saveProgress = async (currentBestResults: Record<string, number>, currentCodes: Record<string, string>) => {
+    try {
+      const userId = localStorage.getItem("userId");
+      let totalScore = 0;
+      Object.values(currentBestResults).forEach(score => totalScore += score);
+      
+      let maxPossibleScore = 0;
+      questions.forEach((q: any) => {
+        if (q.difficulty === 'MEDIUM') maxPossibleScore += 15;
+        else if (q.difficulty === 'HARD') maxPossibleScore += 20;
+        else maxPossibleScore += 10;
+      });
+      
+      const scoreString = `${totalScore}/${maxPossibleScore}`;
+      
+      const takenSeconds = Math.max(0, initialTime - (timeLeft || 0));
+      const m = Math.floor(takenSeconds / 60);
+      const s = takenSeconds % 60;
+      const timeTakenStr = `${m}m ${s}s_${new Date().toISOString()}`;
+      
+      const submissions = questions.map((q: any) => ({
+        questionId: q.id,
+        title: q.title,
+        language: language,
+        code: currentCodes[q.id] || languageTemplates[language]
+      }));
+      
+      await fetch(`http://localhost:3001/db/users/${userId}/assessments/${candidateId}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ score: scoreString, timeTaken: timeTakenStr, submissions, stageId, isFinal: false })
+      });
+    } catch (err) {
+      console.error("Failed to save progress", err);
+    }
+  };
+
+  const submitAssessment = async (reason?: "TAB_VIOLATION") => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     
@@ -212,8 +274,12 @@ export default function Assessment() {
         body: JSON.stringify({ score: scoreString, timeTaken: timeTakenStr, submissions, stageId })
       });
       
-      alert("Assessment Submitted Successfully!");
-      window.location.href = `/student`;
+      if (reason === "TAB_VIOLATION") {
+        setAssessmentEndedState("VIOLATION");
+      } else {
+        alert("Assessment Submitted Successfully!");
+        window.location.href = `/student`;
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to submit assessment.");
@@ -236,6 +302,29 @@ export default function Assessment() {
     return () => clearInterval(timer);
   }, [timeLeft, isSubmitting]);
 
+  // Intercept back navigation
+  useEffect(() => {
+    if (isSubmitting) return;
+
+    window.history.pushState(null, "", window.location.href);
+    const handlePopState = (e: PopStateEvent) => {
+      window.history.pushState(null, "", window.location.href);
+      setShowBackDialog(true);
+    };
+    window.addEventListener("popstate", handlePopState);
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isSubmitting]);
+
   // Security: Tab Switching Detection
   useEffect(() => {
     if (!securityConfig.tabSwitching || isSubmitting) return;
@@ -245,7 +334,7 @@ export default function Assessment() {
         setTabViolations(prev => {
           const newVal = prev + 1;
           if (newVal >= 3) {
-            submitAssessment();
+            submitAssessment("TAB_VIOLATION");
           } else {
             setShowWarningModal(true);
           }
@@ -337,10 +426,16 @@ export default function Assessment() {
         
         const newScore = totalCases > 0 ? (passedCases / totalCases) * maxMarks : 0;
         
-        setBestResults(prev => ({ 
-          ...prev, 
-          [question.id]: Math.max(prev[question.id] || 0, newScore) 
-        }));
+        const currentBest = bestResults[question.id] || 0;
+        const newBest = Math.max(currentBest, newScore);
+        
+        const updatedBestResults = { ...bestResults, [question.id]: newBest };
+        setBestResults(updatedBestResults);
+        
+        const updatedCodes = { ...savedCodes, [question.id]: code };
+        setSavedCodes(updatedCodes);
+        
+        saveProgress(updatedBestResults, updatedCodes);
       }
       setActiveTab(0);
     } catch (err) {
@@ -351,8 +446,81 @@ export default function Assessment() {
     }
   };
 
+  if (assessmentEndedState === "ALREADY_SUBMITTED") {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#0a0a0a] text-white">
+        <div className="bg-[#1e1e1e] border border-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl text-center">
+          <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Lock className="w-8 h-8 text-emerald-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-4">Assessment Already Completed</h2>
+          <p className="text-gray-400 mb-8 leading-relaxed text-sm">
+            You have already submitted this assessment. You cannot take it multiple times.
+          </p>
+          <button 
+            onClick={() => window.location.href = "/student"}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (assessmentEndedState === "VIOLATION") {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-[#0a0a0a] text-white">
+        <div className="bg-[#1e1e1e] border border-gray-800 rounded-2xl p-8 max-w-md w-full shadow-2xl text-center">
+          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <XCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-4">Assessment Ended</h2>
+          <p className="text-gray-400 mb-8 leading-relaxed text-sm">
+            Your assessment has been automatically ended because you exceeded the maximum allowed number of tab switches (3). Your responses have been saved and submitted.
+          </p>
+          <button 
+            onClick={() => window.location.href = "/student"}
+            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-screen w-full">
+      {/* Back Confirmation Dialog */}
+      {showBackDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#1e1e1e] border border-gray-700 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-2">Assessment in Progress</h3>
+            <p className="text-gray-300 mb-6 text-sm">
+              The test is currently live. Do you want to save your progress and finish the assessment?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setShowBackDialog(false)} 
+                className="px-4 py-2 text-sm font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                Continue Test
+              </button>
+              <button 
+                onClick={() => {
+                  setShowBackDialog(false);
+                  submitAssessment();
+                }} 
+                className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+              >
+                Save & Finish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex h-full flex-col bg-[#0a0a0a] text-white overflow-hidden">
       <nav className="flex h-14 shrink-0 items-center justify-between border-b border-gray-800 bg-[#161616] px-6">
         <div className="flex items-center gap-3">
@@ -360,6 +528,9 @@ export default function Assessment() {
             {driveName}
           </span>
           <span className="text-sm font-semibold text-gray-200">| {roundName}</span>
+          <span className="text-sm font-bold text-amber-400 ml-4 bg-amber-500/10 px-3 py-1 rounded-md border border-amber-500/20 shadow-sm">
+            Score: {currentTotalScore} / {maxPossibleScore}
+          </span>
         </div>
         <div className="flex items-center gap-4">
           {timeLeft !== null && (

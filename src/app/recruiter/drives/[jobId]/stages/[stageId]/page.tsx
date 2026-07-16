@@ -16,6 +16,7 @@ export default function StageDetailsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const parseStageData = (data: any) => {
     if (!data) return {};
@@ -124,6 +125,7 @@ export default function StageDetailsPage() {
   }, [job, stageId]);
 
   const fetchJobAndQuestions = async () => {
+    setIsRefreshing(true);
     try {
       const recruiterId = localStorage.getItem('userId');
 
@@ -143,6 +145,7 @@ export default function StageDetailsPage() {
       console.error(err);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -151,7 +154,7 @@ export default function StageDetailsPage() {
   }, [jobId]);
 
   if (loading) {
-    return <div className="py-12 flex justify-center"><Loader2 className="animate-spin text-blue-600" size={32} /></div>;
+    return <div className="py-12 flex justify-center"><Loader2 className="animate-spin text-amber-600" size={32} /></div>;
   }
 
   if (!job) return <div>Job not found</div>;
@@ -588,12 +591,12 @@ export default function StageDetailsPage() {
           startsInText = 'Ended';
         } else {
           statusText = 'Live';
-          statusColor = 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400';
+          statusColor = 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400';
           startsInText = 'Started';
         }
       } else {
         statusText = 'Live';
-        statusColor = 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400';
+        statusColor = 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400';
         startsInText = 'Started';
       }
     }
@@ -646,10 +649,11 @@ export default function StageDetailsPage() {
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={fetchJobAndQuestions}
-              className="p-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-colors shadow-sm tooltip-trigger"
+              disabled={isRefreshing}
+              className="p-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-colors shadow-sm tooltip-trigger disabled:opacity-50"
               title="Refresh Data"
             >
-              <RefreshCw size={18} />
+              <RefreshCw size={18} className={isRefreshing ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
@@ -659,37 +663,37 @@ export default function StageDetailsPage() {
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 overflow-x-auto px-4 md:px-8">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'border-amber-600 text-amber-700 dark:border-amber-500 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <LayoutDashboard size={16} /> Overview
         </button>
         <button
           onClick={() => setActiveTab("candidates")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'candidates' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'candidates' ? 'border-amber-600 text-amber-700 dark:border-amber-500 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <Users size={16} /> Candidates ({stageCandidates.length})
         </button>
         <button
           onClick={() => setActiveTab("questions")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'questions' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'questions' ? 'border-amber-600 text-amber-700 dark:border-amber-500 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <FileCode size={16} /> Questions
         </button>
         <button
           onClick={() => setActiveTab("schedule")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'schedule' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'schedule' ? 'border-amber-600 text-amber-700 dark:border-amber-500 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <Calendar size={16} /> Schedule
         </button>
         <button
           onClick={() => setActiveTab("analysis")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'analysis' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'analysis' ? 'border-amber-600 text-amber-700 dark:border-amber-500 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <LineChart size={16} /> Analysis
         </button>
         <button
           onClick={() => setActiveTab("settings")}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'settings' ? 'border-blue-600 text-blue-700 dark:border-blue-500 dark:text-blue-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'settings' ? 'border-amber-600 text-amber-700 dark:border-amber-500 dark:text-amber-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
         >
           <SettingsIcon size={16} /> Settings
         </button>
@@ -827,13 +831,13 @@ export default function StageDetailsPage() {
                 <input
                   type="text"
                   placeholder="Search candidates by name or email..."
-                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                 />
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setSortConfig(sortConfig === "none" ? "score-desc" : "none")}
-                  className={`flex items-center gap-2 px-4 py-2 border text-sm font-semibold rounded-lg transition-colors ${sortConfig === "score-desc" ? "bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/30 text-blue-700 dark:text-blue-400" : "bg-white dark:bg-[#0f172a] border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"}`}
+                  className={`flex items-center gap-2 px-4 py-2 border text-sm font-semibold rounded-lg transition-colors ${sortConfig === "score-desc" ? "bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400" : "bg-white dark:bg-[#0f172a] border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5"}`}
                 >
                   Sort by Score
                 </button>
@@ -873,7 +877,6 @@ export default function StageDetailsPage() {
               <table className="w-full text-left text-sm whitespace-nowrap">
                 <thead className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-semibold">
                   <tr>
-                    <th className="px-6 py-4 w-10"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /></th>
                     <th className="px-6 py-4">Name</th>
                     <th className="px-6 py-4">Email</th>
                     <th className="px-6 py-4">Status</th>
@@ -890,10 +893,9 @@ export default function StageDetailsPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                   {stageCandidates.length === 0 ? (
-                    <tr><td colSpan={9} className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">No candidates currently in this stage.</td></tr>
+                    <tr><td colSpan={8} className="px-6 py-8 text-center text-slate-500 dark:text-slate-400">No candidates currently in this stage.</td></tr>
                   ) : stageCandidates.map((c: any) => (
                     <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
-                      <td className="px-6 py-4"><input type="checkbox" className="rounded border-slate-300 dark:border-slate-600 bg-transparent" /></td>
                       <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">{c.name}</td>
                       <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{c.email}</td>
                       <td className="px-6 py-4">
@@ -931,7 +933,7 @@ export default function StageDetailsPage() {
                         {!isAdvanced(c) && (
                           <button
                             onClick={() => setSelectedCandidateForReview(c)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             Review
                           </button>
@@ -952,7 +954,7 @@ export default function StageDetailsPage() {
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#0f172a] p-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
               <div className="flex items-center gap-2">
-                <FileCode size={20} className="text-blue-600 dark:text-blue-500" />
+                <FileCode size={20} className="text-amber-600 dark:text-amber-500" />
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Assessment Questions</h3>
               </div>
               <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
@@ -965,7 +967,7 @@ export default function StageDetailsPage() {
                 <button onClick={handleImport} className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-nowrap">
                   <Download size={16} /> Import
                 </button>
-                <button onClick={() => setIsAddQuestionModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap">
+                <button onClick={() => setIsAddQuestionModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-700 transition-colors shadow-sm whitespace-nowrap">
                   <Plus size={16} /> Add Question
                 </button>
               </div>
@@ -977,8 +979,8 @@ export default function StageDetailsPage() {
                 <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Categories</div>
                   <div className="space-y-1">
-                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 rounded-lg transition-colors">
-                      Coding <span className="bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Coding').length}</span>
+                    <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 rounded-lg transition-colors">
+                      Coding <span className="bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'Coding').length}</span>
                     </button>
                     <button className="w-full flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
                       MCQ <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full text-xs">{roundQuestions.filter((q: any) => (q.boilerplate?.type || 'Coding') === 'MCQ').length}</span>
@@ -1026,7 +1028,7 @@ export default function StageDetailsPage() {
                           <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{q.title}</h4>
                           <div className="flex flex-wrap items-center gap-3">
                             <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-2.5 py-1 rounded-lg">
-                              <span className="text-blue-600 dark:text-blue-400 font-bold">{qMarks}</span> Marks
+                              <span className="text-amber-600 dark:text-amber-400 font-bold">{qMarks}</span> Marks
                             </div>
                             <div className="flex gap-1.5">
                               {qTags.map((t: string) => (
@@ -1037,10 +1039,10 @@ export default function StageDetailsPage() {
                         </div>
 
                         <div className="flex items-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors tooltip-trigger" title="Preview">
+                          <button className="p-2 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors tooltip-trigger" title="Preview">
                             <Eye size={18} />
                           </button>
-                          <button className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors tooltip-trigger" title="Edit">
+                          <button className="p-2 text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors tooltip-trigger" title="Edit">
                             <Edit2 size={18} />
                           </button>
                           <button onClick={() => handleDeleteQuestion(q.id)} className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors tooltip-trigger" title="Delete">
@@ -1080,7 +1082,7 @@ export default function StageDetailsPage() {
               </div>
               <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
                 <div className="text-slate-500 dark:text-slate-400 font-medium text-xs mb-1 uppercase tracking-wider">Pass Rate</div>
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                   {stageCandidates.length > 0
                     ? Math.round((stageCandidates.filter((c: any) => isAdvanced(c) || c.status === 'Passed').length / stageCandidates.length) * 100) + '%'
                     : '0%'}
@@ -1192,7 +1194,7 @@ export default function StageDetailsPage() {
                 <button
                   onClick={handleScheduleSubmit}
                   disabled={isSavingSchedule || (!currentStage.config?.questions || currentStage.config.questions.length === 0)}
-                  className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-amber-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-amber-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSavingSchedule ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -1205,11 +1207,11 @@ export default function StageDetailsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Date</label>
-                    <input type="date" value={scheduleForm.date} onChange={e => setScheduleForm({ ...scheduleForm, date: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="date" value={scheduleForm.date} onChange={e => setScheduleForm({ ...scheduleForm, date: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Timezone</label>
-                    <select value={scheduleForm.timeZone} onChange={e => setScheduleForm({ ...scheduleForm, timeZone: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select value={scheduleForm.timeZone} onChange={e => setScheduleForm({ ...scheduleForm, timeZone: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
                       <option value="Asia/Kolkata (IST)">Asia/Kolkata (IST)</option>
                       <option value="UTC">UTC</option>
                       <option value="America/New_York (EST)">America/New_York (EST)</option>
@@ -1217,19 +1219,19 @@ export default function StageDetailsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Start Time</label>
-                    <input type="time" value={scheduleForm.startTime} onChange={e => setScheduleForm({ ...scheduleForm, startTime: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="time" value={scheduleForm.startTime} onChange={e => setScheduleForm({ ...scheduleForm, startTime: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">End Time</label>
-                    <input type="time" value={scheduleForm.endTime} onChange={e => setScheduleForm({ ...scheduleForm, endTime: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="time" value={scheduleForm.endTime} onChange={e => setScheduleForm({ ...scheduleForm, endTime: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Duration</label>
-                    <input type="text" value={scheduleForm.duration} onChange={e => setScheduleForm({ ...scheduleForm, duration: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 90 mins" />
+                    <input type="text" value={scheduleForm.duration} onChange={e => setScheduleForm({ ...scheduleForm, duration: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="e.g. 90 mins" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Registration Deadline</label>
-                    <input type="datetime-local" value={scheduleForm.deadline} onChange={e => setScheduleForm({ ...scheduleForm, deadline: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="datetime-local" value={scheduleForm.deadline} onChange={e => setScheduleForm({ ...scheduleForm, deadline: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
               </div>
@@ -1247,7 +1249,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" checked={scheduleForm.allowLateJoin} onChange={e => setScheduleForm({ ...scheduleForm, allowLateJoin: e.target.checked })} className="sr-only peer" />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
 
@@ -1256,7 +1258,7 @@ export default function StageDetailsPage() {
                       <div className="text-sm font-semibold text-slate-900 dark:text-white">Grace Period</div>
                       <div className="text-xs text-slate-500 dark:text-slate-400">Additional time allowed before auto-submission.</div>
                     </div>
-                    <select value={scheduleForm.gracePeriod} onChange={e => setScheduleForm({ ...scheduleForm, gracePeriod: e.target.value })} className="px-3 py-1.5 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-32">
+                    <select value={scheduleForm.gracePeriod} onChange={e => setScheduleForm({ ...scheduleForm, gracePeriod: e.target.value })} className="px-3 py-1.5 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 w-32">
                       <option value="5 mins">5 mins</option>
                       <option value="10 mins">10 mins</option>
                       <option value="15 mins">15 mins</option>
@@ -1270,7 +1272,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" checked={scheduleForm.autoStart} onChange={e => setScheduleForm({ ...scheduleForm, autoStart: e.target.checked })} className="sr-only peer" />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
 
@@ -1281,7 +1283,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" checked={scheduleForm.autoEnd} onChange={e => setScheduleForm({ ...scheduleForm, autoEnd: e.target.checked })} className="sr-only peer" />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
 
@@ -1292,7 +1294,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" checked={scheduleForm.publishSchedule} onChange={e => setScheduleForm({ ...scheduleForm, publishSchedule: e.target.checked })} className="sr-only peer" />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
 
@@ -1313,7 +1315,7 @@ export default function StageDetailsPage() {
               <button
                 onClick={handleSettingsSubmit}
                 disabled={isSavingSettings}
-                className="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition-colors text-sm disabled:opacity-50">
+                className="bg-amber-600 text-white font-semibold px-5 py-2 rounded-lg shadow-sm hover:bg-amber-700 transition-colors text-sm disabled:opacity-50">
                 {isSavingSettings ? 'Saving...' : 'Save Settings'}
               </button>
             </div>
@@ -1325,11 +1327,11 @@ export default function StageDetailsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Round Name</label>
-                    <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="text" value={settingsForm.name} onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Round Type</label>
-                    <select value={settingsForm.type} onChange={e => setSettingsForm({ ...settingsForm, type: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select value={settingsForm.type} onChange={e => setSettingsForm({ ...settingsForm, type: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
                       <option value="Assessment">Assessment</option>
                       <option value="Interview">Interview</option>
                       <option value="Project">Project</option>
@@ -1337,7 +1339,7 @@ export default function StageDetailsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
-                    <select value={settingsForm.status} onChange={e => setSettingsForm({ ...settingsForm, status: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select value={settingsForm.status} onChange={e => setSettingsForm({ ...settingsForm, status: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500">
                       <option>Active</option>
                       <option>Draft</option>
                       <option>Archived</option>
@@ -1345,7 +1347,7 @@ export default function StageDetailsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Duration</label>
-                    <input type="text" value={settingsForm.duration} onChange={e => setSettingsForm({ ...settingsForm, duration: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="text" value={settingsForm.duration} onChange={e => setSettingsForm({ ...settingsForm, duration: e.target.value })} className="w-full px-3 py-2 bg-transparent dark:bg-white/5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
                   </div>
                 </div>
               </div>
@@ -1363,7 +1365,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleQuestions} onChange={e => setSettingsForm({ ...settingsForm, shuffleQuestions: e.target.checked })} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
                   <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
@@ -1373,7 +1375,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.shuffleMCQs} onChange={e => setSettingsForm({ ...settingsForm, shuffleMCQs: e.target.checked })} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
                   <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
@@ -1383,7 +1385,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.saveProgress} onChange={e => setSettingsForm({ ...settingsForm, saveProgress: e.target.checked })} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
                 </div>
@@ -1402,7 +1404,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.tabSwitching} onChange={e => setSettingsForm({ ...settingsForm, tabSwitching: e.target.checked })} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
                   <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
@@ -1412,7 +1414,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.copyPaste} onChange={e => setSettingsForm({ ...settingsForm, copyPaste: e.target.checked })} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
                   <div className="flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
@@ -1422,7 +1424,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.fullScreen} onChange={e => setSettingsForm({ ...settingsForm, fullScreen: e.target.checked })} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
                 </div>
@@ -1441,7 +1443,7 @@ export default function StageDetailsPage() {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input type="checkbox" className="sr-only peer" checked={settingsForm.autoSubmit} onChange={e => setSettingsForm({ ...settingsForm, autoSubmit: e.target.checked })} />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
                     </label>
                   </div>
                 </div>
@@ -1464,16 +1466,16 @@ export default function StageDetailsPage() {
             <form onSubmit={handleAddQuestionSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Question Title</label>
-                <input required type="text" value={addQuestionForm.title} onChange={e => setAddQuestionForm({ ...addQuestionForm, title: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Reverse Linked List" />
+                <input required type="text" value={addQuestionForm.title} onChange={e => setAddQuestionForm({ ...addQuestionForm, title: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="e.g. Reverse Linked List" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
-                <textarea required value={addQuestionForm.description} onChange={e => setAddQuestionForm({ ...addQuestionForm, description: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]" placeholder="Problem statement..." />
+                <textarea required value={addQuestionForm.description} onChange={e => setAddQuestionForm({ ...addQuestionForm, description: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 min-h-[100px]" placeholder="Problem statement..." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Difficulty</label>
-                  <select value={addQuestionForm.difficulty} onChange={e => setAddQuestionForm({ ...addQuestionForm, difficulty: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select value={addQuestionForm.difficulty} onChange={e => setAddQuestionForm({ ...addQuestionForm, difficulty: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                     <option>Easy</option>
                     <option>Medium</option>
                     <option>Hard</option>
@@ -1481,7 +1483,7 @@ export default function StageDetailsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Type</label>
-                  <select value={addQuestionForm.type} onChange={e => setAddQuestionForm({ ...addQuestionForm, type: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <select value={addQuestionForm.type} onChange={e => setAddQuestionForm({ ...addQuestionForm, type: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
                     <option>Coding</option>
                     <option>MCQ</option>
                     <option>SQL</option>
@@ -1493,16 +1495,16 @@ export default function StageDetailsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Marks</label>
-                  <input required type="number" value={addQuestionForm.marks} onChange={e => setAddQuestionForm({ ...addQuestionForm, marks: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <input required type="number" value={addQuestionForm.marks} onChange={e => setAddQuestionForm({ ...addQuestionForm, marks: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tags (comma separated)</label>
-                  <input type="text" value={addQuestionForm.tags} onChange={e => setAddQuestionForm({ ...addQuestionForm, tags: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Arrays, Sorting" />
+                  <input type="text" value={addQuestionForm.tags} onChange={e => setAddQuestionForm({ ...addQuestionForm, tags: e.target.value })} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="e.g. Arrays, Sorting" />
                 </div>
               </div>
               <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
                 <button type="button" onClick={() => setIsAddQuestionModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">Cancel</button>
-                <button type="submit" disabled={isSubmitting} className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors disabled:opacity-50">
+                <button type="submit" disabled={isSubmitting} className="px-4 py-2 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm transition-colors disabled:opacity-50">
                   {isSubmitting ? 'Saving...' : 'Save Question'}
                 </button>
               </div>
@@ -1521,7 +1523,7 @@ export default function StageDetailsPage() {
             <div className="p-4 bg-slate-50 border-b border-slate-100 shrink-0">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input type="text" placeholder="Search questions..." className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <input type="text" placeholder="Search questions..." className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -1534,13 +1536,13 @@ export default function StageDetailsPage() {
                     <div
                       key={q.id}
                       onClick={() => handleBankSelection(q.id, !isSelected)}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors bg-white cursor-pointer"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-amber-300 transition-colors bg-white cursor-pointer"
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
                         readOnly
-                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 pointer-events-none"
+                        className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 pointer-events-none"
                       />
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold text-slate-900 truncate text-sm">{q.title}</div>
@@ -1559,7 +1561,7 @@ export default function StageDetailsPage() {
               <button onClick={() => setIsBankModalOpen(false)} className="px-5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors border border-transparent">
                 Cancel
               </button>
-              <button onClick={handleBankDone} className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors">
+              <button onClick={handleBankDone} className="px-5 py-2 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm transition-colors">
                 Done
               </button>
             </div>

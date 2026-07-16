@@ -84,7 +84,21 @@ export default function DriveDetails() {
   }
 
   // To support start assessment
-  const isCurrentRoundLive = startDate && startDate <= now && currentStageIndex > 0 && currentStageIndex < pipelineSteps.length - 1;
+  const currentRound = currentStageIndex > 0 && currentStageIndex < pipelineSteps.length - 1 ? pipelineSteps[currentStageIndex] : null;
+  const currentRoundStartDate = currentRound?.startDate ? new Date(currentRound.startDate) : null;
+  const currentRoundDurationInMins = currentRound?.duration ? parseInt(currentRound.duration) : 60;
+  const currentRoundEndDate = currentRound?.endDate ? new Date(currentRound.endDate) : (currentRoundStartDate ? new Date(currentRoundStartDate.getTime() + currentRoundDurationInMins * 60000) : null);
+
+  const hasSubmittedCurrentRound = currentRound && assessment.stageData && 
+    (typeof assessment.stageData === 'string' ? JSON.parse(assessment.stageData) : assessment.stageData)[currentRound.id];
+
+  let currentRoundStatus = "";
+  if (!currentRound) currentRoundStatus = "None";
+  else if (hasSubmittedCurrentRound) currentRoundStatus = "Submitted";
+  else if (!currentRoundStartDate) currentRoundStatus = "Schedule Not Decided";
+  else if (currentRoundStartDate > now) currentRoundStatus = "Scheduled";
+  else if (currentRoundEndDate && currentRoundEndDate < now) currentRoundStatus = "Finished";
+  else currentRoundStatus = "Live";
 
   const roundSteps = pipelineSteps.filter(s => s.type !== 'system' && s.name !== 'Application');
 
@@ -241,20 +255,32 @@ export default function DriveDetails() {
                     </div>
 
                     <div className="flex flex-col gap-3 min-w-[200px]">
-                      {isCurrentRoundLive ? (
+                      {currentRoundStatus === "Schedule Not Decided" ? (
+                        <button disabled className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-400 font-bold py-3.5 px-6 rounded-xl text-center cursor-not-allowed border border-slate-200 dark:border-slate-700">
+                          Schedule to be Decided
+                        </button>
+                      ) : currentRoundStatus === "Scheduled" ? (
+                        <button disabled className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-400 font-bold py-3.5 px-6 rounded-xl text-center cursor-not-allowed border border-slate-200 dark:border-slate-700">
+                          Starts: {currentRoundStartDate?.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                        </button>
+                      ) : currentRoundStatus === "Finished" ? (
+                        <button disabled className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-400 font-bold py-3.5 px-6 rounded-xl text-center cursor-not-allowed border border-slate-200 dark:border-slate-700">
+                          Round Finished
+                        </button>
+                      ) : currentRoundStatus === "Submitted" ? (
+                        <button disabled className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-bold py-3.5 px-6 rounded-xl text-center cursor-not-allowed border border-emerald-200 dark:border-emerald-800">
+                          Assessment Completed
+                        </button>
+                      ) : currentRoundStatus === "Live" ? (
                         pipelineSteps[currentStageIndex].type !== 'Online Assessment' ? (
                           <Link href={`/interview/live_${assessment.id}?role=candidate&stageId=${pipelineSteps[currentStageIndex].id}`} className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-md shadow-purple-500/20 transition-all hover:scale-105 active:scale-95">
-                            Join Live Interview
+                            Live - Join Interview
                           </Link>
                         ) : (
                           <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 px-6 rounded-xl text-center shadow-md shadow-amber-500/20 transition-all hover:scale-105 active:scale-95">
-                            Start Assessment
+                            Live - Start Assessment
                           </Link>
                         )
-                      ) : currentStageIndex > 0 && currentStageIndex < pipelineSteps.length - 1 ? (
-                        <Link href="/editor" className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3.5 px-6 rounded-xl text-center transition-all">
-                          Take Demo Assessment
-                        </Link>
                       ) : (
                         <button disabled className="bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-400 font-bold py-3.5 px-6 rounded-xl text-center cursor-not-allowed border border-slate-200 dark:border-slate-700">
                           Assessment Locked
@@ -301,7 +327,11 @@ export default function DriveDetails() {
                            </div>
                            <div>
                              <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">Time</div>
-                             <div className="font-semibold text-slate-900 dark:text-white">{pipelineSteps[currentStageIndex].startDate ? new Date(pipelineSteps[currentStageIndex].startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'TBD'}</div>
+                             <div className="font-semibold text-slate-900 dark:text-white">
+                               {pipelineSteps[currentStageIndex].startDate 
+                                 ? `${new Date(pipelineSteps[currentStageIndex].startDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}${pipelineSteps[currentStageIndex].endDate ? ` - ${new Date(pipelineSteps[currentStageIndex].endDate).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` : ''}` 
+                                 : 'TBD'}
+                             </div>
                            </div>
                         </div>
 
@@ -317,21 +347,29 @@ export default function DriveDetails() {
                       </div>
                       
                       <div className="pt-4 flex">
-                        {isCurrentRoundLive ? (
+                        {currentRoundStatus === "Schedule Not Decided" ? (
+                          <span className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 py-2.5 px-5 rounded-xl font-semibold shadow-md cursor-not-allowed">
+                            Schedule to be Decided
+                          </span>
+                        ) : currentRoundStatus === "Scheduled" ? (
+                          <span className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 py-2.5 px-5 rounded-xl font-semibold shadow-md cursor-not-allowed">
+                            Starts: {currentRoundStartDate?.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                          </span>
+                        ) : currentRoundStatus === "Finished" ? (
+                          <span className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-400 py-2.5 px-5 rounded-xl font-semibold shadow-md cursor-not-allowed">
+                            Round Finished
+                          </span>
+                        ) : currentRoundStatus === "Live" ? (
                           pipelineSteps[currentStageIndex].type !== 'Online Assessment' ? (
                             <Link href={`/interview/live_${assessment.id}?role=candidate&stageId=${pipelineSteps[currentStageIndex].id}`} className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
-                              Join Live Interview <ChevronRight size={18} />
+                              Live - Join Interview <ChevronRight size={18} />
                             </Link>
                           ) : (
                             <Link href={`/assessment/${drive.id}/${pipelineSteps[currentStageIndex].id}`} className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
-                              Start Assessment <ChevronRight size={18} />
+                              Live - Start Assessment <ChevronRight size={18} />
                             </Link>
                           )
-                        ) : (
-                          <Link href="/editor" className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-5 rounded-xl font-semibold transition-colors shadow-md">
-                            Take Demo Assessment <ChevronRight size={18} />
-                          </Link>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                   </div>

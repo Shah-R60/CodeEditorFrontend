@@ -3,12 +3,17 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Code2, ChevronRight, CheckCircle2, Building, PlayCircle, ArrowRight, Users, Laptop } from 'lucide-react';
+import { Code2, ChevronDown, Moon, Search, Rocket, X, Loader2 } from 'lucide-react';
+import { auth, googleProvider, signInWithPopup } from "@/lib/firebase";
 
 export default function LandingPage() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoginSidebarOpen, setIsLoginSidebarOpen] = useState(false);
+  const [loginRole, setLoginRole] = useState("STUDENT");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -24,196 +29,310 @@ export default function LandingPage() {
         if (role === 'RECRUITER') router.push('/recruiter');
         else router.push('/student');
       } else {
-        router.push('/login/student');
+        setIsLoginSidebarOpen(true);
       }
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setIsLoggingIn(true);
+    setLoginError("");
+    
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const response = await fetch(`${apiUrl}/db/users/google-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, role: loginRole })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.user.id);
+      localStorage.setItem("userRole", data.user.role);
+
+      router.push(loginRole === "RECRUITER" ? "/recruiter" : "/student");
+    } catch (err: any) {
+      console.error(err);
+      setLoginError(err.message || "An error occurred during Google Sign In.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-amber-100 flex flex-col">
       {/* Navigation */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <nav className="flex items-center justify-between px-8 py-5 max-w-7xl mx-auto">
-          <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-1.5 rounded-lg shadow-sm">
-              <Code2 className="text-white h-6 w-6" />
+        <nav className="flex items-center justify-between px-6 py-4 max-w-screen-2xl mx-auto">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
+              <div className="bg-amber-500 p-1.5 rounded-lg shadow-sm">
+                <Code2 className="text-white h-6 w-6" />
+              </div>
+              <span className="text-xl font-bold tracking-tight">CodeCanvas<span className="text-slate-500">.com</span></span>
             </div>
-            <span className="text-xl font-bold tracking-tight">CodeCanvas</span>
+            
+            <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+              <Link href="#" className="hover:text-amber-500 transition-colors">Practice</Link>
+              <Link href="#" className="hover:text-amber-500 transition-colors">Assessments</Link>
+              <Link href="#" className="flex items-center gap-1 hover:text-amber-500 transition-colors">
+                Features <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 rounded-full">NEW</span>
+              </Link>
+            </div>
           </div>
-          
 
-
-          <div className="flex items-center gap-4">
-            {isLoggedIn ? (
-              <>
-                <button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('userRole'); localStorage.removeItem('userId'); window.location.reload(); }} className="text-sm font-medium text-slate-600 hover:text-red-600 transition">
-                  Sign out
+          <div className="flex items-center gap-6">
+            <button className="text-slate-500 hover:text-slate-900 transition-colors hidden md:block">
+              <Moon className="w-5 h-5" />
+            </button>
+            
+            <div className="flex items-center gap-3">
+              {isLoggedIn ? (
+                <>
+                  <button 
+                    onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('userRole'); localStorage.removeItem('userId'); window.location.reload(); }} 
+                    className="px-5 py-2 rounded-full border border-slate-300 text-sm font-medium hover:bg-slate-50 transition-colors"
+                  >
+                    Sign out
+                  </button>
+                  <button 
+                    onClick={() => router.push(userRole === 'RECRUITER' ? '/recruiter' : '/student')} 
+                    className="px-5 py-2 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-900 text-sm font-semibold transition-colors shadow-sm"
+                  >
+                    Go to Dashboard
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => setIsLoginSidebarOpen(true)} 
+                    className="px-5 py-2 rounded-full border border-slate-300 text-sm font-medium hover:bg-slate-50 transition-colors hidden sm:block"
+                  >
+                    Login
+                  </button>
+                </>
+              )}
+              
+              <div className="relative group hidden lg:block ml-2">
+                <button 
+                  className="flex items-center gap-1 text-sm font-medium text-slate-700 hover:text-slate-900 py-2"
+                >
+                  For student <ChevronDown className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.push(userRole === 'RECRUITER' ? '/recruiter' : '/student')} className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm hover:shadow-md">
-                  Go to Dashboard
-                </button>
-              </>
-            ) : (
-              <>
-                <button onClick={() => router.push('/login/student')} className="text-sm font-medium text-slate-600 hover:text-blue-600 transition">
-                  Sign in
-                </button>
-                <button onClick={handleAction} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition shadow-sm hover:shadow-md">
-                  Book a demo
-                </button>
-              </>
-            )}
+                <div className="absolute right-0 top-full w-40 bg-white rounded-xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 z-50">
+                  <button 
+                    onClick={() => { setLoginRole("STUDENT"); setIsLoginSidebarOpen(true); }} 
+                    className="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-amber-500 transition-colors"
+                  >
+                    For student
+                  </button>
+                  <button 
+                    onClick={() => { setLoginRole("RECRUITER"); setIsLoginSidebarOpen(true); }} 
+                    className="w-full text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-amber-500 transition-colors"
+                  >
+                    For recruiter
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </nav>
       </div>
 
-      {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-8 pt-20 pb-24 grid md:grid-cols-2 gap-12 items-center">
-        <div className="space-y-8 pr-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-semibold">
-            CodeCanvas Skills Platform
+      {/* Hero Section Container */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 mt-6 relative pb-24">
+        {/* The Big Gradient Card */}
+        <div className="w-full bg-gradient-to-br from-[#ffc107] via-[#ff9800] to-[#ff5722] rounded-[2rem] pt-12 pb-28 px-4 relative overflow-hidden shadow-xl">
+          
+          {/* Top Right Badge */}
+          <div className="absolute top-6 right-6 hidden md:block">
+            <div className="bg-white/20 hover:bg-white/30 backdrop-blur-md cursor-pointer transition-colors border border-white/30 text-slate-900 text-sm font-medium px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+              <Rocket className="w-4 h-4 text-slate-800" />
+              <span>Ace your interviews — <span className="underline font-bold">Practice now →</span></span>
+            </div>
           </div>
-          <h1 className="text-6xl font-extrabold tracking-tight leading-[1.1] text-slate-900">
-            AI-native hiring & <br/> learning solutions
-          </h1>
-          <p className="text-lg text-slate-600 leading-relaxed max-w-xl">
-            Discover and develop the skills that will shape the future with CodeCanvas's skills assessment, development, and simulation capabilities.
-          </p>
-          <div className="flex items-center gap-4 pt-4">
-            <button onClick={handleAction} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold transition shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2">
-              Get started
-            </button>
+
+          <div className="max-w-4xl mx-auto text-center relative z-10 flex flex-col items-center">
+            
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 leading-[1.15] tracking-tight">
+              Master your coding skills and <br className="hidden md:block" />
+              find the best candidates in one platform
+            </h1>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+              <button 
+                onClick={() => { setLoginRole("STUDENT"); setIsLoginSidebarOpen(true); }}
+                className="px-6 py-2.5 rounded-full border border-slate-900 text-slate-900 font-semibold hover:bg-slate-900/5 transition-colors"
+              >
+                For Candidates
+              </button>
+              <button 
+                onClick={() => { setLoginRole("RECRUITER"); setIsLoginSidebarOpen(true); }}
+                className="px-6 py-2.5 rounded-full bg-[#1a237e] text-white font-semibold hover:bg-[#121858] transition-colors shadow-md"
+              >
+                For Recruiters
+              </button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="w-full max-w-2xl bg-white rounded-full p-2 flex items-center shadow-lg">
+              <div className="pl-4 pr-2 text-slate-400">
+                <Search className="w-5 h-5" />
+              </div>
+              <input 
+                type="text" 
+                placeholder="Skills / language / company" 
+                className="flex-1 bg-transparent border-none outline-none py-2 text-slate-700 placeholder-slate-400 w-full"
+              />
+              <button className="bg-[#1a237e] hover:bg-[#121858] text-white px-8 py-3 rounded-full font-semibold transition-colors">
+                Search
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Hero Visual / Graphic */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-blue-50 rounded-3xl transform rotate-3 scale-105 -z-10"></div>
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-            {/* Decorative background pattern */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl"></div>
-            
-            <div className="relative z-10 flex flex-col gap-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar" className="w-10 h-10" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900">AI Interview Scheduled!</div>
-                    <div className="text-sm text-slate-500">Today at 2:00 PM</div>
-                  </div>
-                </div>
-                <div className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">
-                  Ready
-                </div>
+        {/* Overlapping Stats Card */}
+        <div className="max-w-4xl mx-auto -mt-14 relative z-20 px-4">
+          <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+              <div className="flex flex-col items-center justify-center py-4 md:py-0">
+                <h3 className="text-3xl font-bold text-[#ff9800] mb-1">10,000+</h3>
+                <p className="text-sm text-slate-500 font-medium text-center">Students practiced on platform</p>
               </div>
-              
-              <div className="bg-slate-50 rounded-xl p-6 border border-slate-100">
-                <div className="flex justify-between items-end mb-2">
-                  <div className="text-sm font-semibold text-slate-500">Average Candidate Score</div>
-                  <div className="text-4xl font-extrabold text-slate-900">495</div>
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-2 mt-4">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '75%' }}></div>
-                </div>
-                <div className="flex justify-between mt-2 text-xs text-slate-400 font-medium">
-                  <span>300</span>
-                  <span>600</span>
-                </div>
+              <div className="flex flex-col items-center justify-center py-4 md:py-0">
+                <h3 className="text-3xl font-bold text-[#ff9800] mb-1">45%</h3>
+                <p className="text-sm text-slate-500 font-medium text-center">Increase in interview pass rate</p>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="border border-slate-100 rounded-xl p-4 flex items-center gap-4 bg-white shadow-sm">
-                  <div className="bg-emerald-100 p-2 rounded-lg text-emerald-600">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-slate-900">502</div>
-                    <div className="text-xs text-slate-500 font-medium">Active team members</div>
-                  </div>
-                </div>
-                <div className="border border-slate-100 rounded-xl p-4 flex items-center gap-4 bg-white shadow-sm">
-                  <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
-                    <PlayCircle size={24} />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-slate-900">10,531</div>
-                    <div className="text-xs text-slate-500 font-medium">Hours spent learning</div>
-                  </div>
-                </div>
+              <div className="flex flex-col items-center justify-center py-4 md:py-0">
+                <h3 className="text-3xl font-bold text-[#ff9800] mb-1">500+</h3>
+                <p className="text-sm text-slate-500 font-medium text-center">Hiring partners & recruiters</p>
               </div>
             </div>
+          </div>
+        </div>
+        
+        {/* Browse by Category */}
+        <div className="mt-20 text-center">
+          <h2 className="text-2xl font-bold text-slate-800 mb-8">Browse by Category</h2>
+          <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto opacity-70">
+            {/* Placeholder pills for categories */}
+            {['Software Engineering', 'Data Science', 'Frontend Development', 'Backend Systems', 'AI & Machine Learning', 'DevOps'].map((cat) => (
+              <div key={cat} className="px-5 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-600 hover:border-amber-400 hover:text-amber-600 cursor-pointer transition-colors shadow-sm">
+                {cat}
+              </div>
+            ))}
           </div>
         </div>
       </main>
 
-      {/* Choose Your Path Section */}
-      <section className="bg-white py-24 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Explore capabilities</h2>
-            <p className="text-lg text-slate-500">Choose your path to get started with CodeCanvas.</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Student Card */}
-            <div className="group bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-xl hover:border-blue-200 transition-all duration-300 flex flex-col">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Laptop size={24} />
+      {/* Login Sidebar Overlay */}
+      <div className={`fixed inset-0 z-[60] flex justify-end transition-opacity duration-300 ${isLoginSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div 
+          className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+          onClick={() => setIsLoginSidebarOpen(false)}
+        ></div>
+        
+        <div className={`relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col transition-transform duration-300 rounded-l-3xl ${isLoginSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              <div className="flex items-baseline gap-2">
+                <h2 className="text-2xl font-bold text-slate-900">{loginRole === "RECRUITER" ? "Recruiter Login" : "Student Login"}</h2>
+                <span className="text-[#ff9800] text-sm font-medium cursor-pointer hover:underline">Register for free</span>
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-3">I am a Student</h3>
-              <p className="text-slate-600 leading-relaxed mb-8 flex-1">
-                Access our coding environment to practice algorithmic challenges, prepare for technical interviews, and benchmark your skills.
-              </p>
-              <button onClick={() => router.push('/login/student')} className="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wide group/btn">
-                SEE MORE <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+              <button 
+                onClick={() => setIsLoginSidebarOpen(false)}
+                className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Recruiter Card */}
-            <div className="group bg-white border border-slate-200 rounded-2xl p-8 hover:shadow-xl hover:border-emerald-200 transition-all duration-300 flex flex-col">
-              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Users size={24} />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-3">I am a Recruiter</h3>
-              <p className="text-slate-600 leading-relaxed mb-8 flex-1">
-                Bring our AI Interviewer and comprehensive skills assessments to your hiring team to evaluate candidates fairly and efficiently.
-              </p>
-              <button onClick={() => router.push('/login/recruiter')} className="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 uppercase tracking-wide group/btn">
-                SEE MORE <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+              {loginError && (
+                <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                  {loginError}
+                </div>
+              )}
 
-      {/* Trusted By Section */}
-      <section className="border-t border-slate-100 bg-slate-50/50 py-16">
-        <div className="max-w-7xl mx-auto px-8 text-center">
-          <p className="text-sm font-bold tracking-widest text-slate-500 uppercase mb-8">Trusted by 500+ companies</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-            {/* Logos represented by stylized text */}
-            <div className="text-2xl font-extrabold tracking-tighter text-blue-600 flex items-center gap-1">
-              <div className="w-6 h-6 border-4 border-blue-600 rounded-full border-t-transparent -rotate-45"></div> Meta
-            </div>
-            <div className="text-2xl font-bold text-slate-800">
-              <span className="text-blue-500">G</span>
-              <span className="text-red-500">o</span>
-              <span className="text-yellow-500">o</span>
-              <span className="text-blue-500">g</span>
-              <span className="text-green-500">l</span>
-              <span className="text-red-500">e</span>
-            </div>
-            <div className="text-2xl font-black tracking-widest text-slate-900">ANTHROP\C</div>
-            <div className="text-2xl font-bold text-blue-500">zoom</div>
-            <div className="text-2xl font-bold text-slate-700 flex items-center gap-1">
-              <Building className="text-blue-600" /> Zillow
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Email ID / Username</label>
+                <input 
+                  type="text" 
+                  placeholder="Enter your email or username" 
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffc107] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                <div className="relative">
+                  <input 
+                    type="password" 
+                    placeholder="Enter your password" 
+                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ffc107] focus:border-transparent pr-16"
+                  />
+                  <button className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-[#ff9800] font-medium hover:underline">
+                    Show
+                  </button>
+                </div>
+                <div className="flex justify-end mt-2">
+                  <span className="text-xs text-[#ff9800] font-medium cursor-pointer hover:underline">Forgot Password?</span>
+                </div>
+              </div>
+
+              <button className="w-full py-3 bg-[#ffc107] hover:bg-[#ffb300] text-slate-900 font-bold rounded-full transition-colors mt-2">
+                Login
+              </button>
+
+              <div className="text-center mt-2">
+                <span className="text-sm text-[#ff9800] font-medium cursor-pointer hover:underline">Use OTP to Login</span>
+              </div>
+
+              <div className="flex items-center gap-4 my-2">
+                <div className="flex-1 h-px bg-slate-200"></div>
+                <span className="text-xs text-slate-400 font-medium uppercase">Or</span>
+                <div className="flex-1 h-px bg-slate-200"></div>
+              </div>
+
+              <button 
+                onClick={handleGoogleLogin}
+                disabled={isLoggingIn}
+                className="w-full py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold rounded-full transition-colors flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {isLoggingIn ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                )}
+                Continue with Google
+              </button>
+
+              <div className="mt-auto bg-[#fff8e1] border border-[#ffecb3] p-4 rounded-xl flex items-center justify-between">
+                <div className="text-xs text-slate-600">
+                  <span className="font-bold text-[#ff9800]">Test:</span> student@codecanvas.com / password
+                </div>
+                <button className="text-xs bg-[#ffecb3] hover:bg-[#ffe082] px-3 py-1.5 rounded-lg font-medium transition-colors">
+                  Auto-Fill
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </section>
     </div>
   );
 }

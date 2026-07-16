@@ -84,7 +84,19 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
 
         <div className={`p-4 border-t border-slate-200 dark:border-white/10 ${isCollapsed ? "flex justify-center px-2" : ""}`}>
           <button 
-            onClick={() => {
+            onClick={async () => {
+              const token = localStorage.getItem('token');
+              if (token) {
+                try {
+                  await fetch('http://localhost:3001/db/users/logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                } catch (e) {
+                  console.error('Logout error', e);
+                }
+              }
+              localStorage.removeItem('token');
               localStorage.removeItem('userId');
               localStorage.removeItem('userRole');
               router.push('/login/recruiter');
@@ -103,7 +115,7 @@ export default function RecruiterLayout({ children }: { children: React.ReactNod
       {/* Main Content */}
       <main className={`flex-1 min-h-screen flex flex-col transition-all duration-300 ${isCollapsed ? "ml-20" : "ml-60"}`}>
         {/* Top Header */}
-        <header className="h-16 bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-8 sticky top-0 z-10 transition-colors gap-6">
+        <header className="h-16 bg-white dark:bg-[#0f172a] border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-8 sticky top-0 z-50 transition-colors gap-6">
           
           {/* Left Spacer for Centering */}
           <div className="flex-1 hidden md:block"></div>

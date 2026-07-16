@@ -242,6 +242,40 @@ export default function InterviewRoom() {
      };
   }, []);
 
+  const handleLanguageChange = (newLang: LanguageKey) => {
+    setLanguage(newLang);
+    if (!providerRef.current) return;
+    
+    const type = providerRef.current.doc.getText("monaco");
+    const currentCode = type.toString().replace(/\r\n/g, "\n");
+    
+    let isBoilerplate = false;
+    
+    // Check if it's empty
+    if (currentCode.trim() === "") {
+      isBoilerplate = true;
+    }
+    
+    // Check global templates
+    if (!isBoilerplate && Object.values(languageTemplates).some(t => t.replace(/\r\n/g, "\n") === currentCode)) {
+      isBoilerplate = true;
+    }
+    
+    // Check question specific boilerplates
+    if (!isBoilerplate && question?.boilerplate) {
+      if (Object.values(question.boilerplate).some(t => typeof t === 'string' && t.replace(/\r\n/g, "\n") === currentCode)) {
+        isBoilerplate = true;
+      }
+    }
+    
+    if (isBoilerplate) {
+      const newBoilerplate = question?.boilerplate?.[newLang] || languageTemplates[newLang];
+      type.delete(0, type.length);
+      type.insert(0, newBoilerplate);
+    }
+  };
+
+
   const selectedResult = results?.results[activeTab] ?? null;
   const selectedTestCase = question?.testCases[activeTab] ?? null;
 
@@ -311,7 +345,7 @@ export default function InterviewRoom() {
       
       const userId = localStorage.getItem("userId");
       
-      await fetch(`${API_BASE_URL}/db/users/${userId}/assessments/${candidateId}/submit`, {
+      const response = await fetch(`${API_BASE_URL}/db/users/${userId}/assessments/${candidateId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -324,6 +358,12 @@ export default function InterviewRoom() {
           ] 
         })
       });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Failed to submit: ${response.statusText}`);
+      }
+
       alert("Interview graded successfully!");
       window.close();
     } catch (err) {
@@ -376,7 +416,7 @@ export default function InterviewRoom() {
             </div>
             <select
               value={language}
-              onChange={(e) => setLanguage(e.target.value as LanguageKey)}
+              onChange={(e) => handleLanguageChange(e.target.value as LanguageKey)}
               className="rounded-md border border-gray-700 bg-[#262626] px-3 py-1 text-xs text-gray-200 shadow-sm outline-none transition focus:border-emerald-500"
             >
               {Object.entries(languageMeta).map(([key, meta]) => (

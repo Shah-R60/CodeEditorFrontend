@@ -14,6 +14,7 @@ export default function HiringDrivesPage() {
         const recruiterId = localStorage.getItem('userId');
         const res = await fetch('http://localhost:3001/db/drives', {
           headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'x-user-id': recruiterId || ''
           }
         });

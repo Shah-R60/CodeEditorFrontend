@@ -18,10 +18,15 @@ export default function NotificationDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-  const userRole = typeof window !== "undefined" ? localStorage.getItem("userRole") : null;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const userId = isMounted && typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+  const userRole = isMounted && typeof window !== "undefined" ? localStorage.getItem("userRole") : null;
 
   const fetchNotifications = async () => {
     if (!userId || !userRole) return;
@@ -90,97 +95,132 @@ export default function NotificationDropdown() {
   if (!userId) return null;
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <>
       <button
         onClick={() => {
           if (!isOpen) {
             setIsOpen(true);
-            fetchNotifications().then(() => {
-              // Automatically mark as read
-              handleMarkAllAsRead();
-            });
-          } else {
-            setIsOpen(false);
+            fetchNotifications();
           }
         }}
-        className="relative p-2 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors focus:outline-none"
+        className="relative p-2 text-slate-600 dark:text-slate-300 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors focus:outline-none"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white shadow-[0_0_0_2px_white] dark:shadow-[0_0_0_2px_#0f172a]">
+          <span className="absolute top-0 right-0 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold leading-none text-white shadow-[0_0_0_2px_white] dark:shadow-[0_0_0_2px_#0f172a]">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#0f172a] rounded-xl shadow-xl border border-slate-200 dark:border-white/10 z-50 overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-white/5">
-            <h3 className="font-bold text-slate-900 dark:text-white">Notifications</h3>
-          </div>
+      {/* Backdrop */}
+      <div 
+        className={`fixed inset-0 bg-black/40 z-[100] transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsOpen(false)}
+      />
 
-          <div className="max-h-96 overflow-y-auto">
-            {notifications.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 dark:text-slate-400 flex flex-col items-center">
-                <Bell className="w-8 h-8 mb-2 text-slate-300 dark:text-slate-600" />
-                <p className="text-sm">You're all caught up!</p>
+      {/* Drawer */}
+      <div 
+        className={`fixed inset-y-0 right-0 w-full sm:w-[380px] bg-white dark:bg-[#161722] z-[101] shadow-2xl flex flex-col border-l border-slate-200 dark:border-white/5 rounded-l-3xl overflow-hidden transform transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+            {/* Header */}
+            <div className="p-6 flex items-center justify-between border-b border-slate-200 dark:border-white/5">
+              <div className="flex items-center gap-3">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Notifications</h3>
+                {unreadCount > 0 && (
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-600/20 text-amber-600 dark:text-amber-500 text-xs font-bold border border-amber-200 dark:border-amber-500/20">
+                    {unreadCount} new
+                  </span>
+                )}
               </div>
-            ) : (
-              <div className="divide-y divide-slate-100 dark:divide-white/10">
-                {notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    className={`relative p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors ${
-                      !n.isRead ? 'bg-emerald-50/30 dark:bg-emerald-500/10' : ''
-                    }`}
-                  >
-                    {!n.isRead && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
-                    )}
-                    
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1 min-w-0">
-                        {n.actionLink ? (
-                          <Link href={n.actionLink} onClick={() => setIsOpen(false)} className="block">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{n.title}</p>
-                            <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">{n.message}</p>
-                          </Link>
-                        ) : (
-                          <div>
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white mb-1">{n.title}</p>
-                            <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">{n.message}</p>
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors p-1 rounded-full hover:bg-slate-100 dark:hover:bg-white/10"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-12 text-center text-slate-500 flex flex-col items-center">
+                  <Bell className="w-10 h-10 mb-4 text-slate-300 dark:text-slate-600 opacity-50" />
+                  <p className="text-sm font-medium">You're all caught up!</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 dark:divide-white/5">
+                  {notifications.map((n) => {
+                    const content = (
+                      <div className="flex items-start gap-4">
+                        <div className="mt-0.5">
+                          <div className="w-6 h-6 rounded-full border border-amber-500 flex items-center justify-center text-amber-500 bg-amber-50 dark:bg-amber-500/10">
+                            <span className="text-xs font-bold italic">i</span>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-1.5">
+                            <h4 className="text-[15px] font-bold text-slate-900 dark:text-white tracking-tight">{n.title}</h4>
+                            <span className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0 mt-0.5">
+                              {formatDate(n.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-1">
+                            {n.message}
+                          </p>
+                        </div>
+                        {!n.isRead && (
+                          <div className="shrink-0 flex items-center justify-center mt-6">
+                            <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
                           </div>
                         )}
-                        <div className="flex items-center gap-1 mt-2 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                          <Clock className="w-3 h-3" />
-                          <span>{formatDate(n.createdAt)}</span>
-                        </div>
                       </div>
-                      
-                      {!n.isRead && (
-                        <button
-                          onClick={(e) => handleMarkAsRead(n.id, e)}
-                          className="text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 p-1 -mr-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
-                          title="Mark as read"
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          {notifications.length > 0 && (
-            <div className="p-3 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    );
+
+                    return n.actionLink ? (
+                      <Link
+                        key={n.id}
+                        href={n.actionLink}
+                        onClick={(e) => {
+                          setIsOpen(false);
+                          if (!n.isRead) handleMarkAsRead(n.id, e as any);
+                        }}
+                        className={`block relative p-5 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer ${
+                          !n.isRead ? 'bg-amber-50/30 dark:bg-[#1c1d29]' : ''
+                        }`}
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <div
+                        key={n.id}
+                        onClick={(e) => {
+                          if (!n.isRead) handleMarkAsRead(n.id, e);
+                        }}
+                        className={`relative p-5 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors cursor-pointer ${
+                          !n.isRead ? 'bg-amber-50/30 dark:bg-[#1c1d29]' : ''
+                        }`}
+                      >
+                        {content}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 dark:bg-[#12131c] border-t border-slate-200 dark:border-white/5 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
               Showing latest {notifications.length} notifications
             </div>
-          )}
-        </div>
-      )}
-    </div>
+          </div>
+    </>
   );
 }

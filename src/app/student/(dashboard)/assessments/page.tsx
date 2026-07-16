@@ -73,6 +73,8 @@ export default function StudentAssessmentsPage() {
 
               const firstRound = drive?.rounds?.[0];
               const startDate = firstRound?.startDate ? new Date(firstRound.startDate) : null;
+              const durationInMins = firstRound?.duration ? parseInt(firstRound.duration) : 60;
+              const endDate = firstRound?.endDate ? new Date(firstRound.endDate) : (startDate ? new Date(startDate.getTime() + durationInMins * 60000) : null);
               const now = new Date();
 
               let actionElement;
@@ -80,7 +82,7 @@ export default function StudentAssessmentsPage() {
               if (!startDate) {
                 actionElement = (
                   <span className="flex items-center gap-2 text-sm font-bold text-slate-400 dark:text-slate-500 cursor-not-allowed">
-                    Upcoming Assessment <Clock size={16} />
+                    Schedule to be Decided <Clock size={16} />
                   </span>
                 );
               } else if (startDate > now) {
@@ -90,10 +92,16 @@ export default function StudentAssessmentsPage() {
                     Starts: {formattedTime} <Clock size={16} />
                   </span>
                 );
+              } else if (endDate && endDate < now) {
+                actionElement = (
+                  <span className="flex items-center gap-2 text-sm font-bold text-rose-500 dark:text-rose-400 cursor-not-allowed">
+                    Round Finished <Clock size={16} />
+                  </span>
+                );
               } else {
                 actionElement = (
-                  <Link href="/editor" className="flex items-center gap-2 text-sm font-bold text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform">
-                    Start Assessment <ChevronRight size={16} />
+                  <Link href={`/student/drives/${drive?.id}`} className="flex items-center gap-2 text-sm font-bold text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform">
+                    Live - Start Assessment <ChevronRight size={16} />
                   </Link>
                 );
               }
