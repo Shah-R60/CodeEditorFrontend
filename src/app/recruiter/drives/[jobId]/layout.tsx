@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { LayoutDashboard, Map, Users, CheckCircle, ArrowLeft, Loader2, GitMerge, Search, Filter, LayoutGrid } from "lucide-react";
 import NotificationDropdown from "@/components/common/NotificationDropdown";
+import GlobalSearch from "@/components/common/GlobalSearch";
 import ThemeToggle from "@/components/common/ThemeToggle";
 
 export default function JobDetailsLayout({ children }: { children: React.ReactNode }) {
@@ -189,20 +190,7 @@ export default function JobDetailsLayout({ children }: { children: React.ReactNo
           </div>
 
           {/* Central Search Bar */}
-          <div className="w-full max-w-md hidden sm:flex items-center gap-3">
-            <div className="flex-1 flex items-center bg-slate-50 dark:bg-[#0f172a] rounded-full border border-slate-200 dark:border-white/10 transition-colors pl-2 pr-1 py-1">
-              <div className="relative w-full flex items-center">
-                <input
-                  type="text"
-                  placeholder="Search jobs here"
-                  className="block w-full pl-3 pr-4 py-1.5 bg-transparent border-none text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-0"
-                />
-                <button className="flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-full shrink-0 hover:bg-amber-600 transition-colors">
-                  <Search size={16} strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
-          </div>
+          <GlobalSearch />
 
           {/* Right Action Icons */}
           <div className="flex-1 flex items-center justify-end gap-4 shrink-0">
