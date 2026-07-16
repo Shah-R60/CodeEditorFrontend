@@ -41,7 +41,7 @@ export default function HiringDrivesPage() {
         </div>
         <Link 
           href="/recruiter/drives/new"
-          className="inline-flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium py-2.5 px-5 rounded-xl hover:bg-slate-800 dark:hover:bg-slate-200 transition-all shadow-md hover:shadow-lg focus:ring-4 focus:ring-slate-900/20 active:scale-[0.98]"
+          className="inline-flex items-center justify-center gap-2 bg-amber-500 text-white font-medium py-2.5 px-5 rounded-xl hover:bg-amber-600 transition-all shadow-md hover:shadow-lg hover:shadow-amber-500/20 focus:ring-4 focus:ring-amber-500/20 active:scale-[0.98]"
         >
           <Plus size={18} />
           Create Hiring Drive
@@ -72,66 +72,100 @@ export default function HiringDrivesPage() {
           </div>
         ) : drives.map((drive) => (
           <Link href={`/recruiter/drives/${drive.id}`} key={drive.id} className="group block bg-white dark:bg-[#0f172a] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-white/20 transition-all duration-200 overflow-hidden">
-            <div className="p-6">
+            <div className="p-6 flex flex-col lg:flex-row gap-8">
               
-              {/* Drive Info Top */}
-              <div className="flex justify-between items-start mb-5">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-amber-500 transition-colors truncate">
-                    {drive.title}
-                  </h2>
-                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border flex items-center gap-1.5 shrink-0 ${
-                    drive.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 
-                    drive.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200/60' : 
-                    'bg-slate-50 text-slate-600 border-slate-200/60'
-                  }`}>
-                    {drive.status === 'Active' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>}
-                    {drive.status}
-                  </span>
+              {/* Left Side: Info & Metrics */}
+              <div className="flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-amber-500 transition-colors truncate">
+                        {drive.title}
+                      </h2>
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border flex items-center gap-1.5 shrink-0 ${
+                        drive.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 
+                        drive.status === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200/60' : 
+                        'bg-slate-50 text-slate-600 border-slate-200/60'
+                      }`}>
+                        {drive.status === 'Active' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>}
+                        {drive.status}
+                      </span>
+                    </div>
+                    <button 
+                      className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigator.clipboard.writeText(`${window.location.origin}/apply/${drive.id}`);
+                      }}
+                    >
+                      <Copy size={18} />
+                    </button>
+                  </div>
+                  
+                  <div className="flex flex-col gap-1.5 text-sm text-slate-600 dark:text-slate-300 mb-6">
+                    {drive.department && <span className="font-medium">{drive.department}</span>}
+                    <span>Created {drive.date}</span>
+                  </div>
                 </div>
-                <button 
-                  className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white transition-colors"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigator.clipboard.writeText(`${window.location.origin}/apply/${drive.id}`);
-                  }}
-                >
-                  <Copy size={18} />
-                </button>
-              </div>
-              
-              {/* Department, Date, ID Stack */}
-              <div className="flex flex-col gap-1.5 text-sm text-slate-600 dark:text-slate-300 mb-6">
-                {drive.department && <span className="font-medium">{drive.department}</span>}
-                <span>Created {new Date(drive.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-              </div>
 
-              {/* Divider */}
-              <div className="border-t border-dashed border-slate-200 dark:border-white/10 mb-6"></div>
-
-              {/* Metadata List */}
-              <div className="flex flex-col gap-3 text-sm text-slate-700 dark:text-slate-300">
-                <div className="flex items-center gap-3">
-                  <Users size={16} className="text-indigo-400" />
-                  <span className="font-medium">{drive.candidates}</span> Candidates
-                </div>
-                <div className="flex items-center gap-3">
-                  <Layers size={16} className="text-slate-400" />
-                  <span className="font-medium">{drive.rounds?.length || 4}</span> Rounds
-                </div>
-                <div className="flex items-center gap-3">
-                  <FileText size={16} className="text-rose-400" />
-                  <span className="font-medium">2</span> Assessments
-                </div>
-                <div className="flex items-center gap-3">
-                  <TrendingUp size={16} className="text-sky-400" />
-                  <span className="font-medium">{drive.passRate}</span> Pass
+                {/* Metrics Row */}
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-dashed border-slate-200 dark:border-white/10">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1.5"><Users size={14}/> Candidates</span>
+                    <span className="text-lg font-bold text-slate-800 dark:text-slate-200">{drive.candidates}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1.5"><Layers size={14}/> Rounds</span>
+                    <span className="text-lg font-bold text-slate-800 dark:text-slate-200">{drive.rounds?.length || 0}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1.5"><TrendingUp size={14}/> Pass Rate</span>
+                    <span className="text-lg font-bold text-slate-800 dark:text-slate-200">{drive.passRate}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Arrow */}
-              <div className="flex justify-end mt-2">
-                <ChevronRight size={20} className="text-slate-300 dark:text-slate-600 group-hover:text-amber-500 transition-colors group-hover:translate-x-1 duration-200" />
+              {/* Right Side: Assessment Pipeline */}
+              <div className="w-full lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l border-dashed border-slate-200 dark:border-white/10 pt-6 lg:pt-0 lg:pl-8 flex flex-col">
+                <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-5">Assessment Pipeline</h4>
+                <div className="relative flex-1">
+                  {drive.rounds && drive.rounds.length > 0 ? (
+                    <>
+                      {drive.rounds.slice(0, 3).map((round: any, i: number) => (
+                        <div key={round.id || i} className="flex gap-4 mb-4 relative group/step">
+                          {/* Vertical Connector */}
+                          {i !== Math.min(drive.rounds.length - 1, 2) && (
+                            <div className="absolute left-[15px] top-[28px] bottom-[-20px] w-[2px] bg-slate-200 dark:bg-[#1e293b]"></div>
+                          )}
+                          <div className="w-8 h-8 shrink-0 rounded-full bg-emerald-400 border border-transparent flex items-center justify-center text-white dark:text-slate-900 font-bold text-xs z-10 shadow-sm transition-colors group-hover/step:bg-emerald-500">
+                            {i + 1}
+                          </div>
+                          <div className="pt-1 min-w-0">
+                            <p className="font-semibold text-sm text-slate-900 dark:text-white truncate">{round.name}</p>
+                            <p className="text-[13px] text-slate-500 truncate">{round.type}</p>
+                          </div>
+                        </div>
+                      ))}
+                      {drive.rounds.length > 3 && (
+                        <div className="flex gap-4 relative mt-2">
+                          <div className="w-8 h-8 shrink-0 rounded-full bg-slate-100 dark:bg-[#1e293b] border border-slate-200 dark:border-[#334155] flex items-center justify-center text-slate-500 font-bold text-xs z-10">
+                            +{drive.rounds.length - 3}
+                          </div>
+                          <div className="flex items-center">
+                            <p className="text-xs text-slate-500 font-medium">More rounds</p>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-sm text-slate-500 italic mt-2">No rounds configured.</div>
+                  )}
+                </div>
+                
+                {/* Arrow */}
+                <div className="flex justify-end mt-4">
+                  <ChevronRight size={20} className="text-slate-300 dark:text-slate-600 group-hover:text-amber-500 transition-colors group-hover:translate-x-1 duration-200" />
+                </div>
               </div>
 
             </div>

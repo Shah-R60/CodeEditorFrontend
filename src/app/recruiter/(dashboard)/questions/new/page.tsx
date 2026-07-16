@@ -159,7 +159,7 @@ export default function CreateQuestion() {
                 {...register("boilerplate.cpp")}
                 rows={12}
                 placeholder="#include <iostream>..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
               />
             </div>
 
@@ -171,7 +171,7 @@ export default function CreateQuestion() {
                 {...register("boilerplate.python")}
                 rows={12}
                 placeholder="def solve():..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
               />
             </div>
 
@@ -183,7 +183,7 @@ export default function CreateQuestion() {
                 {...register("boilerplate.javascript")}
                 rows={12}
                 placeholder="function solve() {..."
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
+                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-emerald-400 font-mono text-sm min-h-[300px] focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
               />
             </div>
           </div>
@@ -226,7 +226,7 @@ export default function CreateQuestion() {
                     <textarea
                       {...register(`testCases.${index}.input`, { required: true })}
                       rows={3}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-3 text-slate-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3 text-slate-900 dark:text-slate-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
                       placeholder="e.g. [2,7,11,15]\n9"
                     />
                   </div>
@@ -235,7 +235,7 @@ export default function CreateQuestion() {
                     <textarea
                       {...register(`testCases.${index}.expectedOutput`, { required: true })}
                       rows={3}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-3 text-emerald-400 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
+                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3 text-slate-900 dark:text-emerald-400 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600/50 focus:border-emerald-500 transition-all shadow-inner"
                       placeholder="e.g. [0,1]"
                     />
                   </div>
