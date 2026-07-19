@@ -137,7 +137,7 @@ export default function HiringDrivesPage() {
                           {i !== Math.min(drive.rounds.length - 1, 2) && (
                             <div className="absolute left-[15px] top-[28px] bottom-[-20px] w-[2px] bg-slate-200 dark:bg-[#1e293b]"></div>
                           )}
-                          <div className="w-8 h-8 shrink-0 rounded-full bg-emerald-400 border border-transparent flex items-center justify-center text-white dark:text-slate-900 font-bold text-xs z-10 shadow-sm transition-colors group-hover/step:bg-emerald-500">
+                          <div className="w-8 h-8 shrink-0 rounded-full bg-white dark:bg-[#1e293b] border-2 border-amber-500 flex items-center justify-center text-amber-500 font-bold text-xs z-10 shadow-sm transition-colors group-hover/step:bg-amber-50 dark:group-hover/step:bg-amber-500/10">
                             {i + 1}
                           </div>
                           <div className="pt-1 min-w-0">

@@ -16,6 +16,8 @@ export default function ApplyPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [resume, setResume] = useState<File | null>(null);
+  const [github, setGithub] = useState("");
+  const [linkedin, setLinkedin] = useState("");
   
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -67,6 +69,8 @@ export default function ApplyPage() {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("email", email);
+      if (github) formData.append("github", github);
+      if (linkedin) formData.append("linkedin", linkedin);
       if (resume) {
         formData.append("resume", resume);
       }
@@ -242,6 +246,29 @@ export default function ApplyPage() {
                   className="w-full px-4 py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all shadow-sm"
                 />
                 <p className="text-xs text-slate-500 mt-1">We'll send your assessment instructions to this email.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-900">GitHub Profile (Optional)</label>
+                  <input 
+                    type="url" 
+                    value={github}
+                    onChange={e => setGithub(e.target.value)}
+                    placeholder="https://github.com/janedoe"
+                    className="w-full px-4 py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all shadow-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-900">LinkedIn Profile (Optional)</label>
+                  <input 
+                    type="url" 
+                    value={linkedin}
+                    onChange={e => setLinkedin(e.target.value)}
+                    placeholder="https://linkedin.com/in/janedoe"
+                    className="w-full px-4 py-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all shadow-sm"
+                  />
+                </div>
               </div>
 
               <div>

@@ -2,8 +2,57 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { CheckCircle, Award, Loader2, Download, X, ExternalLink, FileText, Code, Briefcase, Check, UserX } from "lucide-react";
+import { CheckCircle, Award, Loader2, Download, X, ExternalLink, FileText, Code, Briefcase, Check, UserX, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { CandidateDetailsSidebar } from "@/components/common/CandidateDetailsSidebar";
+
+const parseScore = (scoreStr: string) => {
+  if (!scoreStr) return { earned: 0, total: 0 };
+  const parts = scoreStr.toString().split('/');
+  if (parts.length === 2) {
+    return { earned: parseFloat(parts[0]) || 0, total: parseFloat(parts[1]) || 0 };
+  }
+  return { earned: parseFloat(scoreStr) || 0, total: 100 }; 
+};
+
+const getRoundScore = (candidate: any, round: any, idx: number) => {
+  if (candidate?.stageData) {
+    let stageData = candidate.stageData;
+    if (typeof stageData === 'string') {
+       try { stageData = JSON.parse(stageData); } catch(e) {}
+    }
+    const roundData = stageData[round.id];
+    if (roundData && roundData.score) {
+      return roundData.score.toString();
+    }
+  }
+  return '0/0';
+};
+
+const getOverallScore = (candidate: any, job: any) => {
+  let totalEarned = 0;
+  let totalMax = 0;
+  
+  const roundsToProcess = (job?.rounds && job.rounds.length > 0) 
+    ? job.rounds 
+    : [
+        { id: 'mock1', name: 'Online Assessment', type: 'OA' },
+        { id: 'mock2', name: 'Technical Interview', type: 'Technical' }
+      ];
+
+  roundsToProcess.forEach((round: any, idx: number) => {
+    const scoreStr = getRoundScore(candidate, round, idx);
+    const parsed = parseScore(scoreStr);
+    totalEarned += parsed.earned;
+    totalMax += parsed.total;
+  });
+
+  return { 
+    display: totalMax > 0 ? `${totalEarned}/${totalMax}` : (candidate?.score || '0/0'),
+    earned: totalEarned,
+    max: totalMax
+  };
+};
 
 export default function FinalSelectionPage() {
   const params = useParams();
@@ -11,6 +60,39 @@ export default function FinalSelectionPage() {
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+
+  const [confirmDialog, setConfirmDialog] = useState<{ candidateId: string, status: string } | null>(null);
+
+  const handleCandidateDecision = (candidateId: string, status: string) => {
+    setConfirmDialog({ candidateId, status });
+  };
+
+  const executeDecision = async () => {
+    if (!confirmDialog) return;
+    const { candidateId, status } = confirmDialog;
+
+    try {
+      const res = await fetch(`http://localhost:3001/db/drives/${jobId}/candidates/${candidateId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setJob((prev: any) => ({
+          ...prev,
+          candidates: prev.candidates.map((c: any) => c.id === candidateId ? { ...c, status } : c)
+        }));
+        setSelectedCandidate(null);
+        setConfirmDialog(null);
+      } else {
+        alert(json.error || "Failed to update candidate status");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error. Please try again.");
+    }
+  };
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -36,22 +118,23 @@ export default function FinalSelectionPage() {
 
   if (!job) return <div>Job not found</div>;
 
-  const finalCandidates = job.candidates?.filter((c: any) => c.status === "Passed") || [];
+  const finalCandidates = job.candidates?.filter((c: any) => ["Passed", "Selected", "Hired", "Rejected"].includes(c.status)) || [];
 
-  // Calculate Average Score
-  const totalScore = finalCandidates.reduce((acc: number, curr: any) => {
-    const scoreVal = parseFloat(curr.score) || 92; // fallback mock
-    return acc + scoreVal;
-  }, 0);
-  const avgScore = finalCandidates.length > 0 ? (totalScore / finalCandidates.length).toFixed(1) : 0;
+  const enrichedCandidates = finalCandidates.map((c: any) => ({
+    ...c,
+    computedScore: getOverallScore(c, job)
+  }));
+
+  const totalEarned = enrichedCandidates.reduce((acc: number, curr: any) => acc + curr.computedScore.earned, 0);
+  const avgScore = enrichedCandidates.length > 0 ? (totalEarned / enrichedCandidates.length).toFixed(1) : "0.0";
 
   const handleExportCSV = () => {
-    if (!finalCandidates.length) return;
+    if (!enrichedCandidates.length) return;
     const headers = ["Name", "Email", "Overall Score", "Completed On"];
-    const rows = finalCandidates.map((c: any) => [
+    const rows = enrichedCandidates.map((c: any) => [
       c.name,
       c.email,
-      c.score || '92',
+      c.computedScore.display,
       new Date(c.createdAt).toLocaleDateString()
     ]);
     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
@@ -66,9 +149,10 @@ export default function FinalSelectionPage() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
-      
-      {/* Header */}
+    <>
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
+        
+        {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -123,23 +207,31 @@ export default function FinalSelectionPage() {
                     </Link>
                   </td>
                 </tr>
-              ) : finalCandidates.map((c: any) => (
+              ) : enrichedCandidates.map((c: any) => (
                 <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="font-semibold text-slate-900 dark:text-white">{c.name}</div>
-                    <div className="text-slate-500 dark:text-slate-400 text-xs mt-0.5">{c.email}</div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-slate-500 dark:text-slate-400 text-xs">{c.email}</span>
+                      {(c.status === 'Selected' || c.status === 'Hired') && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">HIRED</span>}
+                      {c.status === 'Rejected' && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400">REJECTED</span>}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400">{c.score || '92'}</td>
+                  <td className="px-6 py-4 font-bold text-emerald-600 dark:text-emerald-400">{c.computedScore.display}</td>
                   <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
                     {new Date(c.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={() => setSelectedCandidate(c)}
-                      className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors px-4 py-1.5 rounded-lg font-medium text-sm"
-                    >
-                      View Results
-                    </button>
+                    {(c.status !== 'Selected' && c.status !== 'Hired' && c.status !== 'Rejected') ? (
+                      <button 
+                        onClick={() => setSelectedCandidate(c)}
+                        className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors px-4 py-1.5 rounded-lg font-medium text-sm"
+                      >
+                        View Results
+                      </button>
+                    ) : (
+                      <span className="text-sm font-medium text-slate-400 dark:text-slate-500 italic">Decision Final</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -147,101 +239,57 @@ export default function FinalSelectionPage() {
           </table>
         </div>
       </div>
-
-      {/* Candidate Details Drawer Overlay */}
-      {selectedCandidate && (
-        <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40" onClick={() => setSelectedCandidate(null)}></div>
-      )}
-
-      {/* Candidate Details Drawer */}
-      <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-slate-900 text-slate-300 z-50 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${selectedCandidate ? 'translate-x-0' : 'translate-x-full'}`}>
-        {selectedCandidate && (
-          <>
-            <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-white">{selectedCandidate.name}</h3>
-                <div className="text-slate-500 text-sm mt-1">{selectedCandidate.email}</div>
-              </div>
-              <button onClick={() => setSelectedCandidate(null)} className="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-white">
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="p-6 flex-1 overflow-y-auto space-y-8">
-              
-              {/* Overall Score */}
-              <div>
-                <div className="text-slate-500 text-sm mb-2">Overall Score</div>
-                <div className="text-4xl font-bold text-emerald-400">{selectedCandidate.score || '92'}</div>
-              </div>
-
-              {/* Round Results */}
-              <div>
-                <div className="text-slate-200 font-medium mb-4 pb-2 border-b border-slate-800">Round Results</div>
-                <div className="space-y-4">
-                  {job.rounds?.map((round: any, idx: number) => (
-                    <div key={round.id || idx} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Check size={16} className="text-emerald-500" />
-                        <span className="text-sm">{round.name || round.type}</span>
-                      </div>
-                      <div className="font-semibold text-white">
-                        {/* Mocking scores based on type for demonstration */}
-                        {round.type === 'INTERVIEW' ? '4.5/5' : (85 + (idx * 3))}
-                      </div>
-                    </div>
-                  ))}
-                  {/* Fallback if no rounds in job */}
-                  {(!job.rounds || job.rounds.length === 0) && (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3"><Check size={16} className="text-emerald-500" /><span className="text-sm">Online Assessment</span></div>
-                        <div className="font-semibold text-white">88</div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3"><Check size={16} className="text-emerald-500" /><span className="text-sm">Technical Interview</span></div>
-                        <div className="font-semibold text-white">94</div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3"><Check size={16} className="text-emerald-500" /><span className="text-sm">HR Interview</span></div>
-                        <div className="font-semibold text-white">4.5/5</div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Links */}
-              <div>
-                <div className="text-slate-200 font-medium mb-4 pb-2 border-b border-slate-800">Candidate Profile</div>
-                <div className="space-y-3">
-                  <a href="#" className="flex items-center gap-3 text-sm text-slate-400 hover:text-white transition-colors">
-                    <FileText size={16} /> Resume <ExternalLink size={14} className="ml-auto opacity-50" />
-                  </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-slate-400 hover:text-white transition-colors">
-                    <Code size={16} /> GitHub <ExternalLink size={14} className="ml-auto opacity-50" />
-                  </a>
-                  <a href="#" className="flex items-center gap-3 text-sm text-slate-400 hover:text-white transition-colors">
-                    <Briefcase size={16} /> LinkedIn <ExternalLink size={14} className="ml-auto opacity-50" />
-                  </a>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Actions */}
-            <div className="p-6 border-t border-slate-800 flex gap-3">
-              <button className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-lg font-medium transition-colors">
-                Select Candidate
-              </button>
-              <button className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-lg font-medium transition-colors">
-                Reject
-              </button>
-            </div>
-          </>
-        )}
       </div>
 
-    </div>
+      <CandidateDetailsSidebar
+        candidate={selectedCandidate}
+        job={job}
+        onClose={() => setSelectedCandidate(null)}
+        onSelect={() => handleCandidateDecision(selectedCandidate.id, 'Selected')}
+        onReject={() => handleCandidateDecision(selectedCandidate.id, 'Rejected')}
+      />
+
+      {confirmDialog && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-start gap-4 mb-2">
+                <div className={`p-3 rounded-full shrink-0 ${confirmDialog.status === 'Selected' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400'}`}>
+                  {confirmDialog.status === 'Selected' ? <CheckCircle size={24} /> : <AlertTriangle size={24} />}
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
+                    {confirmDialog.status === 'Selected' ? 'Select Candidate' : 'Reject Candidate'}
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                    {confirmDialog.status === 'Selected' 
+                      ? 'Are you sure you want to select this candidate? This will immediately send them an official offer email.'
+                      : 'Are you sure you want to reject this candidate? This will immediately send them a rejection email.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+              <button 
+                onClick={() => setConfirmDialog(null)}
+                className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={executeDecision}
+                className={`px-4 py-2 text-sm font-bold text-white rounded-lg transition-colors shadow-sm ${
+                  confirmDialog.status === 'Selected' 
+                    ? 'bg-emerald-500 hover:bg-emerald-600' 
+                    : 'bg-rose-500 hover:bg-rose-600'
+                }`}
+              >
+                Confirm {confirmDialog.status === 'Selected' ? 'Selection' : 'Rejection'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
