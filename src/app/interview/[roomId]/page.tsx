@@ -3,11 +3,12 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { Play, Lock, Users, ChevronDown, ChevronUp, Terminal, FileText } from "lucide-react";
+import { Play, Lock, Users, ChevronDown, ChevronUp, Terminal, FileText, Bot } from "lucide-react";
 import { Panel, Group, Separator } from "react-resizable-panels";
 import * as Y from "yjs";
 import { io, Socket } from "socket.io-client";
 import VideoSidebar from "./VideoSidebar";
+import AIChatbot from "./AIChatbot";
 
 type LanguageKey = "python" | "javascript" | "cpp";
 
@@ -67,6 +68,7 @@ export default function InterviewRoom() {
   const [isQuestionBankOpen, setIsQuestionBankOpen] = useState(false);
   const [globalQuestions, setGlobalQuestions] = useState<Question[]>([]);
   const [isGradingModalOpen, setIsGradingModalOpen] = useState(false);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [interviewerScore, setInterviewerScore] = useState({
     communication: 0,
     coding: 0,
@@ -389,6 +391,17 @@ export default function InterviewRoom() {
             {role === 'interviewer' && (
               <div className="flex gap-2">
                 <button
+                  onClick={() => setIsAIChatOpen(!isAIChatOpen)}
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md transition border shadow-sm ${
+                    isAIChatOpen 
+                      ? "bg-emerald-600 border-emerald-500 text-white hover:bg-emerald-700" 
+                      : "bg-[#262626] border-gray-700 text-emerald-400 hover:bg-[#333333]"
+                  }`}
+                >
+                  <Bot size={14} />
+                  AI Assist
+                </button>
+                <button
                   onClick={() => {
                     const newState = viewMode === 'coding' ? 'video' : 'coding';
                     setViewMode(newState);
@@ -633,6 +646,9 @@ export default function InterviewRoom() {
                   )}
                 </div>
               </Panel>
+
+
+
             </Group>
             </div>
             <div className="w-[30%] min-w-[300px] shrink-0"></div>
@@ -653,6 +669,21 @@ export default function InterviewRoom() {
               </div>
             )}
           </div>
+
+          {/* AI Chatbot Overlay (Interviewer Only) */}
+          {role === 'interviewer' && isAIChatOpen && (
+            <div 
+              className="absolute right-0 top-0 bottom-0 z-30 w-[30%] min-w-[300px] shadow-2xl animate-in slide-in-from-right-full duration-300"
+            >
+              <AIChatbot
+                language={language}
+                editorCode={editorRef.current?.getValue() || ""}
+                question={question}
+                testResults={results}
+                onClose={() => setIsAIChatOpen(false)}
+              />
+            </div>
+          )}
         </div>
       </div>
 

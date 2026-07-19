@@ -146,11 +146,11 @@ export default function PipelinePlanTab() {
                   statusColor = 'bg-slate-500';
                 } else {
                   status = 'Live';
-                  statusColor = 'bg-blue-500';
+                  statusColor = 'bg-green-500';
                 }
               } else {
                 status = 'Live';
-                statusColor = 'bg-blue-500';
+                statusColor = 'bg-green-500';
               }
             }
           }

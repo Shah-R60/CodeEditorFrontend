@@ -591,12 +591,12 @@ export default function StageDetailsPage() {
           startsInText = 'Ended';
         } else {
           statusText = 'Live';
-          statusColor = 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400';
+          statusColor = 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400';
           startsInText = 'Started';
         }
       } else {
         statusText = 'Live';
-        statusColor = 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400';
+        statusColor = 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400';
         startsInText = 'Started';
       }
     }
