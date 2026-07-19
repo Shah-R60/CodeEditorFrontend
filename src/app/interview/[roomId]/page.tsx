@@ -392,7 +392,7 @@ export default function InterviewRoom() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setIsAIChatOpen(!isAIChatOpen)}
-                  className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md transition border shadow-sm ${
+                  className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition border shadow-sm ${
                     isAIChatOpen 
                       ? "bg-emerald-600 border-emerald-500 text-white hover:bg-emerald-700" 
                       : "bg-[#262626] border-gray-700 text-emerald-400 hover:bg-[#333333]"
@@ -407,7 +407,7 @@ export default function InterviewRoom() {
                     setViewMode(newState);
                     providerRef.current?.doc.getMap('state').set('viewMode', newState);
                   }}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-md transition ${viewMode === 'coding' ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md' : 'bg-[#262626] border border-gray-700 hover:bg-[#333333] text-gray-300'}`}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition ${viewMode === 'coding' ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md' : 'bg-[#262626] border border-gray-700 hover:bg-[#333333] text-gray-300'}`}
                 >
                   {viewMode === 'coding' ? 'Hide Code Editor' : 'Show Code Editor'}
                 </button>
@@ -417,20 +417,20 @@ export default function InterviewRoom() {
                     setViewMode(newState);
                     providerRef.current?.doc.getMap('state').set('viewMode', newState);
                   }}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-md transition ${viewMode === 'notepad' ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md' : 'bg-[#262626] border border-gray-700 hover:bg-[#333333] text-gray-300'}`}
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition ${viewMode === 'notepad' ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md' : 'bg-[#262626] border border-gray-700 hover:bg-[#333333] text-gray-300'}`}
                 >
                   {viewMode === 'notepad' ? 'Hide Notepad' : 'Show Notepad'}
                 </button>
               </div>
             )}
-            <div className="flex items-center gap-2 text-sm text-gray-300 bg-[#262626] px-3 py-1 rounded-md border border-gray-700">
+            <div className="flex items-center gap-2 text-sm text-gray-300 bg-[#262626] px-3 py-1 rounded-xl border border-gray-700">
               <Users className="h-4 w-4 text-emerald-400" />
               <span>{connectedUsers} Online</span>
             </div>
             <select
               value={language}
               onChange={(e) => handleLanguageChange(e.target.value as LanguageKey)}
-              className="rounded-md border border-gray-700 bg-[#262626] px-3 py-1 text-xs text-gray-200 shadow-sm outline-none transition focus:border-emerald-500"
+              className="rounded-xl border border-gray-700 bg-[#262626] px-3 py-1 text-xs text-gray-200 shadow-sm outline-none transition focus:border-emerald-500"
             >
               {Object.entries(languageMeta).map(([key, meta]) => (
                 <option key={key} value={key}>
@@ -441,15 +441,17 @@ export default function InterviewRoom() {
           </div>
         </nav>
 
-        <div className="flex-1 relative flex min-h-0 overflow-hidden">
-          {/* Main Interview Area (Coding Layout) */}
-          <div className={`absolute inset-0 flex transition-opacity duration-500 ${viewMode !== 'video' ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}>
-            <div className="flex-1 p-2 min-h-0 overflow-hidden">
-              <Group orientation="horizontal" className="flex">
+        <div className="flex-1 relative flex min-h-0 overflow-hidden bg-[#0a0a0a]">
+          <Group orientation="horizontal" className="flex w-full h-full">
+            {/* Main Interview Area (Coding Layout) */}
+            {viewMode !== 'video' && (
+              <>
+                <Panel defaultSize={70} minSize={30} className="flex flex-col p-2 min-h-0 overflow-hidden relative z-10 bg-[#0f0f0f]">
+                  <Group orientation="horizontal" className="flex">
               
               {/* Left Panel: Problem */}
               {viewMode === 'coding' && (
-                <Panel defaultSize={45} minSize={25} className="flex flex-col rounded-xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
+                <Panel defaultSize={45} minSize={25} className="flex flex-col rounded-2xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
                   <div className="flex shrink-0 items-center bg-[#262626] px-4 py-2 border-b border-gray-800">
                     <span className="text-sm font-semibold text-gray-300">Description</span>
                   </div>
@@ -489,7 +491,7 @@ export default function InterviewRoom() {
                   <Group orientation="vertical" className="flex flex-col">
                     
                     {/* Top Half: Editor */}
-                    <Panel defaultSize={viewMode === 'coding' ? 60 : 100} minSize={20} className="flex flex-col rounded-xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
+                    <Panel defaultSize={viewMode === 'coding' ? 60 : 100} minSize={20} className="flex flex-col rounded-2xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
                     <div className="flex shrink-0 items-center justify-between bg-[#262626] px-4 py-2 border-b border-gray-800">
                       <span className="text-sm font-semibold text-gray-300 flex items-center gap-2">
                         <span className="text-emerald-500">&lt;/&gt;</span> Code
@@ -524,7 +526,7 @@ export default function InterviewRoom() {
 
                   {/* Bottom Half: Test Results */}
                   {viewMode === 'coding' && (
-                    <Panel defaultSize={40} minSize={20} className="flex flex-col rounded-xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
+                    <Panel defaultSize={40} minSize={20} className="flex flex-col rounded-2xl border border-gray-800 bg-[#1e1e1e] overflow-hidden shadow-sm">
                     <div className="flex shrink-0 items-center justify-between bg-[#262626] px-4 py-2 border-b border-gray-800">
                       <h2 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
                         <span className="text-emerald-500">☑</span> Testcase
@@ -536,7 +538,7 @@ export default function InterviewRoom() {
 
                     <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                       {errorBanner ? (
-                        <div className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
+                        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">
                           {errorBanner}
                         </div>
                       ) : null}
@@ -552,7 +554,7 @@ export default function InterviewRoom() {
                               <button
                                 key={result.testCase}
                                 onClick={() => setActiveTab(index)}
-                                className={`rounded-md px-4 py-1.5 text-xs font-semibold transition ${
+                                className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition ${
                                   index === activeTab
                                     ? "bg-[#333333] text-gray-100"
                                     : "bg-transparent text-gray-500 hover:bg-[#262626] hover:text-gray-300"
@@ -576,7 +578,7 @@ export default function InterviewRoom() {
                             </div>
 
                             {selectedTestCase?.isHidden ? (
-                              <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-gray-800 bg-[#161616] p-8 text-gray-400">
+                              <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-gray-800 bg-[#161616] p-8 text-gray-400">
                                 <Lock className="h-6 w-6" />
                                 <span className="text-sm font-semibold">Hidden Test Case</span>
                                 <p className="text-xs text-center max-w-xs text-gray-500">Input and Expected Output are hidden. Your code must handle edge cases automatically.</p>
@@ -585,15 +587,15 @@ export default function InterviewRoom() {
                               <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-1.5">
                                   <div className="text-xs font-medium text-gray-400">Input</div>
-                                  <pre className="rounded-lg border border-gray-800 bg-[#161616] p-3 text-xs text-gray-300 font-mono whitespace-pre-wrap">{selectedTestCase?.input || ""}</pre>
+                                  <pre className="rounded-xl border border-gray-800 bg-[#161616] p-3 text-xs text-gray-300 font-mono whitespace-pre-wrap">{selectedTestCase?.input || ""}</pre>
                                 </div>
                                 <div className="space-y-1.5">
                                   <div className="text-xs font-medium text-gray-400">Expected Output</div>
-                                  <pre className="rounded-lg border border-gray-800 bg-[#161616] p-3 text-xs text-gray-300 font-mono whitespace-pre-wrap">{selectedResult?.expected || ""}</pre>
+                                  <pre className="rounded-xl border border-gray-800 bg-[#161616] p-3 text-xs text-gray-300 font-mono whitespace-pre-wrap">{selectedResult?.expected || ""}</pre>
                                 </div>
                                 <div className="space-y-1.5">
                                   <div className="text-xs font-medium text-gray-400">Your Output</div>
-                                  <pre className={`rounded-lg border p-3 text-xs font-mono whitespace-pre-wrap ${
+                                  <pre className={`rounded-xl border p-3 text-xs font-mono whitespace-pre-wrap ${
                                     selectedResult?.stderr 
                                       ? "border-rose-500/20 bg-rose-500/5 text-rose-400" 
                                       : "border-gray-800 bg-[#161616] text-gray-300"
@@ -618,11 +620,11 @@ export default function InterviewRoom() {
                 </div>
                 
                 {/* Bottom Action Bar (Always Visible) */}
-                <div className="flex shrink-0 items-center justify-end bg-[#1e1e1e] px-4 py-3 border border-gray-800 rounded-xl mt-2 gap-3 shadow-sm">
+                <div className="flex shrink-0 items-center justify-end bg-[#1e1e1e] px-4 py-3 border border-gray-800 rounded-2xl mt-2 gap-3 shadow-sm">
                   <button
                     onClick={handleRun}
                     disabled={isLoading}
-                    className="flex items-center gap-2 rounded-md bg-[#262626] border border-gray-700 px-6 py-1.5 text-sm font-semibold text-gray-300 transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex items-center gap-2 rounded-xl bg-[#262626] border border-gray-700 px-6 py-1.5 text-sm font-semibold text-gray-300 transition hover:bg-[#333333] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Play className="h-4 w-4" fill="currentColor" />
                     {isLoading ? "Running" : "Run Code"}
@@ -632,13 +634,13 @@ export default function InterviewRoom() {
                     <>
                       <button
                         onClick={() => setIsQuestionBankOpen(true)}
-                        className="flex items-center gap-2 rounded-md bg-blue-600 px-6 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-sm"
+                        className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-1.5 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-sm"
                       >
                         Question Bank
                       </button>
                       <button
                         onClick={() => setIsGradingModalOpen(true)}
-                        className="flex items-center gap-2 rounded-md bg-emerald-600 px-6 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
+                        className="flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-1.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm"
                       >
                         End Interview
                       </button>
@@ -649,41 +651,50 @@ export default function InterviewRoom() {
 
 
 
-            </Group>
-            </div>
-            <div className="w-[30%] min-w-[300px] shrink-0"></div>
-          </div>
-
-          {/* Right Side: Video Sidebar */}
-          <div className={`absolute right-0 top-0 bottom-0 transition-all duration-500 z-20 bg-[#0a0a0a] ${viewMode !== 'video' ? 'w-[30%] min-w-[300px] border-l border-gray-800 shadow-2xl' : 'w-full'}`}>
-            {videoToken && videoServerUrl ? (
-              <VideoSidebar 
-                token={videoToken} 
-                serverUrl={videoServerUrl} 
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center p-6 text-center">
-                <div className="text-sm text-gray-500">
-                  {errorBanner ? "Failed to load video" : "Connecting to video service..."}
-                </div>
-              </div>
+                  </Group>
+                </Panel>
+                
+                <Separator className="w-1.5 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition flex flex-col justify-center items-center group cursor-col-resize z-20 bg-gray-900/50">
+                  <div className="h-8 w-1 rounded-full bg-gray-800 group-hover:bg-emerald-500/50 transition"></div>
+                </Separator>
+              </>
             )}
-          </div>
 
-          {/* AI Chatbot Overlay (Interviewer Only) */}
-          {role === 'interviewer' && isAIChatOpen && (
-            <div 
-              className="absolute right-0 top-0 bottom-0 z-30 w-[30%] min-w-[300px] shadow-2xl animate-in slide-in-from-right-full duration-300"
-            >
-              <AIChatbot
-                language={language}
-                editorCode={editorRef.current?.getValue() || ""}
-                question={question}
-                testResults={results}
-                onClose={() => setIsAIChatOpen(false)}
-              />
-            </div>
-          )}
+            {/* Right Side: Video Sidebar */}
+            <Panel defaultSize={viewMode !== 'video' ? 30 : 100} minSize={20} className="flex flex-col bg-[#0a0a0a] z-20 relative border-l border-gray-800 shadow-2xl">
+              {videoToken && videoServerUrl ? (
+                <VideoSidebar 
+                  token={videoToken} 
+                  serverUrl={videoServerUrl} 
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center p-6 text-center">
+                  <div className="text-sm text-gray-500">
+                    {errorBanner ? "Failed to load video" : "Connecting to video service..."}
+                  </div>
+                </div>
+              )}
+
+              {/* AI Chatbot Overlay Wrapper (Interviewer Only) */}
+              {role === 'interviewer' && (
+                <div className="absolute inset-0 z-30 overflow-hidden pointer-events-none rounded-l-none">
+                  <div 
+                    className={`w-full h-full pointer-events-auto shadow-2xl transition-transform duration-300 ${
+                      isAIChatOpen ? 'translate-x-0' : 'translate-x-full'
+                    }`}
+                  >
+                    <AIChatbot
+                      language={language}
+                      editorCode={editorRef.current?.getValue() || ""}
+                      question={question}
+                      testResults={results}
+                      onClose={() => setIsAIChatOpen(false)}
+                    />
+                  </div>
+                </div>
+              )}
+            </Panel>
+          </Group>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, X, Bot, User, Loader2, Copy, Check, Code } from "lucide-react";
+import { Send, X, Bot, User, Loader2, Copy, Check, Code, Plus } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -20,6 +20,8 @@ interface Message {
   content: string;
 }
 
+type ContextMode = "all" | "code" | "none";
+
 export default function AIChatbot({
   language,
   editorCode,
@@ -31,6 +33,9 @@ export default function AIChatbot({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  
+  const [contextMode, setContextMode] = useState<ContextMode>("code");
+  const [isContextDropdownOpen, setIsContextDropdownOpen] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -66,17 +71,27 @@ export default function AIChatbot({
     setIsLoading(true);
 
     // Build the context invisibly
-    let contextStr = `\n\n--- CONTEXT ---\n`;
-    if (language) contextStr += `Language: ${language}\n`;
-    if (question) {
-      contextStr += `Question Title: ${question.title || ""}\n`;
-      contextStr += `Problem Description: ${question.description || ""}\n`;
+    let contextStr = "";
+    if (contextMode === "code") {
+      if (editorCode) {
+        contextStr += `\n\n\`\`\`${language}\n${editorCode}\n\`\`\`\n`;
+      }
+    } else if (contextMode === "all") {
+      contextStr += `\n\n--- CONTEXT ---\n`;
+      if (language) contextStr += `Language: ${language}\n`;
+      if (editorCode) {
+        contextStr += `Current Code in Editor:\n\`\`\`${language}\n${editorCode}\n\`\`\`\n`;
+      }
     }
-    if (editorCode) {
-      contextStr += `Current Code in Editor:\n\`\`\`${language}\n${editorCode}\n\`\`\`\n`;
-    }
-    if (testResults && testResults.results) {
-      contextStr += `Recent Test Results:\n${JSON.stringify(testResults.results.slice(0, 3), null, 2)}\n`;
+    
+    if (contextMode === "all") {
+      if (question) {
+        contextStr += `Question Title: ${question.title || ""}\n`;
+        contextStr += `Problem Description: ${question.description || ""}\n`;
+      }
+      if (testResults && testResults.results) {
+        contextStr += `Recent Test Results:\n${JSON.stringify(testResults.results.slice(0, 3), null, 2)}\n`;
+      }
     }
 
     // Combine user prompt with invisible context
@@ -189,10 +204,10 @@ export default function AIChatbot({
               {msg.role === "user" ? <User size={16} className="text-white" /> : <Bot size={16} className="text-white" />}
             </div>
             
-            <div className={`max-w-[85%] text-sm rounded-2xl px-4 py-3 ${
+            <div className={`max-w-[85%] text-sm rounded-3xl px-4 py-3 ${
               msg.role === "user" 
-                ? "bg-purple-600/20 text-purple-100 rounded-tr-sm" 
-                : "bg-[#262626] text-gray-200 rounded-tl-sm shadow-sm"
+                ? "bg-purple-600/20 text-purple-100 rounded-tr-xl" 
+                : "bg-[#262626] text-gray-200 rounded-tl-xl shadow-sm"
             }`}>
               {msg.role === "user" ? (
                 <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -206,7 +221,7 @@ export default function AIChatbot({
                       
                       if (!inline && match) {
                         return (
-                          <div className="my-3 rounded-lg overflow-hidden border border-gray-700 bg-[#1e1e1e]">
+                          <div className="my-3 rounded-2xl overflow-hidden border border-gray-700 bg-[#1e1e1e]">
                             <div className="flex items-center justify-between px-3 py-1.5 bg-[#2a2a2a] border-b border-gray-700">
                               <span className="text-xs text-gray-400 uppercase font-semibold">{match[1]}</span>
                               <div className="flex items-center gap-2">
@@ -250,7 +265,46 @@ export default function AIChatbot({
 
       {/* Input Area */}
       <div className="p-3 bg-[#1e1e1e] border-t border-gray-800 shrink-0">
-        <div className="relative flex items-end gap-2 bg-[#0f0f0f] rounded-xl border border-gray-700 p-1 focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all">
+        <div className="relative flex items-end gap-2 bg-[#0f0f0f] rounded-2xl border border-gray-700 p-1 focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all">
+          <div className="relative shrink-0 mb-0.5 ml-0.5">
+            <button
+              onClick={() => setIsContextDropdownOpen(!isContextDropdownOpen)}
+              className="p-2.5 rounded-xl bg-[#262626] text-gray-400 hover:text-white hover:bg-[#333333] transition-colors flex items-center justify-center"
+              title="Select Context"
+            >
+              <Plus size={18} />
+            </button>
+            
+            {isContextDropdownOpen && (
+              <div className="absolute bottom-full left-0 mb-2 w-48 bg-[#1e1e1e] border border-gray-700 rounded-2xl shadow-xl overflow-hidden z-50">
+                <div className="px-3 py-2 text-[10px] font-semibold text-gray-400 border-b border-gray-800 uppercase tracking-wider bg-[#262626]">
+                  Context Level
+                </div>
+                <button
+                  onClick={() => { setContextMode("all"); setIsContextDropdownOpen(false); }}
+                  className={`w-full text-left px-3 py-2.5 text-xs flex justify-between items-center hover:bg-[#2a2a2a] transition-colors ${contextMode === "all" ? "text-emerald-400 font-medium" : "text-gray-300"}`}
+                >
+                  Everything
+                  {contextMode === "all" && <Check size={14} />}
+                </button>
+                <button
+                  onClick={() => { setContextMode("code"); setIsContextDropdownOpen(false); }}
+                  className={`w-full text-left px-3 py-2.5 text-xs flex justify-between items-center hover:bg-[#2a2a2a] transition-colors ${contextMode === "code" ? "text-emerald-400 font-medium" : "text-gray-300"}`}
+                >
+                  Code Editor Only
+                  {contextMode === "code" && <Check size={14} />}
+                </button>
+                <button
+                  onClick={() => { setContextMode("none"); setIsContextDropdownOpen(false); }}
+                  className={`w-full text-left px-3 py-2.5 text-xs flex justify-between items-center hover:bg-[#2a2a2a] transition-colors ${contextMode === "none" ? "text-emerald-400 font-medium" : "text-gray-300"}`}
+                >
+                  No Context
+                  {contextMode === "none" && <Check size={14} />}
+                </button>
+              </div>
+            )}
+          </div>
+
           <textarea
             ref={textareaRef}
             value={input}
@@ -264,13 +318,17 @@ export default function AIChatbot({
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="shrink-0 p-2.5 mb-0.5 mr-0.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="shrink-0 p-2.5 mb-0.5 mr-0.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
           </button>
         </div>
         <div className="text-center mt-2">
-          <span className="text-[10px] text-gray-500">AI has context of your code. Shift+Enter for new line.</span>
+          <span className="text-[10px] text-gray-500">
+            {contextMode === "all" ? "AI has full context of code & problem. Shift+Enter for new line." : 
+             contextMode === "code" ? "AI only has context of your code. Shift+Enter for new line." : 
+             "AI has no context. Shift+Enter for new line."}
+          </span>
         </div>
       </div>
     </div>
