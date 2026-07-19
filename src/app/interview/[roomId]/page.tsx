@@ -84,8 +84,8 @@ export default function InterviewRoom() {
   const [language, setLanguage] = useState<LanguageKey>("python");
   const [question, setQuestion] = useState<Question | null>(null);
   const [results, setResults] = useState<ExecuteResponse | null>(null);
-  const [streamToken, setStreamToken] = useState<string | null>(null);
-  const [streamApiKey, setStreamApiKey] = useState<string | null>(null);
+  const [videoToken, setVideoToken] = useState<string | null>(null);
+  const [videoServerUrl, setVideoServerUrl] = useState<string | null>(null);
   const [userId] = useState<string>(() => `user_${Math.floor(Math.random() * 100000)}`);
   const [activeTab, setActiveTab] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -138,8 +138,8 @@ export default function InterviewRoom() {
         .catch(console.error);
     }
 
-    // Fetch GetStream.io token
-    fetch(`${API_BASE_URL}/stream/token`, {
+    // Fetch LiveKit token
+    fetch(`${API_BASE_URL}/livekit/token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, roomId }),
@@ -147,13 +147,13 @@ export default function InterviewRoom() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.token) {
-          setStreamToken(data.token);
-          setStreamApiKey(data.apiKey);
+          setVideoToken(data.token);
+          setVideoServerUrl(data.serverUrl);
         } else {
-          console.error("Failed to fetch stream token:", data.error);
+          console.error("Failed to fetch livekit token:", data.error);
         }
       })
-      .catch((err) => console.error("Error fetching stream token:", err));
+      .catch((err) => console.error("Error fetching livekit token:", err));
 
     return () => {
       socket.disconnect();
@@ -640,12 +640,10 @@ export default function InterviewRoom() {
 
           {/* Right Side: Video Sidebar */}
           <div className={`absolute right-0 top-0 bottom-0 transition-all duration-500 z-20 bg-[#0a0a0a] ${viewMode !== 'video' ? 'w-[30%] min-w-[300px] border-l border-gray-800 shadow-2xl' : 'w-full'}`}>
-            {streamToken && streamApiKey ? (
+            {videoToken && videoServerUrl ? (
               <VideoSidebar 
-                token={streamToken} 
-                apiKey={streamApiKey} 
-                userId={userId} 
-                callId={roomId} 
+                token={videoToken} 
+                serverUrl={videoServerUrl} 
               />
             ) : (
               <div className="flex h-full items-center justify-center p-6 text-center">
